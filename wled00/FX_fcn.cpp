@@ -171,7 +171,7 @@ void WS2812FX::service() {
         _no_rgb = !(SEGMENT.getLightCapabilities() & 0x01);
         if (_no_rgb) Bus::setAutoWhiteMode(RGBW_MODE_MANUAL_ONLY);
         delay = (this->*_mode[SEGMENT.mode])(); //effect function
-        if (SEGMENT.mode != FX_MODE_HALLOWEEN_EYES) SEGENV.call++;
+        //if (SEGMENT.mode != FX_MODE_HALLOWEEN_EYES) SEGENV.call++;
         Bus::setAutoWhiteMode(strip.autoWhiteMode);
       }
 
@@ -1047,23 +1047,23 @@ void WS2812FX::handle_palette(void)
   _segment_index_palette_last = _segment_index;
 
   byte paletteIndex = SEGMENT.palette;
-  if (paletteIndex == 0) //default palette. Differs depending on effect
-  {
-    switch (SEGMENT.mode)
-    {
-      case FX_MODE_FIRE_2012  : paletteIndex = 35; break; //heat palette
-      case FX_MODE_COLORWAVES : paletteIndex = 26; break; //landscape 33
-      case FX_MODE_FILLNOISE8 : paletteIndex =  9; break; //ocean colors
-      case FX_MODE_NOISE16_1  : paletteIndex = 20; break; //Drywet
-      case FX_MODE_NOISE16_2  : paletteIndex = 43; break; //Blue cyan yellow
-      case FX_MODE_NOISE16_3  : paletteIndex = 35; break; //heat palette
-      case FX_MODE_NOISE16_4  : paletteIndex = 26; break; //landscape 33
-      case FX_MODE_GLITTER    : paletteIndex = 11; break; //rainbow colors
-      case FX_MODE_SUNRISE    : paletteIndex = 35; break; //heat palette
-      case FX_MODE_FLOW       : paletteIndex =  6; break; //party
-    }
-  }
-  if (SEGMENT.mode >= FX_MODE_METEOR && paletteIndex == 0) paletteIndex = 4;
+  // if (paletteIndex == 0) //default palette. Differs depending on effect
+  // {
+  //   switch (SEGMENT.mode)
+  //   {
+  //     // case FX_MODE_FIRE_2012  : paletteIndex = 35; break; //heat palette
+  //     // case FX_MODE_COLORWAVES : paletteIndex = 26; break; //landscape 33
+  //     // case FX_MODE_FILLNOISE8 : paletteIndex =  9; break; //ocean colors
+  //     // case FX_MODE_NOISE16_1  : paletteIndex = 20; break; //Drywet
+  //     // case FX_MODE_NOISE16_2  : paletteIndex = 43; break; //Blue cyan yellow
+  //     // case FX_MODE_NOISE16_3  : paletteIndex = 35; break; //heat palette
+  //     // case FX_MODE_NOISE16_4  : paletteIndex = 26; break; //landscape 33
+  //     // case FX_MODE_GLITTER    : paletteIndex = 11; break; //rainbow colors
+  //     // case FX_MODE_SUNRISE    : paletteIndex = 35; break; //heat palette
+  //     // case FX_MODE_FLOW       : paletteIndex =  6; break; //party
+  //   }
+  // }
+  //if (SEGMENT.mode >= FX_MODE_METEOR && paletteIndex == 0) paletteIndex = 4;
   
   switch (paletteIndex)
   {

@@ -237,7 +237,7 @@ void handleNightlight()
         colNlT[2] = effectPalette;
 
         strip.setMode(strip.getFirstSelectedSegId(), FX_MODE_STATIC); // make sure seg runtime is reset if it was in sunrise mode
-        effectCurrent = FX_MODE_SUNRISE;
+        //effectCurrent = FX_MODE_SUNRISE;
         effectSpeed = nightlightDelayMins;
         effectPalette = 0;
         if (effectSpeed > 60) effectSpeed = 60; //currently limited to 60 minutes
