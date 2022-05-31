@@ -176,14 +176,14 @@ uint16_t WS2812FX::mode_color_sweep(void) {
 }
 
 
-/*
- * Turns all LEDs after each other to a random color.
- * Then starts over with another color.
- */
-uint16_t WS2812FX::mode_color_wipe_random(void) {
-  return color_wipe(false, true);
-}
-
+// /*
+//  * Turns all LEDs after each other to a random color.
+//  * Then starts over with another color.
+//  */
+// uint16_t WS2812FX::mode_color_wipe_random(void) {
+//   return color_wipe(false, true);
+// }
+ 
 
 /*
  * Random color introduced alternating from start and end of strip.

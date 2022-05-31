@@ -119,13 +119,13 @@
 #define IS_REVERSE      ((SEGMENT.options & REVERSE     ) == REVERSE     )
 #define IS_SELECTED     ((SEGMENT.options & SELECTED    ) == SELECTED    )
 
-#define MODE_COUNT  118
+#define MODE_COUNT  117
 
 #define FX_MODE_STATIC                   0
 #define FX_MODE_BLINK                    1
 #define FX_MODE_BREATH                   2
 #define FX_MODE_COLOR_WIPE               3
-#define FX_MODE_COLOR_WIPE_RANDOM        4
+// #define FX_MODE_COLOR_WIPE_RANDOM        4
 #define FX_MODE_RANDOM_COLOR             5
 #define FX_MODE_COLOR_SWEEP              6
 #define FX_MODE_DYNAMIC                  7
@@ -494,7 +494,7 @@ class WS2812FX {
       _mode[FX_MODE_STATIC]                  = &WS2812FX::mode_static;
       _mode[FX_MODE_BLINK]                   = &WS2812FX::mode_blink;
       _mode[FX_MODE_COLOR_WIPE]              = &WS2812FX::mode_color_wipe;
-      _mode[FX_MODE_COLOR_WIPE_RANDOM]       = &WS2812FX::mode_color_wipe_random;
+      //_mode[FX_MODE_COLOR_WIPE_RANDOM]       = &WS2812FX::mode_color_wipe_random;
       _mode[FX_MODE_RANDOM_COLOR]            = &WS2812FX::mode_random_color;
       _mode[FX_MODE_COLOR_SWEEP]             = &WS2812FX::mode_color_sweep;
       _mode[FX_MODE_DYNAMIC]                 = &WS2812FX::mode_dynamic;
@@ -722,7 +722,7 @@ class WS2812FX {
       mode_strobe_rainbow(void),
       mode_color_wipe(void),
       mode_color_sweep(void),
-      mode_color_wipe_random(void),
+      //mode_color_wipe_random(void),
       mode_color_sweep_random(void),
       mode_random_color(void),
       mode_dynamic(void),
@@ -925,7 +925,7 @@ class WS2812FX {
 
 //10 names per line
 const char JSON_mode_names[] PROGMEM = R"=====([
-"Solid","Blink","Breathe","Wipe","Wipe Random","Random Colors","Sweep","Dynamic","Colorloop","Rainbow",
+"Solid","Blink","Breathe","Wipe","Random Colors","Sweep","Dynamic","Colorloop","Rainbow",
 "Scan","Scan Dual","Fade","Theater","Theater Rainbow","Running","Saw","Twinkle","Dissolve","Dissolve Rnd",
 "Sparkle","Sparkle Dark","Sparkle+","Strobe","Strobe Rainbow","Strobe Mega","Blink Rainbow","Android","Chase","Chase Random",
 "Chase Rainbow","Chase Flash","Chase Flash Rnd","Rainbow Runner","Colorful","Traffic Light","Sweep Random","Chase 2","Aurora","Stream",

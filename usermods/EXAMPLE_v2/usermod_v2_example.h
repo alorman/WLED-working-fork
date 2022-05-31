@@ -31,6 +31,7 @@ class usermod_v2_example : public Usermod {
     unsigned long testULong = 42424242;
     float testFloat = 42.42;
     String testString = "Forty-Two";
+    String devString = "this is a test";
 
     // These config variables have defaults set inside readFromConfig()
     int testInt;
@@ -162,6 +163,7 @@ class usermod_v2_example : public Usermod {
       top["testULong"] = testULong;
       top["testFloat"] = testFloat;
       top["testString"] = testString;
+      top["DevString"] = devString;
       JsonArray pinArray = top.createNestedArray("pin");
       pinArray.add(testPins[0]);
       pinArray.add(testPins[1]); 
@@ -197,6 +199,7 @@ class usermod_v2_example : public Usermod {
       configComplete &= getJsonValue(top["testULong"], testULong);
       configComplete &= getJsonValue(top["testFloat"], testFloat);
       configComplete &= getJsonValue(top["testString"], testString);
+      configComplete &= getJsonValue(top["devString"], devString);
 
       // A 3-argument getJsonValue() assigns the 3rd argument as a default value if the Json value is missing
       configComplete &= getJsonValue(top["testInt"], testInt, 42);  
