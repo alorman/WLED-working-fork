@@ -51,7 +51,7 @@
 
 //optionally disable brownout detector on ESP32.
 //This is generally a terrible idea, but improves boot success on boards with a 3.3v regulator + cap setup that can't provide 400mA peaks
-//#define WLED_DISABLE_BROWNOUT_DET
+//#define WLED_DISABLE_BROWNOUT_DETT
 
 // Library inclusions.
 #include <Arduino.h>
