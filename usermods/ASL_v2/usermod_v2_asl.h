@@ -205,8 +205,8 @@ class usermod_v2_ASL : public Usermod {
       // A 3-argument getJsonValue() assigns the 3rd argument as a default value if the Json value is missing
       configComplete &= getJsonValue(top["testInt"], testInt, 42);  
       configComplete &= getJsonValue(top["testLong"], testLong, -42424242);
-      configComplete &= getJsonValue(top["pin"][0], testPins[0], -1);
-      configComplete &= getJsonValue(top["pin"][1], testPins[1], -1);
+      //configComplete &= getJsonValue(top["pin"][0], testPins[0], 26);
+      //configComplete &= getJsonValue(top["pin"][1], testPins[1], 27);
 
       return configComplete;
     }
