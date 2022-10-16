@@ -480,6 +480,7 @@ void deserializeConfigFromFS() {
   success = readObjectFromFile("/cfg.json", nullptr, &doc);
   if (!success) { //if file does not exist, try reading from EEPROM
     deEEPSettings();
+    DEBUG_PRINTLN(F("Did not read JSON settings"));
     releaseJSONBufferLock();
     return;
   }

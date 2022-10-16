@@ -31,8 +31,9 @@ class usermod_v2_ASL : public Usermod {
     bool testBool = false;
     unsigned long testULong = 42424242;
     float testFloat = 42.42;
-    String testString = "Forty-Two";
-    String devString = "this is a test";
+    String testString = "0";
+    String devString = "0";
+
 
     // These config variables have defaults set inside readFromConfig()
     int testInt;
@@ -115,6 +116,7 @@ class usermod_v2_ASL : public Usermod {
     void readFromJsonState(JsonObject& root)
     {
       userVar0 = root["user0"] | userVar0; //if "user0" key exists in JSON, update, else keep old value
+      testString = root["testString"] | testString;
       //if (root["bri"] == 255) Serial.println(F("Don't burn down your garage!"));
     }
 
@@ -163,8 +165,8 @@ class usermod_v2_ASL : public Usermod {
       top["testLong"] = testLong;
       top["testULong"] = testULong;
       top["testFloat"] = testFloat;
-      top["testString"] = testString;
-      top["DevString"] = devString;
+      top["testString"] = String ("written from addconfig");
+      top["DevString"] = String ("written from addconfig");
       JsonArray pinArray = top.createNestedArray("pin");
       pinArray.add(testPins[0]);
       pinArray.add(testPins[1]); 
@@ -205,6 +207,8 @@ class usermod_v2_ASL : public Usermod {
       // A 3-argument getJsonValue() assigns the 3rd argument as a default value if the Json value is missing
       configComplete &= getJsonValue(top["testInt"], testInt, 42);  
       configComplete &= getJsonValue(top["testLong"], testLong, -42424242);
+      configComplete &= getJsonValue(top["testString"], testString, "set from 3 arg");
+      configComplete &= getJsonValue(top["DevString"], devString, "set from 3 arg");
       //configComplete &= getJsonValue(top["pin"][0], testPins[0], 26);
       //configComplete &= getJsonValue(top["pin"][1], testPins[1], 27);
 

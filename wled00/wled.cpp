@@ -428,7 +428,7 @@ void WLED::beginStrip()
   // Initialize NeoPixel Strip and button
   strip.finalizeInit(); // busses created during deserializeConfig()
   strip.deserializeMap();
-  strip.makeAutoSegments();
+  strip.makeAutoSegments(true);
   strip.setBrightness(0);
   strip.setShowCallback(handleOverlayDraw);
 
