@@ -1,6 +1,8 @@
 #pragma once
 
 #include "wled.h"
+#include "src/dependencies/json/ArduinoJson-v6.h"
+#include <HTTPClient.h>
 
 /*
  * ASL's usermod test
@@ -33,8 +35,8 @@ class usermod_v2_ASL : public Usermod {
     float testFloat = 42.42;
     String devString = "0";
     String testString = "0";
-    String ServerAddressString = "0";
-    String apiKeyString = "0";
+    String ServerAddressString = "https://api.wmata.com/TrainPositions/TrainPositions?contentType=json";
+    String apiKeyString = "Your API key here";
     int ServerPollIntervalSeconds = 10;
     int LEDRefreshIntervalms = 1000;
 
@@ -62,6 +64,10 @@ class usermod_v2_ASL : public Usermod {
      */
     void connected() {
       //Serial.println("Connected to WiFi!");
+        if (millis() - lastTime > 1000) {
+        Serial.println("I'm alive! in connected loop");
+        lastTime = millis();
+      }
     }
 
 
@@ -76,10 +82,18 @@ class usermod_v2_ASL : public Usermod {
      *    Instead, use a timer check as shown here.
      */
     void loop() {
-      if (millis() - lastTime > 1000) {
-        //Serial.println("I'm alive!");
+     //Serial.println("Connected to WiFi!");
+      if (millis() - lastTime > 5000) {
+        Serial.println("I'm alive! in main loop");
+        //readFromConfig();
+        Serial.println(ServerAddressString);
+        GetWMATAdata();
         lastTime = millis();
       }
+      // if (millis() - lastTime > 1000) {
+      //   //Serial.println("I'm alive!");
+      //   lastTime = millis();
+      // }
     }
 
 
@@ -171,8 +185,8 @@ class usermod_v2_ASL : public Usermod {
       top["testFloat"] = testFloat;
       top["testString"] = String ("written from addconfig");
       top["DevString"] = String ("written from addconfig");
-      top["ServerAddressString"] = String ("written from addconfig");
-      top["apiKeyString"] = String ("written from addconfig");
+      top["ServerAddressString"] = ServerAddressString;
+      top["apiKeyString"] = apiKeyString;
       top["ServerPollIntervalSeconds"] = ServerPollIntervalSeconds;
       top["LEDRefreshIntervalms"] = LEDRefreshIntervalms;
       JsonArray pinArray = top.createNestedArray("pin");
@@ -219,6 +233,8 @@ class usermod_v2_ASL : public Usermod {
       configComplete &= getJsonValue(top["DevString"], devString, "set from 3 arg");
       //configComplete &= getJsonValue(top["pin"][0], testPins[0], 26);
       //configComplete &= getJsonValue(top["pin"][1], testPins[1], 27);
+      configComplete &= getJsonValue(top["ServerAddressString"], ServerAddressString);
+      configComplete &= getJsonValue(top["apiKeyString"], apiKeyString);
 
       return configComplete;
     }
@@ -246,4 +262,20 @@ class usermod_v2_ASL : public Usermod {
 
    //More methods can be added in the future, this example will then be extended.
    //Your usermod will remain compatible as it does not need to implement all methods from the Usermod base class!
+   void GetWMATAdata(){
+     DynamicJsonDocument doc(16384); //JSON doc size, see JSON arduino assistant for better info
+     HTTPClient http; //establish the HTTPclient object
+     String payload;
+     String serverPath = ServerAddressString + "&api_key=" + apiKeyString; //these are defined in globals  
+     int16_t httpResponseCode = 0;
+     http.begin(serverPath); 
+     httpResponseCode = http.GET(); //send the GET Request
+     if (httpResponseCode > 0) {
+        Serial.print("HTTP Response code: ");
+        Serial.println(httpResponseCode);
+      }
+     payload = http.getString(); //write the Wmata response to a String object
+     http.end(); //free memory now and clean up 
+     Serial.println(payload);
+   }
 };
