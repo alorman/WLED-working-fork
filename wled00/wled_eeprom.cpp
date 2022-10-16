@@ -41,12 +41,12 @@
  */
 void clearEEPROM()
 {
-  // EEPROM.begin(EEPSIZE);
-  // for (int i = 0; i < EEPSIZE; i++)
-  // {
-  //   EEPROM.write(i, 0);
-  // }
-  // EEPROM.end();
+  EEPROM.begin(EEPSIZE);
+  for (int i = 0; i < EEPSIZE; i++)
+  {
+    EEPROM.write(i, 0);
+  }
+  EEPROM.end();
 }
 
 
