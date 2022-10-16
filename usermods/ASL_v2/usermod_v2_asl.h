@@ -31,8 +31,12 @@ class usermod_v2_ASL : public Usermod {
     bool testBool = false;
     unsigned long testULong = 42424242;
     float testFloat = 42.42;
-    String testString = "0";
     String devString = "0";
+    String testString = "0";
+    String ServerAddressString = "0";
+    String apiKeyString = "0";
+    int ServerPollIntervalSeconds = 10;
+    int LEDRefreshIntervalms = 1000;
 
 
     // These config variables have defaults set inside readFromConfig()
@@ -158,7 +162,7 @@ class usermod_v2_ASL : public Usermod {
      */
     void addToConfig(JsonObject& root)
     {
-      JsonObject top = root.createNestedObject("exampleUsermod");
+      JsonObject top = root.createNestedObject("ASL-usermod-v2");
       top["great"] = userVar0; //save these vars persistently whenever settings are saved
       top["testBool"] = testBool;
       top["testInt"] = testInt;
@@ -167,6 +171,10 @@ class usermod_v2_ASL : public Usermod {
       top["testFloat"] = testFloat;
       top["testString"] = String ("written from addconfig");
       top["DevString"] = String ("written from addconfig");
+      top["ServerAddressString"] = String ("written from addconfig");
+      top["apiKeyString"] = String ("written from addconfig");
+      top["ServerPollIntervalSeconds"] = ServerPollIntervalSeconds;
+      top["LEDRefreshIntervalms"] = LEDRefreshIntervalms;
       JsonArray pinArray = top.createNestedArray("pin");
       pinArray.add(testPins[0]);
       pinArray.add(testPins[1]); 
@@ -193,7 +201,7 @@ class usermod_v2_ASL : public Usermod {
       // default settings values could be set here (or below using the 3-argument getJsonValue()) instead of in the class definition or constructor
       // setting them inside readFromConfig() is slightly more robust, handling the rare but plausible use case of single value being missing after boot (e.g. if the cfg.json was manually edited and a value was removed)
 
-      JsonObject top = root["exampleUsermod"];
+      JsonObject top = root["ASL-usermod-v2"];
 
       bool configComplete = !top.isNull();
 
