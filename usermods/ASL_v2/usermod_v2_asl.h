@@ -3,7 +3,6 @@
 #include "wled.h"
 #include "src/dependencies/json/ArduinoJson-v6.h"
 #include <HTTPClient.h>
-//uint8_t DevLEDAddress[6]= {1,2,5,7,9,11};
 
 
 
@@ -66,6 +65,17 @@ class usermod_v2_ASL : public Usermod {
         DevLEDAddress[2] = 6;
         DevLEDAddress[3] = 23;
         DevLEDAddress[4] = 14;
+
+        //setup frames for interpolation.
+        for(int i=0; i<100; i++){
+          TargetFrame[i]=RED;
+        }
+        for(int i=0; i<100; i++){
+          uint32_t tempcolor = strip.getPixelColor(i);
+          DisplayFrame[i]=tempcolor;
+          Serial.println(tempcolor);
+        }
+        Serial.println("setup done");
     }
 
 

@@ -244,7 +244,11 @@ WLED_GLOBAL int8_t irPin _INIT(-1);
 WLED_GLOBAL int8_t irPin _INIT(IRPIN);
 #endif
 
+//dev globals
 WLED_GLOBAL uint8_t DevLEDAddress[6];
+WLED_GLOBAL uint32_t TargetFrame[100];
+WLED_GLOBAL uint32_t DisplayFrame[100];
+
 //WLED_GLOBAL byte presetToApply _INIT(0);
 
 WLED_GLOBAL char ntpServerName[33] _INIT("0.wled.pool.ntp.org");   // NTP server to use
