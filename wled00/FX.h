@@ -123,7 +123,8 @@
 
 #define FX_MODE_STATIC                   0
 #define FX_MODE_BLINK                    1
-#define FX_MODE_BREATH                   2
+#define FX_MODE_DEV                      2
+#define FX_MODE_BREATH                   3
 // #define FX_MODE_COLOR_WIPE               3
 // #define FX_MODE_COLOR_WIPE_RANDOM        4
 // #define FX_MODE_RANDOM_COLOR             5
@@ -493,6 +494,7 @@ class WS2812FX {
       //assign each member of the _mode[] array to its respective function reference 
       _mode[FX_MODE_STATIC]                  = &WS2812FX::mode_static;
       _mode[FX_MODE_BLINK]                   = &WS2812FX::mode_blink;
+      _mode[FX_MODE_DEV]                    = &WS2812FX::mode_dev;
       // _mode[FX_MODE_COLOR_WIPE]              = &WS2812FX::mode_color_wipe;
       // _mode[FX_MODE_COLOR_WIPE_RANDOM]       = &WS2812FX::mode_color_wipe_random;
       // _mode[FX_MODE_RANDOM_COLOR]            = &WS2812FX::mode_random_color;
@@ -717,6 +719,7 @@ class WS2812FX {
     uint16_t
       mode_static(void),
       mode_blink(void),
+      mode_dev(void),
       // mode_blink_rainbow(void),
       // mode_strobe(void),
       // mode_strobe_rainbow(void),
@@ -926,7 +929,7 @@ class WS2812FX {
 
 //10 names per line
 const char JSON_mode_names[] PROGMEM = R"=====([
-"Solid","Blink","Breathe"
+"Solid","Blink","Dev","Breathe"
 ])=====";
 
 

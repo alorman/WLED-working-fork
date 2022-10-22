@@ -3,6 +3,9 @@
 #include "wled.h"
 #include "src/dependencies/json/ArduinoJson-v6.h"
 #include <HTTPClient.h>
+//uint8_t DevLEDAddress[6]= {1,2,5,7,9,11};
+
+
 
 /*
  * ASL's usermod test
@@ -28,6 +31,8 @@ class usermod_v2_ASL : public Usermod {
   private:
     //Private class members. You can declare variables and functions only accessible to your usermod here
     unsigned long lastTime = 0;
+    uint32_t state_seg_0_col_0_0 = 0;
+    //String state_bri = "0";
 
     // set your config variables to their boot default value (this can also be done in readFromConfig() or a constructor if you prefer)
     bool testBool = false;
@@ -35,10 +40,12 @@ class usermod_v2_ASL : public Usermod {
     float testFloat = 42.42;
     String devString = "0";
     String testString = "0";
-    String ServerAddressString = "https://api.wmata.com/TrainPositions/TrainPositions?contentType=json";
+    String ServerAddressString = "192.168.1.233/json/state";
     String apiKeyString = "Your API key here";
     int ServerPollIntervalSeconds = 10;
     int LEDRefreshIntervalms = 1000;
+    WS2812FX::Segment &seg = strip.getSegment(0);
+    uint32_t steps = 0;
 
 
     // These config variables have defaults set inside readFromConfig()
@@ -48,13 +55,17 @@ class usermod_v2_ASL : public Usermod {
 
   public:
     //Functions called by WLED
-
     /*
      * setup() is called once at boot. WiFi is not yet connected at this point.
      * You can use it to initialize variables, sensors or similar.
      */
     void setup() {
       //Serial.println("Hello from my usermod!");
+        DevLEDAddress[0] = 1;
+        DevLEDAddress[1] = 4;
+        DevLEDAddress[2] = 6;
+        DevLEDAddress[3] = 23;
+        DevLEDAddress[4] = 14;
     }
 
 
@@ -66,6 +77,7 @@ class usermod_v2_ASL : public Usermod {
       //Serial.println("Connected to WiFi!");
         if (millis() - lastTime > 1000) {
         Serial.println("I'm alive! in connected loop");
+        Serial.println(DevLEDAddress[4]);
         lastTime = millis();
       }
     }
@@ -86,9 +98,31 @@ class usermod_v2_ASL : public Usermod {
       if (millis() - lastTime > 5000) {
         Serial.println("I'm alive! in main loop");
         //readFromConfig();
-        Serial.println(ServerAddressString);
-        GetWMATAdata();
+        //Serial.println(ServerAddressString);
+        //GetWMATAdata();
+        Serial.println(steps);
+        steps++;
+        DynamicJsonDocument doc(16384); //JSON doc size, see JSON arduino assistant for better info
+        HTTPClient http; //establish the HTTPclient object
+        String payload;
+        String serverPath = ServerAddressString; //these are defined in globals  
+        int16_t httpResponseCode = 0;
+        http.begin(serverPath); 
+        //httpResponseCode = http.GET(); //send the GET Request
+         if (httpResponseCode > 0) {
+        Serial.print("HTTP Response code: ");
+        Serial.println(httpResponseCode);
+         }
+         Serial.println(httpResponseCode);
+        payload = http.getString(); //write the Wmata response to a String object
+        http.end(); //free memory now and clean up 
+        Serial.println(payload);
+        //int color = WS2812FX::color_from_palette(0, false, true, 0);
+        //Serial.println(color);
+        //uint32_t test = strip.getMainSegment().colors;
+        //Serial.println(test);
         lastTime = millis();
+
       }
       // if (millis() - lastTime > 1000) {
       //   //Serial.println("I'm alive!");
@@ -123,6 +157,10 @@ class usermod_v2_ASL : public Usermod {
      */
     void addToJsonState(JsonObject& root)
     {
+      JsonObject top = root.createNestedObject("ASL-usermod-v2");
+      top["testString"] = String ("written from addtojson state");
+      top["DevString"] = String ("written from addtojson state");
+      Serial.println("added to json state");
       //root["user0"] = userVar0;
     }
 
@@ -134,8 +172,19 @@ class usermod_v2_ASL : public Usermod {
     void readFromJsonState(JsonObject& root)
     {
       userVar0 = root["user0"] | userVar0; //if "user0" key exists in JSON, update, else keep old value
-      testString = root["testString"] | testString;
-      //if (root["bri"] == 255) Serial.println(F("Don't burn down your garage!"));
+      // JsonObject& state = root["state"];
+      // JsonObject& state_seg = state["seg"];
+      //JsonObject& state_seg_0_col = state_seg_0["col"];
+      //JsonObject& state_seg_0_col_0 = state_seg_0_col[0];
+      //JsonObject& state = root["state"];
+      uint32_t state_bri = root["transition"];
+      Serial.println(state_bri);
+      //state_seg_0_col_0_0 = root["state"];//["seg"]["0"]["col"]["0"]; // 213
+      //int state_seg_0_col_0_1 = state_seg_0_col_0[1]; // 255
+      //int state_seg_0_col_0_2 = state_seg_0_col_0[2]; // 107
+      if (root["bri"] == 255) Serial.println(F("Don't burn down your garage!"));
+      uint32_t bri = root["bri"];
+      Serial.println(bri);
     }
 
 
@@ -247,7 +296,12 @@ class usermod_v2_ASL : public Usermod {
      */
     void handleOverlayDraw()
     {
-      //strip.setPixelColor(0, RGBW32(0,0,0,0)) // set the first pixel to black
+      // #define SEGCOLOR(x)      _colors_t[x]
+      // for(int i=0; i < 50; i++){
+      //     strip.setPixelColor(i, SEGCOLOR(0)); // set the first pixel to black
+      // }
+      //strip.setPixelColor(steps, color_from_palette(1, true, false, 0, 255));
+
     }
 
    
@@ -269,13 +323,15 @@ class usermod_v2_ASL : public Usermod {
      String serverPath = ServerAddressString + "&api_key=" + apiKeyString; //these are defined in globals  
      int16_t httpResponseCode = 0;
      http.begin(serverPath); 
-     httpResponseCode = http.GET(); //send the GET Request
+     //httpResponseCode = http.GET(); //send the GET Request
      if (httpResponseCode > 0) {
         Serial.print("HTTP Response code: ");
         Serial.println(httpResponseCode);
       }
      payload = http.getString(); //write the Wmata response to a String object
      http.end(); //free memory now and clean up 
-     Serial.println(payload);
+     //Serial.println(payload);
+     //Serial.print("State JSON ");
+     //Serial.println(state_bri);
    }
 };

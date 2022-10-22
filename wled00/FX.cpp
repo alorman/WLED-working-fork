@@ -29,6 +29,9 @@
 
 #define IBN 5100
 #define PALETTE_SOLID_WRAP (paletteBlend == 1 || paletteBlend == 3)
+unsigned long lastTime = 0;
+
+//
 
 /*
  * No blinking. Just plain old static light.
@@ -71,6 +74,25 @@ uint16_t WS2812FX::blink(uint32_t color1, uint32_t color2, bool strobe, bool do_
   return FRAMETIME;
 }
 
+//New dev effect
+uint16_t WS2812FX::mode_dev(void) { 
+  //Serial.println("Dev effect actiavted");
+  // for(int i=0; i<5; i++){
+  //   setPixelColor(DevLEDAddress[i], SEGCOLOR(1));
+  //   Serial.println("writing first pass");
+  //}
+  if (millis() - lastTime > 1000) {
+    for(int i=0; i<5; i++){
+      setPixelColor(DevLEDAddress[i], SEGCOLOR(2));
+      DevLEDAddress[i]++;
+      Serial.println("writing second pass");
+    }
+    lastTime = millis();
+    //Serial.println(DevLEDAddress[2]);
+  }
+
+  return FRAMETIME;
+}
 
 /*
  * Normal blinking. 50% on/off time.
