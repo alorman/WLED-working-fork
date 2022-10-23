@@ -81,9 +81,9 @@ uint16_t WS2812FX::mode_dev(void) {
   //   Serial.println("writing first pass");
   //}
   unsigned long lastTime = 0;
-  Serial.println("not in loop");
+  //Serial.println("not in loop");
   if (millis() - lastTime > transitionDelay) {
-    Serial.println("in loop");
+    //Serial.println("in loop");
     int DisplayStripNumPixels = 100; //maybe SEGLEN?//find the number of pixels we need to iterate on. Assumes that the target frame and display strip are the same.
     for(int i = 0; i < DisplayStripNumPixels; i++){ //for each pixel in the array
         uint32_t TargetFrameRGB = TargetFrame[i]; //get the RGB values of the target frame for each pixel
@@ -94,8 +94,8 @@ uint16_t WS2812FX::mode_dev(void) {
         uint8_t DisplayFrameR = DisplayFrameRGB >> 16;
         uint8_t DisplayFrameG = DisplayFrameRGB >> 8;
         uint8_t DisplayFrameB = DisplayFrameRGB;
-        Serial.println(DisplayFrame[i]);
-        Serial.println(TargetFrame[i]);
+        // Serial.println(DisplayFrame[i]);
+        // Serial.println(TargetFrame[i]);
         if(DisplayFrameRGB != TargetFrameRGB){ //if we're at the desired state, awesome. don't do anything
         Serial.println("firing on changes");
         if (DisplayFrameR < TargetFrameR) DisplayFrameR++; else if (DisplayFrameR > TargetFrameR) DisplayFrameR--;
@@ -104,7 +104,7 @@ uint16_t WS2812FX::mode_dev(void) {
         DisplayFrameRGB = (DisplayFrameR) << 16 + (DisplayFrameG << 8) + DisplayFrameB;
         setPixelColor(i, DisplayFrameR, DisplayFrameG, DisplayFrameB);
         DisplayFrame[i] = DisplayFrameRGB; //create a copy of the output, so that we dont have to read it via lossy method getPixelColor
-        Serial.println(DisplayFrame[i]);
+        //Serial.println(DisplayFrame[i]);
         lastTime = millis();
                       //Serial.println((String)"Strings are different: LED output " + i + ":" + DisplayStripR + "," + DisplayStripG + "," + DisplayStripB);
     // for(int i=0; i<5; i++){

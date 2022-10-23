@@ -246,8 +246,9 @@ WLED_GLOBAL int8_t irPin _INIT(IRPIN);
 
 //dev globals
 WLED_GLOBAL uint8_t DevLEDAddress[6];
-WLED_GLOBAL uint32_t TargetFrame[100];
-WLED_GLOBAL uint32_t DisplayFrame[100];
+WLED_GLOBAL uint32_t DisplayFrame[200];
+WLED_GLOBAL uint32_t TargetFrame[200];
+
 
 //WLED_GLOBAL byte presetToApply _INIT(0);
 
