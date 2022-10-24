@@ -249,6 +249,9 @@ WLED_GLOBAL uint8_t DevLEDAddress[6];
 WLED_GLOBAL uint32_t DisplayFrame[200];
 WLED_GLOBAL uint32_t TargetFrame[200];
 
+WLED_GLOBAL uint32_t StationRed;
+WLED_GLOBAL uint32_t TrainRed;
+WLED_GLOBAL uint32_t TrackRed;
 
 //WLED_GLOBAL byte presetToApply _INIT(0);
 
