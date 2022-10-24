@@ -157,11 +157,11 @@ class usermod_v2_ASL : public Usermod {
      */
     void loop() {
      //Serial.println("Connected to WiFi!");
-      if (millis() - lastTime > 1000) {
+      if (millis() - lastTime > 15000) {
         Serial.println("I'm alive! in main loop");
         //readFromConfig();
         //Serial.println(ServerAddressString);
-        //GetWMATAdata();
+        GetWMATAdata();
         Serial.println(steps);
         steps++;
         // DynamicJsonDocument doc(16384); //JSON doc size, see JSON arduino assistant for better info
@@ -186,12 +186,14 @@ class usermod_v2_ASL : public Usermod {
         
        // strip.setPixelColor()
         PlotLEDStations(TargetFrame, RedLineStationLEDPosition, RedLineNumStationsInLine, StationRed, TrackRed, Red_Num_LEDS);
-        //PlotLEDTrainPositions(TargetFrame, "RD", RedLineTrack1Domains, RedLineTrack1Segments, RedLineTrack1StationSegments, RedLineNumStationsInLine, RedLineLEDArray, RedLineStationLEDPosition,Red_Num_LED_Domains, StationRed, TrainRed);
+        PlotLEDTrainPositions(TargetFrame, "RD", RedLineTrack1Domains, RedLineTrack1Segments, RedLineTrack1StationSegments, RedLineNumStationsInLine, RedLineLEDArray, RedLineStationLEDPosition, Red_Num_LED_Domains, StationRed, TrainRed);
+        PlotLEDTrainPositions(TargetFrame, "RD", RedLineTrack2Domains, RedLineTrack2Segments, RedLineTrack2StationSegments, RedLineNumStationsInLine, RedLineLEDArray, RedLineStationLEDPosition, Red_Num_LED_Domains, StationRed, TrainRed);
+
         Serial.print("train red = ");
         Serial.println(TrainRed);
         Serial.print("station red = ");
         Serial.println(StationRed);
-        Serial.print("trac red = ");
+        Serial.print("track red = ");
         Serial.println(TrackRed);
         // for(int i=0; i<Red_Num_LEDS; i++){
         //   Serial.print(i);
@@ -431,6 +433,8 @@ class usermod_v2_ASL : public Usermod {
         const char* ServiceTypeBuf = workingTrainPosition["ServiceType"];
         String ServiceTypeString((char*)ServiceTypeBuf);
         TrainPositions_ServiceType[i] = ServiceTypeString;
+        // Serial.print("in retreival :");
+        // Serial.println(TrainPositions_CarCount[i]);
         }
    }
 
@@ -447,7 +451,7 @@ class usermod_v2_ASL : public Usermod {
       uint16_t StationArrayIndex = StationArray[i];
       LEDArrayToPlot[StationArrayIndex] = StationColor; //write the resulting stations to the array
       //StationArray[i] = StationColor;
-      Serial.println(StationArrayIndex);
+      //Serial.println(StationArrayIndex);
     }
   }
 
@@ -456,7 +460,6 @@ class usermod_v2_ASL : public Usermod {
   void PlotLEDTrainPositions(uint32_t LEDArrayToPlot[], String LineCode, uint16_t TrackSegmentArray[][2], uint16_t TrackSegmentList[], uint16_t StationSegmentArray[], uint8_t NumStationsInLine, uint16_t LEDTrackArray[][2], uint16_t LEDStationArray[], uint16_t NumLEDSegmentDomains, uint32_t StationColor, uint32_t TrainColor)
   {
     int NumNormalTrains = 0;
-    Serial.println("plotting trians");
     for (int i = 0; i < MaxNumTrains; i++) { //run this for the max number of trains
       int8_t StationPlotted = 0;
       if(TrainPositions_ServiceType[i] == "Normal" && TrainPositions_LineCode[i] == LineCode){
