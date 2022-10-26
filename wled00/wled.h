@@ -246,8 +246,8 @@ WLED_GLOBAL int8_t irPin _INIT(IRPIN);
 
 //dev globals
 WLED_GLOBAL uint8_t DevLEDAddress[6];
-WLED_GLOBAL uint32_t DisplayFrame[200];
-WLED_GLOBAL uint32_t TargetFrame[200];
+WLED_GLOBAL uint32_t DisplayFrame[266];
+WLED_GLOBAL uint32_t TargetFrame[266];
 
 WLED_GLOBAL uint32_t StationRed;
 WLED_GLOBAL uint32_t TrainRed;

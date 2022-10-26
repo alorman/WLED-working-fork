@@ -23,8 +23,8 @@
     uint16_t RedLineTrack2StationSegments[] = {210,232,251,260,278,294,309,326,336,346,356,363,378,389,661,667,677,686,700,717,731,757,785,809,828,846,868};
 
     //Red LED Globals
-    uint16_t RedLineStationLEDPosition[] = {1,7,13,19,25,31,36,41,44,47,50,52,54,57,66,68,70,73,77,81,86,92,103,110,120,125}; //hard coded position of each station within sequential numbering of LEDS (this can be less than the total number of stations if you want (for some odd reason))
-    uint16_t RedLineLEDArray [][2] = { {2,6},{8,12},{14,18},{20,24},{26,30},{32,35},{37,40},{41,43},{45,46},{48,49},{51,51},{53,53},{55,56},{58,65},{67,67},{69,69},{71,72},{74,76},{78,80},{82,85},{87,91},{93,102},{104,109},{111,119},{121,124} };
+    uint16_t RedLineStationLEDPosition[] = {0,11,22,33,44,56,65,73,79,87,94,99,104,109,138,149,155,165,175,182,192,205,228,242,250,258,266}; //hard coded position of each station within sequential numbering of LEDS (this can be less than the total number of stations if you want (for some odd reason))
+    uint16_t RedLineLEDArray [][2] = { {1,10},{12,21},{23,32},{34,43},{45,55},{57,64},{66,72},{74,78},{80,86},{88,93},{95,98},{100,103},{105,108},{110,137},{139,148},{150,154},{156,164},{166,174},{176,181},{183,191},{193,204},{206,227},{229,241},{243,249},{251,257},{259,265} };
 
     //train position array fields
     int TrainPositions_TrainId[MaxNumPossibleTrains];
@@ -186,8 +186,8 @@ class usermod_v2_ASL : public Usermod {
         
        // strip.setPixelColor()
         PlotLEDStations(TargetFrame, RedLineStationLEDPosition, RedLineNumStationsInLine, StationRed, TrackRed, Red_Num_LEDS);
-        PlotLEDTrainPositions(TargetFrame, "RD", RedLineTrack1Domains, RedLineTrack1Segments, RedLineTrack1StationSegments, RedLineNumStationsInLine, RedLineLEDArray, RedLineStationLEDPosition, Red_Num_LED_Domains, StationRed, TrainRed);
-        PlotLEDTrainPositions(TargetFrame, "RD", RedLineTrack2Domains, RedLineTrack2Segments, RedLineTrack2StationSegments, RedLineNumStationsInLine, RedLineLEDArray, RedLineStationLEDPosition, Red_Num_LED_Domains, StationRed, TrainRed);
+        PlotLEDTrainPositions(TargetFrame, "RD", RedLineTrack1Domains, RedLineTrack1Segments, RedLineTrack1StationSegments, RedLineNumStationsInLine, RedLineLEDArray, RedLineStationLEDPosition, Red_Num_LED_Domains, TrainRed);
+        //PlotLEDTrainPositions(TargetFrame, "RD", RedLineTrack2Domains, RedLineTrack2Segments, RedLineTrack2StationSegments, RedLineNumStationsInLine, RedLineLEDArray, RedLineStationLEDPosition, Red_Num_LED_Domains, TrainRed);
 
         Serial.print("train red = ");
         Serial.println(TrainRed);
@@ -457,7 +457,7 @@ class usermod_v2_ASL : public Usermod {
 
 
   //function to plot the trains into the LED array, modularized to accept various line colors and output arrays
-  void PlotLEDTrainPositions(uint32_t LEDArrayToPlot[], String LineCode, uint16_t TrackSegmentArray[][2], uint16_t TrackSegmentList[], uint16_t StationSegmentArray[], uint8_t NumStationsInLine, uint16_t LEDTrackArray[][2], uint16_t LEDStationArray[], uint16_t NumLEDSegmentDomains, uint32_t StationColor, uint32_t TrainColor)
+  void PlotLEDTrainPositions(uint32_t LEDArrayToPlot[], String LineCode, uint16_t TrackSegmentArray[][2], uint16_t TrackSegmentList[], uint16_t StationSegmentArray[], uint8_t NumStationsInLine, uint16_t LEDTrackArray[][2], uint16_t LEDStationArray[], uint16_t NumLEDSegmentDomains, uint32_t TrainColor)
   {
     int NumNormalTrains = 0;
     for (int i = 0; i < MaxNumTrains; i++) { //run this for the max number of trains
