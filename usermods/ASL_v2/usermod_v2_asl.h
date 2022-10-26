@@ -26,6 +26,22 @@
     uint16_t RedLineStationLEDPosition[] = {0,11,22,33,44,56,65,73,79,87,94,99,104,109,138,149,155,165,175,182,192,205,228,242,250,258,266}; //hard coded position of each station within sequential numbering of LEDS (this can be less than the total number of stations if you want (for some odd reason))
     uint16_t RedLineLEDArray [][2] = { {1,10},{12,21},{23,32},{34,43},{45,55},{57,64},{66,72},{74,78},{80,86},{88,93},{95,98},{100,103},{105,108},{110,137},{139,148},{150,154},{156,164},{166,174},{176,181},{183,191},{193,204},{206,227},{229,241},{243,249},{251,257},{259,265} };
 
+    //Blue LED Globals
+    uint16_t BlueLineStationLEDPosition[] = {0,23,56,62,72,82,92,101,121,149,168,178,188,195,200,206,224,230,236,245,251,256,267,278,284,290,297}; //hard coded position of each station within sequential numbering of LEDS (this can be less than the total number of stations if you want (for some odd reason))
+    uint16_t BlueLineLEDArray [][2] = { {1,22},{24,55},{57,62},{63,71},{73,81},{83,91},{93,100},{102,120},{122,148},{150,167},{169,177},{179,187},{189,194},{196,199},{201,205},{207,223},{225,229},{231,235},{237,244},{246,250},{252,255},{257,266},{268,277},{279,283},{285,289},{291,296} };
+
+    //Green LED Globals
+    uint16_t GreenLineStationLEDPosition[] = {0,8,15,2232,48,53,73,80,86,93,104,115,124,134,152,158,166,173,180}; //hard coded position of each station within sequential numbering of LEDS (this can be less than the total number of stations if you want (for some odd reason))
+    uint16_t GreenLineLEDArray [][2] = { {1,7},{9,14},{16,21},{23,31},{33,36},{38,47},{49,52},{54,72},{74,79},{81,85},{87,92},{94,103},{105,114},{116,123},{125,133},{135,151,},{153,157,},{159,165},{167,172},{174,179} };
+
+    //Orange LED Globals
+    uint16_t OrangeLineStationLEDPosition[] = {0,6,12,18,24,30,36,42,52,78,88,99,112,117,122,132,139,145,150,157,163,177,184,192,200,208}; //hard coded position of each station within sequential numbering of LEDS (this can be less than the total number of stations if you want (for some odd reason))
+    uint16_t OrangeLineLEDArray [][2] = { {1,5},{7,11},{13,17},{19,23},{25,29},{31,35},{37,41},{43,51},{53,77},{79,87},{89,98},{100,112},{113,116},{118,121},{123,132},{134,138},{140,144},{146,149},{151,156},{158,164},{166,176},{178,183},{185,191},{193,199},{201,207} };
+
+    //Yellow LED Globals
+    uint16_t YellowLineStationLEDPosition[] = {0,8,13,18,29,42,47,56,100,107,113,120,129,135,152,170,184}; //hard coded position of each station within sequential numbering of LEDS (this can be less than the total number of stations if you want (for some odd reason))
+    uint16_t YellowLineLEDArray [][2] = { {1,7},{9,12},{14,17},{19,28},{30,41},{43,46},{48,55},{57,99},{101,112},{114,119},{121,128},{130,134},{136,151},{153,169},{171,183} };
+
     //train position array fields
     int TrainPositions_TrainId[MaxNumPossibleTrains];
     int TrainPositions_TrainNumber[MaxNumPossibleTrains];
