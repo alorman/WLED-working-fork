@@ -565,18 +565,19 @@ class usermod_v2_ASL : public Usermod {
       int8_t StationPlotted = 0;
       if(TrainPositions_ServiceType[i] == "Normal" && TrainPositions_LineCode[i] == LineCode){
           NumNormalTrains ++;
-          // for(int x = 0; x < NumStationsInLine; x++){ //run this loop for the total number of stations we have, to cycle through the station array
-          //   if(TrainPositions_CircuitId[i] == StationSegmentArray[x]) { 
-          //     TargetFrame[x] = TrainColor; //set the LED to high brightness so that we know theres a train there
-          //     Serial.println((String)"Train ID " + TrainPositions_TrainId[i] + " is at Station Segment " + StationSegmentArray[x] + " Direction: " + TrainPositions_DirectionNum[i] + " Mapped to " + LineCode + " LED " + LEDStationArray[x]); 
-          //     StationPlotted = 1;
-          //   }else if(TrainPositions_CircuitId[i] == (StationSegmentArray[x]+1) || TrainPositions_CircuitId[i] == (StationSegmentArray[x]-1)) { //additional loop for aide in snapping segments to stations
-          //     TargetFrame[x] = TrainColor;
-          //     Serial.println((String)"Train ID " + TrainPositions_TrainId[i] + " is at Station Segment " + StationSegmentArray[x] + " Direction: " + TrainPositions_DirectionNum[i] + " Snapped to " + LineCode + " LED " + LEDStationArray[x]);
-          //     StationPlotted = 1;
-          //   }
-          // }
-          if(StationPlotted == 0){
+          for(int x = 0; x < NumStationsInLine; x++){ //run this loop for the total number of stations we have, to cycle through the station array
+            if(TrainPositions_CircuitId[i] == StationSegmentArray[x]) { 
+              TargetFrame[(LEDStationArray[x])] = TrainColor; //set the LED to high brightness so that we know theres a train there
+              Serial.println((String)"Train ID " + TrainPositions_TrainId[i] + " is at Station Segment " + StationSegmentArray[x] + " Direction: " + TrainPositions_DirectionNum[i] + " Mapped to " + LineCode + " LED " + LEDStationArray[x]); 
+              StationPlotted = 1;
+            }else 
+            if(TrainPositions_CircuitId[i] == (StationSegmentArray[x]+1) || TrainPositions_CircuitId[i] == (StationSegmentArray[x]-1)) { //if the train is + or - 1 from the station it snaps it to the station. WMATA has documented that the sensor before the platform sometimes trips
+              TargetFrame[(LEDStationArray[x])] = TrainColor;
+              Serial.println((String)"Train ID " + TrainPositions_TrainId[i] + " is at Station Segment " + StationSegmentArray[x] + " Direction: " + TrainPositions_DirectionNum[i] + " Snapped to " + LineCode + " LED " + LEDStationArray[x]);
+              StationPlotted = 1;
+            }
+          }
+          if(StationPlotted == 0){ //don't plot the segment if we already plotted it as a station
             for(int y = 0; y < (NumLEDSegmentDomains); y++) { //cycle through each domain and check to see if it's the domain we want (this is -1 since we're directly counting the number of LEDs and we want the number of domains between them)
               if(TrainPositions_CircuitId[i] >= TrackSegmentArray[y][0] && TrainPositions_CircuitId[i] <= TrackSegmentArray[y][1]){  //we should now have found the correct domain range
                 int MappedLED = mapRound(TrainPositions_CircuitId[i], TrackSegmentArray[y][0], TrackSegmentArray[y][1], LEDTrackArray[y][0], LEDTrackArray[y][1]);
