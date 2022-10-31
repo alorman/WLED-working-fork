@@ -55,12 +55,12 @@
 
 //Track Domains
 //Red Line
-uint16_t RedLineTrack1Domains [][2] = { {8,31},{33,52},{54,61},{63,79},{81,94},{96,108},{110,125},{127,132},{134,141},{143,153},{155,163},{165,178},{180,189},{191,202},{462,466},{468,476},{478,484},{486,495},{497,512},{514,526},{528,547},{549,570},{572,590},{592,610},{612,628},{630,651} };
-uint16_t RedLineTrack2Domains [][2] ={ {211,231},{233,250},{252,259},{261,277},{279,293},{295,308},{310,325},{327,335},{337,345},{347,355},{357,362},{364,377},{379,388},{390,400},{662,666},{668,676},{678,685},{687,699},{701,716},{718,730},{732,756},{758,784},{786,808},{810,827},{829,845},{847,867} };
+uint16_t RedLineTrack1Domains [][2] = { {8,31},   {33,52},  {54,61},  {63,79},  {81,94},  {96,108}, {110,125},{127,132},{134,141},{143,153},{155,163},{165,178},{180,189},{191,202},{462,466},{468,476},{478,484},{486,495},{497,512},{514,526},{528,547},{549,570},{572,590},{592,610},{612,628},{630,651} };
+uint16_t RedLineTrack2Domains [][2] ={  {211,231},{233,250},{252,259},{261,277},{279,293},{295,308},{310,325},{327,335},{337,345},{347,355},{357,362},{364,377},{379,388},{390,400},{662,666},{668,676},{678,685},{687,699},{701,716},{718,730},{732,756},{758,784},{786,808},{810,827},{829,845},{847,867} };
 uint16_t RedLineTrack1Segments[] = {7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,160,161,162,163,164,165,166,167,168,169,170,171,172,173,174,175,176,177,178,179,180,181,182,183,184,185,186,187,188,189,190,191,192,193,194,195,196,197,198,199,200,201,202,203,462,463,464,465,466,467,468,469,470,471,472,473,474,475,476,477,478,479,480,481,482,483,484,485,486,487,488,489,490,491,492,493,494,495,496,497,498,499,500,501,502,503,504,505,506,507,508,509,510,511,512,513,514,515,516,517,518,519,520,521,522,523,524,525,526,527,528,529,530,531,532,533,534,535,536,537,538,539,540,541,542,543,544,545,546,547,548,549,550,551,552,553,554,555,556,557,558,559,560,561,562,563,564,565,566,567,568,569,570,571,572,573,574,575,576,577,578,579,580,581,582,583,584,585,586,587,588,589,590,591,592,593,594,595,596,597,598,599,600,601,602,603,604,605,606,607,608,609,610,611,612,613,614,615,616,617,618,619,620,621,622,623,624,625,626,627,628,629,630,631,632,633,634,635,636,637,638,639,640,641,642,643,644,645,646,647,648,649,650,651,652};
 uint16_t RedLineTrack2Segments [] = {210,211,212,213,214,215,216,217,218,219,220,221,222,223,224,225,226,227,228,229,230,231,232,233,234,235,236,237,238,239,240,241,242,243,244,245,246,247,248,249,250,251,252,253,254,255,256,257,258,259,260,261,262,263,264,265,266,267,268,269,270,271,272,273,274,275,276,277,278,279,280,281,282,283,284,285,286,287,288,289,290,291,292,293,294,295,296,297,298,299,300,301,302,303,304,305,306,307,308,309,310,311,312,313,314,315,316,317,318,319,320,321,322,323,324,325,326,327,328,329,330,331,332,333,334,335,336,337,338,339,340,341,342,343,344,345,346,347,348,349,350,351,352,353,354,355,356,357,358,359,360,361,362,363,364,365,366,367,368,369,370,371,372,373,374,375,376,377,378,379,380,381,382,383,384,385,386,387,388,389,390,391,392,393,394,395,396,397,398,399,400,661,662,663,664,665,666,667,668,669,670,671,672,673,674,675,676,677,678,679,680,681,682,683,684,685,686,687,688,689,690,691,692,693,694,695,696,697,698,699,700,701,702,703,704,705,706,707,708,709,710,711,712,713,714,715,716,717,718,719,720,721,722,723,724,725,726,727,728,729,730,731,732,733,734,735,736,737,738,739,740,741,742,743,744,745,746,747,748,749,750,751,752,753,754,755,756,757,758,759,760,761,762,763,764,765,766,767,768,769,770,771,772,773,774,775,776,777,778,779,780,781,782,783,784,785,786,787,788,789,790,791,792,793,794,795,796,797,798,799,800,801,802,803,804,805,806,807,808,809,810,811,812,813,814,815,816,817,818,819,820,821,822,823,824,825,826,827,828,829,830,831,832,833,834,835,836,837,838,839,840,841,842,843,844,845,846,847,848,849,850,851,852,853,854,855,856,857,858,859,860,861,862,863,864,865,866,867,868};
 
-uint16_t RedLineTrack1StationSegments[] = {7,32,53,62,80,95,109,126,133,142,154,164,179,190,203,467,477,485,496,513,527,548,571,591,611,629,652};  
+uint16_t RedLineTrack1StationSegments[] = {  7, 32, 53, 62, 80, 95,109,126,133,142,154,164,179,190,203,467,477,485,496,513,527,548,571,591,611,629,652};  
 uint16_t RedLineTrack2StationSegments[] = {210,232,251,260,278,294,309,326,336,346,356,363,378,389,661,667,677,686,700,717,731,757,785,809,828,846,868};
 
 //Blue Line
@@ -134,6 +134,13 @@ String TrainPositions_ServiceType[MaxNumPossibleTrains];
 int MaxNumTrains = 0; 
 int NormalTrainCount = 0;
 int RedTrainCount = 0;
+
+// test fake train data variable 
+uint8_t UseFakeJsonData = 2;
+
+uint16_t TempTrain1PositionCounter = 0;
+uint16_t TempTrain2PositionCounter = 399;
+
 /*
  * ASL's usermod test
  * Usermods allow you to add own functionality to WLED more easily
@@ -250,7 +257,7 @@ class usermod_v2_ASL : public Usermod {
      */
     void loop() {
      //Serial.println("Connected to WiFi!");
-      if (millis() - lastTime > 15000) {
+      if (millis() - lastTime > 2500) {
         Serial.println("I'm alive! in main loop");
         //readFromConfig();
         //Serial.println(ServerAddressString);
@@ -280,14 +287,14 @@ class usermod_v2_ASL : public Usermod {
        // strip.setPixelColor()
         PlotLEDStations(TargetFrame, RedLineStationLEDPosition, RedLineNumStationsInLine, StationRed, TrackRed, Red_Num_LEDS);
         PlotLEDTrainPositions(TargetFrame, "RD", RedLineTrack1Domains, RedLineTrack1Segments, RedLineTrack1StationSegments, RedLineNumStationsInLine, RedLineLEDArray, RedLineStationLEDPosition, Red_Num_LED_Domains, TrainRed);
-        //PlotLEDTrainPositions(TargetFrame, "RD", RedLineTrack2Domains, RedLineTrack2Segments, RedLineTrack2StationSegments, RedLineNumStationsInLine, RedLineLEDArray, RedLineStationLEDPosition, Red_Num_LED_Domains, TrainRed);
+        PlotLEDTrainPositions(TargetFrame, "RD", RedLineTrack2Domains, RedLineTrack2Segments, RedLineTrack2StationSegments, RedLineNumStationsInLine, RedLineLEDArray, RedLineStationLEDPosition, Red_Num_LED_Domains, TrainRed);
 
-        Serial.print("train red = ");
-        Serial.println(TrainRed);
-        Serial.print("station red = ");
-        Serial.println(StationRed);
-        Serial.print("track red = ");
-        Serial.println(TrackRed);
+        // Serial.print("train red = ");
+        // Serial.println(TrainRed);
+        // Serial.print("station red = ");
+        // Serial.println(StationRed);
+        // Serial.print("track red = ");
+        // Serial.println(TrackRed);
         // for(int i=0; i<Red_Num_LEDS; i++){
         //   Serial.print(i);
         //   Serial.print(" ");
@@ -495,14 +502,15 @@ class usermod_v2_ASL : public Usermod {
      String payload;
      String serverPath = ServerAddressString + "&api_key=" + apiKeyString; //these are defined in globals  
      int16_t httpResponseCode = 0;
-     http.begin(serverPath); 
-     httpResponseCode = http.GET(); //send the GET Request
-     if (httpResponseCode > 0) {
-        Serial.print("HTTP Response code: ");
-        Serial.println(httpResponseCode);
-      }
-     payload = http.getString(); //write the Wmata response to a String object
-     http.end(); //free memory now and clean up 
+    //  http.begin(serverPath); 
+    //  httpResponseCode = http.GET(); //send the GET Request
+    //  if (httpResponseCode > 0) {
+    //     Serial.print("HTTP Response code: ");
+    //     Serial.println(httpResponseCode);
+    //   }
+      payload = UseFakeData();
+    //  payload = http.getString(); //write the Wmata response to a String object
+    //  http.end(); //free memory now and clean up 
      //Serial.println(payload);
      //Serial.print("State JSON ");
      //Serial.println(state_bri);
@@ -557,23 +565,23 @@ class usermod_v2_ASL : public Usermod {
       int8_t StationPlotted = 0;
       if(TrainPositions_ServiceType[i] == "Normal" && TrainPositions_LineCode[i] == LineCode){
           NumNormalTrains ++;
-          for(int x = 0; x < NumStationsInLine; x++){ //run this loop for the total number of stations we have, to cycle through the station array
-            if(TrainPositions_CircuitId[i] == StationSegmentArray[x]) { 
-              TargetFrame[x] = TrainColor; //set the LED to high brightness so that we know theres a train there
-              Serial.println((String)"Train ID " + TrainPositions_TrainId[i] + " is at Station Segment " + StationSegmentArray[x] + " Direction: " + TrainPositions_DirectionNum[i] + " Mapped to " + LineCode + " LED " + LEDStationArray[x]); 
-              StationPlotted = 1;
-            }else if(TrainPositions_CircuitId[i] == (StationSegmentArray[x]+1) || TrainPositions_CircuitId[i] == (StationSegmentArray[x]-1)) { //additional loop for aide in snapping segments to stations
-              TargetFrame[x] = TrainColor;
-              Serial.println((String)"Train ID " + TrainPositions_TrainId[i] + " is at Station Segment " + StationSegmentArray[x] + " Direction: " + TrainPositions_DirectionNum[i] + " Snapped to " + LineCode + " LED " + LEDStationArray[x]);
-              StationPlotted = 1;
-            }
-          }
+          // for(int x = 0; x < NumStationsInLine; x++){ //run this loop for the total number of stations we have, to cycle through the station array
+          //   if(TrainPositions_CircuitId[i] == StationSegmentArray[x]) { 
+          //     TargetFrame[x] = TrainColor; //set the LED to high brightness so that we know theres a train there
+          //     Serial.println((String)"Train ID " + TrainPositions_TrainId[i] + " is at Station Segment " + StationSegmentArray[x] + " Direction: " + TrainPositions_DirectionNum[i] + " Mapped to " + LineCode + " LED " + LEDStationArray[x]); 
+          //     StationPlotted = 1;
+          //   }else if(TrainPositions_CircuitId[i] == (StationSegmentArray[x]+1) || TrainPositions_CircuitId[i] == (StationSegmentArray[x]-1)) { //additional loop for aide in snapping segments to stations
+          //     TargetFrame[x] = TrainColor;
+          //     Serial.println((String)"Train ID " + TrainPositions_TrainId[i] + " is at Station Segment " + StationSegmentArray[x] + " Direction: " + TrainPositions_DirectionNum[i] + " Snapped to " + LineCode + " LED " + LEDStationArray[x]);
+          //     StationPlotted = 1;
+          //   }
+          // }
           if(StationPlotted == 0){
-            for(int y = 0; y < (NumLEDSegmentDomains - 1); y++) { //cycle through each domain and check to see if it's the domain we want (this is -1 since we're directly counting the number of LEDs and we want the number of domains between them)
+            for(int y = 0; y < (NumLEDSegmentDomains); y++) { //cycle through each domain and check to see if it's the domain we want (this is -1 since we're directly counting the number of LEDs and we want the number of domains between them)
               if(TrainPositions_CircuitId[i] >= TrackSegmentArray[y][0] && TrainPositions_CircuitId[i] <= TrackSegmentArray[y][1]){  //we should now have found the correct domain range
                 int MappedLED = mapRound(TrainPositions_CircuitId[i], TrackSegmentArray[y][0], TrackSegmentArray[y][1], LEDTrackArray[y][0], LEDTrackArray[y][1]);
                 TargetFrame[MappedLED] = TrainColor;
-                //Serial.println((String)"Train ID " + TrainPositions_TrainId[i] + " at circuit " + TrainPositions_CircuitId[i] + " Direction: " + TrainPositions_DirectionNum[i] + " Mapped to " + LineCode + " LED " + MappedLED);
+                Serial.println((String)"Train ID " + TrainPositions_TrainId[i] + " at circuit " + TrainPositions_CircuitId[i] + " Direction: " + TrainPositions_DirectionNum[i] + " Mapped to " + LineCode + " LED " + MappedLED);
               }
             }
           }
@@ -600,6 +608,545 @@ class usermod_v2_ASL : public Usermod {
       if (TrainPositions_LineCode[i] == "SV"){
         RedTrainCount ++;
       }
+    }
+  }
+
+  String UseFakeData() { //function to allow us to create test JSON data rather than having to get it from WMATA. Below is a representative weekend train load
+    if(UseFakeJsonData == 2) { //this implements two moving trains worth of data
+    String FakeDataJSONpart1 = R"=====({"TrainPositions":[{
+      "TrainId": "001",
+      "TrainNumber": "001",
+      "CarCount": 8,
+      "DirectionNum": )=====";
+    String FakeDataJSONpart2 = R"=====(,
+      "CircuitId": )=====";
+    String FakeDataJSONpart3 = R"=====(,
+      "DestinationStationCode": )=====";
+    String FakeDataJSONpart4 = R"=====(,
+      "LineCode": "RD",
+      "SecondsAtLocation": 1,
+      "ServiceType": "Normal"
+    }, {
+      "TrainId": "002",
+      "TrainNumber": "703",
+      "CarCount": 8,
+      "DirectionNum": )====="; //2,
+    String FakeDataJSONpart5 = R"=====(,
+      "CircuitId": )=====";
+    String FakeDataJSONpart6 = R"=====(,
+      "DestinationStationCode": )=====";
+    String FakeDataJSONpart7 = R"=====(,
+      "LineCode": "RD",
+      "SecondsAtLocation": 1,
+      "ServiceType": "Normal"
+    }, {
+      "TrainId": "024",
+      "TrainNumber": "506",
+      "CarCount": 8,
+      "DirectionNum": 1,
+      "CircuitId": 1773,
+      "DestinationStationCode": null,
+      "LineCode": null,
+      "SecondsAtLocation": 29,
+      "ServiceType": "NoPassengers"
+    }, {
+      "TrainId": "035",
+      "TrainNumber": "000",
+      "CarCount": 0,
+      "DirectionNum": 2,
+      "CircuitId": 2545,
+      "DestinationStationCode": null,
+      "LineCode": null,
+      "SecondsAtLocation": 1832,
+      "ServiceType": "Unknown"
+    }, {
+      "TrainId": "036",
+      "TrainNumber": "000",
+      "CarCount": 0,
+      "DirectionNum": 2,
+      "CircuitId": 2548,
+      "DestinationStationCode": null,
+      "LineCode": null,
+      "SecondsAtLocation": 1832,
+      "ServiceType": "Unknown"
+    }, {
+      "TrainId": "046",
+      "TrainNumber": "000",
+      "CarCount": 0,
+      "DirectionNum": 1,
+      "CircuitId": 2551,
+      "DestinationStationCode": null,
+      "LineCode": null,
+      "SecondsAtLocation": 1832,
+      "ServiceType": "Unknown"
+    }, {
+      "TrainId": "093",
+      "TrainNumber": "000",
+      "CarCount": 8,
+      "DirectionNum": 1,
+      "CircuitId": 2581,
+      "DestinationStationCode": null,
+      "LineCode": null,
+      "SecondsAtLocation": 275,
+      "ServiceType": "Unknown"
+    }, {
+      "TrainId": "104",
+      "TrainNumber": "000",
+      "CarCount": 0,
+      "DirectionNum": 2,
+      "CircuitId": 1057,
+      "DestinationStationCode": null,
+      "LineCode": null,
+      "SecondsAtLocation": 1832,
+      "ServiceType": "Unknown"
+    }, {
+      "TrainId": "108",
+      "TrainNumber": "000",
+      "CarCount": 0,
+      "DirectionNum": 1,
+      "CircuitId": 1072,
+      "DestinationStationCode": null,
+      "LineCode": null,
+      "SecondsAtLocation": 1832,
+      "ServiceType": "Unknown"
+    }, {
+      "TrainId": "109",
+      "TrainNumber": "000",
+      "CarCount": 0,
+      "DirectionNum": 1,
+      "CircuitId": 1063,
+      "DestinationStationCode": null,
+      "LineCode": null,
+      "SecondsAtLocation": 1832,
+      "ServiceType": "Unknown"
+    }, {
+      "TrainId": "110",
+      "TrainNumber": "000",
+      "CarCount": 0,
+      "DirectionNum": 2,
+      "CircuitId": 1264,
+      "DestinationStationCode": null,
+      "LineCode": null,
+      "SecondsAtLocation": 1832,
+      "ServiceType": "Unknown"
+    }, {
+      "TrainId": "111",
+      "TrainNumber": "000",
+      "CarCount": 0,
+      "DirectionNum": 1,
+      "CircuitId": 1259,
+      "DestinationStationCode": null,
+      "LineCode": null,
+      "SecondsAtLocation": 1832,
+      "ServiceType": "Unknown"
+    }, {
+      "TrainId": "129",
+      "TrainNumber": "000",
+      "CarCount": 0,
+      "DirectionNum": 2,
+      "CircuitId": 2601,
+      "DestinationStationCode": null,
+      "LineCode": null,
+      "SecondsAtLocation": 1832,
+      "ServiceType": "Unknown"
+    }, {
+      "TrainId": "138",
+      "TrainNumber": "714",
+      "CarCount": 8,
+      "DirectionNum": 2,
+      "CircuitId": 344,
+      "DestinationStationCode": null,
+      "LineCode": null,
+      "SecondsAtLocation": 2,
+      "ServiceType": "NoPassengers"
+    }, {
+      "TrainId": "150",
+      "TrainNumber": "701",
+      "CarCount": 8,
+      "DirectionNum": 2,
+      "CircuitId": 2363,
+      "DestinationStationCode": null,
+      "LineCode": null,
+      "SecondsAtLocation": 47,
+      "ServiceType": "NoPassengers"
+    }, {
+      "TrainId": "153",
+      "TrainNumber": "792",
+      "CarCount": 8,
+      "DirectionNum": 1,
+      "CircuitId": 1758,
+      "DestinationStationCode": null,
+      "LineCode": null,
+      "SecondsAtLocation": 1,
+      "ServiceType": "NoPassengers"
+    }, {
+      "TrainId": "229",
+      "TrainNumber": "845",
+      "CarCount": 0,
+      "DirectionNum": 2,
+      "CircuitId": 715,
+      "DestinationStationCode": null,
+      "LineCode": null,
+      "SecondsAtLocation": 4,
+      "ServiceType": "NoPassengers"
+    }, {
+      "TrainId": "233",
+      "TrainNumber": "824",
+      "CarCount": 6,
+      "DirectionNum": 1,
+      "CircuitId": 22,
+      "DestinationStationCode": null,
+      "LineCode": null,
+      "SecondsAtLocation": 11,
+      "ServiceType": "NoPassengers"
+    }, {
+      "TrainId": "247",
+      "TrainNumber": "851",
+      "CarCount": 6,
+      "DirectionNum": 1,
+      "CircuitId": 3271,
+      "DestinationStationCode": null,
+      "LineCode": null,
+      "SecondsAtLocation": 2,
+      "ServiceType": "NoPassengers"
+    }, {
+      "TrainId": "249",
+      "TrainNumber": "000",
+      "CarCount": 6,
+      "DirectionNum": 1,
+      "CircuitId": 2933,
+      "DestinationStationCode": null,
+      "LineCode": null,
+      "SecondsAtLocation": 13,
+      "ServiceType": "Unknown"
+    }, {
+      "TrainId": "253",
+      "TrainNumber": "000",
+      "CarCount": 8,
+      "DirectionNum": 1,
+      "CircuitId": 660,
+      "DestinationStationCode": null,
+      "LineCode": null,
+      "SecondsAtLocation": 10,
+      "ServiceType": "Unknown"
+    }, {
+      "TrainId": "255",
+      "TrainNumber": "708",
+      "CarCount": 8,
+      "DirectionNum": 1,
+      "CircuitId": 3191,
+      "DestinationStationCode": null,
+      "LineCode": null,
+      "SecondsAtLocation": 5,
+      "ServiceType": "NoPassengers"
+    }, {
+      "TrainId": "277",
+      "TrainNumber": "706",
+      "CarCount": 8,
+      "DirectionNum": 1,
+      "CircuitId": 2851,
+      "DestinationStationCode": null,
+      "LineCode": null,
+      "SecondsAtLocation": 733,
+      "ServiceType": "NoPassengers"
+    }, {
+      "TrainId": "405",
+      "TrainNumber": "PM37",
+      "CarCount": 0,
+      "DirectionNum": 1,
+      "CircuitId": 997,
+      "DestinationStationCode": null,
+      "LineCode": null,
+      "SecondsAtLocation": 1832,
+      "ServiceType": "Unknown"
+    }, {
+      "TrainId": "415",
+      "TrainNumber": "T006",
+      "CarCount": 0,
+      "DirectionNum": 1,
+      "CircuitId": 993,
+      "DestinationStationCode": null,
+      "LineCode": null,
+      "SecondsAtLocation": 1832,
+      "ServiceType": "Unknown"
+    }, {
+      "TrainId": "419",
+      "TrainNumber": "PM35",
+      "CarCount": 0,
+      "DirectionNum": 1,
+      "CircuitId": 1181,
+      "DestinationStationCode": null,
+      "LineCode": null,
+      "SecondsAtLocation": 1832,
+      "ServiceType": "Unknown"
+    }, {
+      "TrainId": "426",
+      "TrainNumber": "12220",
+      "CarCount": 0,
+      "DirectionNum": 2,
+      "CircuitId": 987,
+      "DestinationStationCode": null,
+      "LineCode": null,
+      "SecondsAtLocation": 1832,
+      "ServiceType": "Unknown"
+    }, {
+      "TrainId": "444",
+      "TrainNumber": "000",
+      "CarCount": 6,
+      "DirectionNum": 1,
+      "CircuitId": 2494,
+      "DestinationStationCode": null,
+      "LineCode": null,
+      "SecondsAtLocation": 1832,
+      "ServiceType": "Unknown"
+    }, {
+      "TrainId": "445",
+      "TrainNumber": "000",
+      "CarCount": 0,
+      "DirectionNum": 1,
+      "CircuitId": 984,
+      "DestinationStationCode": null,
+      "LineCode": null,
+      "SecondsAtLocation": 1832,
+      "ServiceType": "Unknown"
+    }, {
+      "TrainId": "448",
+      "TrainNumber": "000",
+      "CarCount": 0,
+      "DirectionNum": 2,
+      "CircuitId": 1187,
+      "DestinationStationCode": null,
+      "LineCode": null,
+      "SecondsAtLocation": 1832,
+      "ServiceType": "Unknown"
+    }, {
+      "TrainId": "452",
+      "TrainNumber": "000",
+      "CarCount": 0,
+      "DirectionNum": 2,
+      "CircuitId": 2634,
+      "DestinationStationCode": null,
+      "LineCode": null,
+      "SecondsAtLocation": 1832,
+      "ServiceType": "Unknown"
+    }, {
+      "TrainId": "471",
+      "TrainNumber": "000",
+      "CarCount": 0,
+      "DirectionNum": 2,
+      "CircuitId": 2536,
+      "DestinationStationCode": null,
+      "LineCode": null,
+      "SecondsAtLocation": 1832,
+      "ServiceType": "Unknown"
+    }, {
+      "TrainId": "472",
+      "TrainNumber": "000",
+      "CarCount": 0,
+      "DirectionNum": 1,
+      "CircuitId": 2542,
+      "DestinationStationCode": null,
+      "LineCode": null,
+      "SecondsAtLocation": 1832,
+      "ServiceType": "Unknown"
+    }, {
+      "TrainId": "473",
+      "TrainNumber": "000",
+      "CarCount": 0,
+      "DirectionNum": 1,
+      "CircuitId": 2543,
+      "DestinationStationCode": null,
+      "LineCode": null,
+      "SecondsAtLocation": 1832,
+      "ServiceType": "Unknown"
+    }, {
+      "TrainId": "474",
+      "TrainNumber": "000",
+      "CarCount": 0,
+      "DirectionNum": 2,
+      "CircuitId": 1280,
+      "DestinationStationCode": null,
+      "LineCode": null,
+      "SecondsAtLocation": 1832,
+      "ServiceType": "Unknown"
+    }, {
+      "TrainId": "475",
+      "TrainNumber": "000",
+      "CarCount": 0,
+      "DirectionNum": 1,
+      "CircuitId": 1087,
+      "DestinationStationCode": null,
+      "LineCode": null,
+      "SecondsAtLocation": 1832,
+      "ServiceType": "Unknown"
+    }, {
+      "TrainId": "499",
+      "TrainNumber": "710",
+      "CarCount": 8,
+      "DirectionNum": 2,
+      "CircuitId": 3030,
+      "DestinationStationCode": null,
+      "LineCode": null,
+      "SecondsAtLocation": 37,
+      "ServiceType": "NoPassengers"
+    }, {
+      "TrainId": "502",
+      "TrainNumber": "706",
+      "CarCount": 2,
+      "DirectionNum": 1,
+      "CircuitId": 513,
+      "DestinationStationCode": null,
+      "LineCode": null,
+      "SecondsAtLocation": 43,
+      "ServiceType": "NoPassengers"
+    }, {
+      "TrainId": "510",
+      "TrainNumber": "000",
+      "CarCount": 8,
+      "DirectionNum": 1,
+      "CircuitId": 2580,
+      "DestinationStationCode": null,
+      "LineCode": null,
+      "SecondsAtLocation": 457,
+      "ServiceType": "Unknown"
+    }, {
+      "TrainId": "486",
+      "TrainNumber": "592",
+      "CarCount": 8,
+      "DirectionNum": 2,
+      "CircuitId": 2254,
+      "DestinationStationCode": "F11",
+      "LineCode": "GR",
+      "SecondsAtLocation": 922,
+      "ServiceType": "NoPassengers"
+    }, {
+      "TrainId": "495",
+      "TrainNumber": "501",
+      "CarCount": 8,
+      "DirectionNum": 2,
+      "CircuitId": 2317,
+      "DestinationStationCode": "F11",
+      "LineCode": "GR",
+      "SecondsAtLocation": 13,
+      "ServiceType": "NoPassengers"
+    }, {
+      "TrainId": "017",
+      "TrainNumber": "905",
+      "CarCount": 8,
+      "DirectionNum": 1,
+      "CircuitId": 1443,
+      "DestinationStationCode": "D13",
+      "LineCode": "OR",
+      "SecondsAtLocation": 11,
+      "ServiceType": "NoPassengers"
+    }, {
+      "TrainId": "004",
+      "TrainNumber": "992",
+      "CarCount": 8,
+      "DirectionNum": 2,
+      "CircuitId": 3019,
+      "DestinationStationCode": "K08",
+      "LineCode": "OR",
+      "SecondsAtLocation": 2,
+      "ServiceType": "NoPassengers"
+    }, {
+      "TrainId": "494",
+      "TrainNumber": "110",
+      "CarCount": 8,
+      "DirectionNum": 2,
+      "CircuitId": 6,
+      "DestinationStationCode": "A15",
+      "LineCode": "RD",
+      "SecondsAtLocation": 214,
+      "ServiceType": "NoPassengers"
+    }, {
+      "TrainId": "506",
+      "TrainNumber": "192",
+      "CarCount": 8,
+      "DirectionNum": 2,
+      "CircuitId": 331,
+      "DestinationStationCode": "A15",
+      "LineCode": "RD",
+      "SecondsAtLocation": 0,
+      "ServiceType": "NoPassengers"
+    }, {
+      "TrainId": "491",
+      "TrainNumber": "191",
+      "CarCount": 8,
+      "DirectionNum": 1,
+      "CircuitId": 572,
+      "DestinationStationCode": "B11",
+      "LineCode": "RD",
+      "SecondsAtLocation": 36,
+      "ServiceType": "NoPassengers"
+    }, {
+      "TrainId": "490",
+      "TrainNumber": "691",
+      "CarCount": 8,
+      "DirectionNum": 1,
+      "CircuitId": 2412,
+      "DestinationStationCode": "G05",
+      "LineCode": "SV",
+      "SecondsAtLocation": 10,
+      "ServiceType": "NoPassengers"
+    }, {
+      "TrainId": "131",
+      "TrainNumber": "792",
+      "CarCount": 8,
+      "DirectionNum": 2,
+      "CircuitId": 3421,
+      "DestinationStationCode": "N06",
+      "LineCode": "SV",
+      "SecondsAtLocation": 91,
+      "ServiceType": "NoPassengers"
+    }, {
+      "TrainId": "273",
+      "TrainNumber": "332",
+      "CarCount": 0,
+      "DirectionNum": 2,
+      "CircuitId": 1176,
+      "DestinationStationCode": "C15",
+      "LineCode": "YL",
+      "SecondsAtLocation": 561,
+      "ServiceType": "NoPassengers"
+    }, {
+      "TrainId": "154",
+      "TrainNumber": "391",
+      "CarCount": 8,
+      "DirectionNum": 1,
+      "CircuitId": 1895,
+      "DestinationStationCode": "E10",
+      "LineCode": "YL",
+      "SecondsAtLocation": 195,
+      "ServiceType": "NoPassengers"
+    }]
+    })=====";
+    
+    uint8_t TempTrain1DirectionNum = 2; //southbound from Shady Grove
+    uint8_t TempTrain2DirectionNum = 1; //southbound from Glenmont
+    String TempTrain1DesitinationCode = "\"B11\""; //Glenmont
+    String TempTrain2DesitinationCode = "\"A15\""; //Shady Grove
+
+    String FakeDataJSON = FakeDataJSONpart1 + TempTrain1DirectionNum + FakeDataJSONpart2 + RedLineTrack1Segments[TempTrain1PositionCounter] + FakeDataJSONpart3 + TempTrain1DesitinationCode + FakeDataJSONpart4 + TempTrain2DirectionNum + FakeDataJSONpart5 + RedLineTrack2Segments[TempTrain2PositionCounter] + FakeDataJSONpart6 + TempTrain2DesitinationCode + FakeDataJSONpart7;
+
+    Serial.println((String)"TempTrain1PositionCounter = " + TempTrain1PositionCounter + " Array Value = " + RedLineTrack1Segments[TempTrain1PositionCounter]);
+    Serial.println((String)"TempTrain2PositionCounter = " + TempTrain2PositionCounter + " Array Value = " + RedLineTrack2Segments[TempTrain2PositionCounter]);
+
+    if(TempTrain1PositionCounter <= RedLineTrack1SegmentCount){
+      TempTrain1PositionCounter ++;
+    }
+    if(TempTrain1PositionCounter >= RedLineTrack1SegmentCount){
+      TempTrain1PositionCounter = 0;
+    }
+
+    if(TempTrain2PositionCounter >= 0){
+      TempTrain2PositionCounter --;
+    }
+    if(TempTrain2PositionCounter < 0){
+      TempTrain2PositionCounter = 399;
+    }
+
+    return FakeDataJSON;
     }
   }
 
