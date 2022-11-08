@@ -246,12 +246,43 @@ WLED_GLOBAL int8_t irPin _INIT(IRPIN);
 
 //dev globals
 WLED_GLOBAL uint8_t DevLEDAddress[6];
-WLED_GLOBAL uint32_t DisplayFrame[266];
-WLED_GLOBAL uint32_t TargetFrame[266];
 
+WLED_GLOBAL uint32_t RedDisplayFrame[268];
+WLED_GLOBAL uint32_t RedTargetFrame[268];
+
+WLED_GLOBAL uint32_t BlueDisplayFrame[299];
+WLED_GLOBAL uint32_t BlueTargetFrame[299];
+
+WLED_GLOBAL uint32_t GreenDisplayFrame[181];
+WLED_GLOBAL uint32_t GreenTargetFrame[181];
+
+WLED_GLOBAL uint32_t OrangeDisplayFrame[209];
+WLED_GLOBAL uint32_t OrangeTargetFrame[209];
+
+WLED_GLOBAL uint32_t YellowDisplayFrame[185];
+WLED_GLOBAL uint32_t YellowTargetFrame[185];
+
+//global color definitions
 WLED_GLOBAL uint32_t StationRed;
 WLED_GLOBAL uint32_t TrainRed;
 WLED_GLOBAL uint32_t TrackRed;
+
+WLED_GLOBAL uint32_t StationBlue;
+WLED_GLOBAL uint32_t TrainBlue;
+WLED_GLOBAL uint32_t TrackBlue;
+
+WLED_GLOBAL uint32_t StationGreen;
+WLED_GLOBAL uint32_t TrainGreen;
+WLED_GLOBAL uint32_t TrackGreen;
+
+WLED_GLOBAL uint32_t StationOrange;
+WLED_GLOBAL uint32_t TrainOrange;
+WLED_GLOBAL uint32_t TrackOrange;
+
+WLED_GLOBAL uint32_t StationYellow;
+WLED_GLOBAL uint32_t TrainYellow;
+WLED_GLOBAL uint32_t TrackYellow;
+
 
 //WLED_GLOBAL byte presetToApply _INIT(0);
 

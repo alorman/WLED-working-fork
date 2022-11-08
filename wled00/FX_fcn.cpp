@@ -44,7 +44,7 @@
 */
 
 //factory defaults LED setup
-#define PIXEL_COUNTS 100, 100, 100, 100, 100
+#define PIXEL_COUNTS 267, 298, 181, 185, 209
 #define DATA_PINS 33, 25, 26, 27, 14
 #define DEFAULT_LED_TYPE TYPE_WS2812_RGB
 

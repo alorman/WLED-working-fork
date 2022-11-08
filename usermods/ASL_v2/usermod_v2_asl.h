@@ -20,7 +20,7 @@
 //Blue line
 #define BlueLineNumStationsInLine (sizeof(BlueLineTrack1StationSegments)/sizeof(BlueLineTrack1StationSegments[1])) //counts number of stations we've defined above
 #define Blue_Num_LED_Domains (sizeof(BlueLineLEDArray)/sizeof(BlueLineLEDArray[1,1])) //counts the number of LED domains we've specified and makes all the LED number comply with that
-#define Blue_Num_LEDS BlueLineStationLEDPosition[Blue_Num_LED_Domains]//count max number of station LEDs and make this the number of LEDs we have (assumes every line ends with a station)
+#define Blue_Num_LEDS 297 //BlueLineStationLEDPosition[Blue_Num_LED_Domains]//count max number of station LEDs and make this the number of LEDs we have (assumes every line ends with a station)
 #define BlueLineTrack1SegmentCount (sizeof(BlueLineTrack1Segments)/sizeof(BlueLineTrack1Segments[1])) //counts number of Blue line track 1 track segments
 #define BlueLineTrack2SegmentCount (sizeof(BlueLineTrack2Segments)/sizeof(BlueLineTrack2Segments[1])) //counts number of Blue line track 2 track segments
 #define BlueLineTrack1SegmentDomains (sizeof(BlueLineTrack1Domains)/sizeof(BlueLineTrack1Domains[1,1])) //counts the number of track 1 segment domains (including breaks and stations)
@@ -64,8 +64,8 @@ uint16_t RedLineTrack1StationSegments[] = {  7, 32, 53, 62, 80, 95,109,126,133,1
 uint16_t RedLineTrack2StationSegments[] = {210,232,251,260,278,294,309,326,336,346,356,363,378,389,661,667,677,686,700,717,731,757,785,809,828,846,868};
 
 //Blue Line
-uint16_t BlueLineTrack1Domains [][2] = { {2680,2708},{2710,2752},{1159,1161},{1163,1169},{1171,1203},{1205,1216},{1218,1229},{1231,1245},{1247,1264},{1266,1284},{1286,1297},{1299,1309},{1311,1322},{1324,1329},{1544,1567},{1569,1574},{1576,1589},{1591,1597},{1599,1609},{1611,1617},{1619,1635},{2423,2433},{2507,2520},{ 252,2536},{2538,2556},{2558,2573} };
-uint16_t BlueLineTrack2Domains [][2] = { {2605,2623},{2635,2673},{966 , 968},{970 , 975},{ 977,1009},{1011,1023},{1025,1035},{1037,1051},{1053,1069},{1071,1091},{1093,1104},{1106,1116},{1118,1125},{1127,1134},{1378,1399},{1401,1405},{1407,1417},{1419,1423},{1425,1435},{1437,1442},{1444,1461},{2409,2419},{2421,2433},{2435,2448},{2450,2468},{2470,2486} };
+uint16_t BlueLineTrack1Domains [][2] = { {2605,2623},{2635,2673},{966 , 968},{970 , 975},{ 977,1009},{1011,1023},{1025,1035},{1037,1051},{1053,1069},{1071,1091},{1093,1104},{1106,1116},{1118,1125},{1127,1134},{1378,1399},{1401,1405},{1407,1417},{1419,1423},{1425,1435},{1437,1442},{1444,1461},{2409,2419},{2421,2433},{2435,2448},{2450,2468},{2470,2486} };
+uint16_t BlueLineTrack2Domains [][2] = { {2680,2708},{2710,2752},{1159,1161},{1163,1169},{1171,1203},{1205,1216},{1218,1229},{1231,1245},{1247,1264},{1266,1284},{1286,1297},{1299,1309},{1311,1322},{1324,1329},{1544,1567},{1569,1574},{1576,1589},{1591,1597},{1599,1609},{1611,1617},{1619,1635},{2423,2433},{2507,2520},{ 252,2536},{2538,2556},{2558,2573} };
 uint16_t BlueLineTrack1Segments[] = {2604,2605,2606,2607,2608,2609,2610,2611,2612,2613,2614,2615,2616,2617,2618,2619,2620,2621,2622,2623,2624,2625,2626,2627,2628,2629,2630,2631,2632,2633,2634,2635,2636,2637,2638,2639,2640,2641,2642,2643,2644,2645,2646,2647,2648,2649,2650,2651,2652,2653,2654,2655,2656,2657,2658,2659,2660,2661,2662,2663,2664,2665,2666,2667,2668,2669,2670,2671,2672,2673,966,967,968,969,970,971,972,973,974,975,976,977,978,979,980,981,982,983,984,985,986,987,988,989,990,991,992,993,994,995,996,997,998,999,1000,1001,1002,1003,1004,1005,1006,1007,1008,1009,1010,1011,1012,1013,1014,1015,1016,1017,1018,1019,1020,1021,1022,1023,1024,1025,1026,1027,1028,1029,1030,1031,1032,1033,1034,1035,1036,1037,1038,1039,1040,1041,1042,1043,1044,1045,1046,1047,1048,1049,1050,1051,1052,1053,1054,1055,1056,1057,1058,1059,1060,1061,1062,1063,1064,1065,1066,1067,1068,1069,1070,1071,1072,1073,1074,1075,1076,1077,1078,1079,1080,1081,1082,1083,1084,1085,1086,1087,1088,1089,1090,1091,1092,1093,1094,1095,1096,1097,1098,1099,1100,1101,1102,1103,1104,1105,1106,1107,1108,1109,1110,1111,1112,1113,1114,1115,1116,1117,1118,1119,1120,1121,1122,1123,1124,1125,1126,1127,1128,1129,1130,1131,1132,1133,1134,1135,1378,1379,1380,1381,1382,1383,1384,1385,1386,1387,1388,1389,1390,1391,1392,1393,1394,1395,1396,1397,1398,1399,1400,1401,1402,1403,1404,1405,1406,1407,1408,1409,1410,1411,1412,1413,1414,1415,1416,1417,1418,1419,1420,1421,1422,1423,1424,1425,1426,1427,1428,1429,1430,1431,1432,1433,1434,1435,1436,1437,1438,1439,1440,1441,1442,1443,1444,1445,1446,1447,1448,1449,1450,1451,1452,1453,1454,1455,1456,1457,1458,1459,1460,1461,2409,2410,2411,2412,2413,2414,2415,2416,2417,2418,2419,2420,2421,2422,2423,2424,2425,2426,2427,2428,2429,2430,2431,2432,2433,2434,2435,2436,2437,2438,2439,2440,2441,2442,2443,2444,2445,2446,2447,2448,2449,2450,2451,2452,2453,2454,2455,2456,2457,2458,2459,2460,2461,2462,2463,2464,2465,2466,2467,2468,2469,2470,2471,2472,2473,2474,2475,2476,2477,2478,2479,2480,2481,2482,2483,2484,2485,2486,2487};
 uint16_t BlueLineTrack2Segments [] = {2679,2680,2681,2682,2683,2684,2685,2686,2687,2688,2689,2690,2691,2692,2693,2694,2695,2696,2697,2698,2699,2700,2701,2702,2703,2704,2705,2706,2707,2708,2709,2710,2711,2712,2713,2714,2715,2716,2717,2718,2719,2720,2721,2722,2723,2724,2725,2726,2727,2728,2729,2730,2731,2732,2733,2734,2735,2736,2737,2738,2739,2740,2741,2742,2743,2744,2745,2746,2747,2748,2749,2750,2751,2752,1159,1160,1161,1162,1163,1164,1165,1166,1167,1168,1169,1170,1171,1172,1173,1174,1175,1176,1177,1178,1179,1180,1181,1182,1183,1184,1185,1186,1187,1188,1189,1190,1191,1192,1193,1194,1195,1196,1197,1198,1199,1200,1201,1202,1203,1204,1205,1206,1207,1208,1209,1210,1211,1212,1213,1214,1215,1216,1217,1218,1219,1220,1221,1222,1223,1224,1225,1226,1227,1228,1229,1230,1231,1232,1233,1234,1235,1236,1237,1238,1239,1240,1241,1242,1243,1244,1245,1246,1247,1248,1249,1250,1251,1252,1253,1254,1255,1256,1257,1258,1259,1260,1261,1262,1263,1264,1265,1266,1267,1268,1269,1270,1271,1272,1273,1274,1275,1276,1277,1278,1279,1280,1281,1282,1283,1284,1285,1286,1287,1288,1289,1290,1291,1292,1293,1294,1295,1296,1297,1298,1299,1300,1301,1302,1303,1304,1305,1306,1307,1308,1309,1310,1311,1312,1313,1314,1315,1316,1317,1318,1319,1320,1321,1322,1323,1324,1325,1326,1327,1328,1329,1330,1544,1545,1546,1547,1548,1549,1550,1551,1552,1553,1554,1555,1556,1557,1558,1559,1560,1561,1562,1563,1564,1565,1566,1567,1568,1569,1570,1571,1572,1573,1574,1575,1576,1577,1578,1579,1580,1581,1582,1583,1584,1585,1586,1587,1588,1589,1590,1591,1592,1593,1594,1595,1596,1597,1598,1599,1600,1601,1602,1603,1604,1605,1606,1607,1608,1609,1610,1611,1612,1613,1614,1615,1616,1617,1618,1619,1620,1621,1622,1623,1624,1625,1626,1627,1628,1629,1630,1631,1632,1633,1634,1635,2423,2424,2425,2426,2427,2428,2429,2430,2431,2432,2433,2506,2507,2508,2509,2510,2511,2512,2513,2514,2515,2516,2517,2518,2519,2520,2521,2522,2523,2524,2525,2526,2527,2528,2529,2530,2531,2532,2533,2534,2535,2536,2537,2538,2539,2540,2541,2542,2543,2544,2545,2546,2547,2548,2549,2550,2551,2552,2553,2554,2555,2556,2557,2558,2559,2560,2561,2562,2563,2564,2565,2566,2567,2568,2569,2570,2571,2572,2573,2574};
 
@@ -91,13 +91,13 @@ uint16_t OrangeLineTrack1StationSegments[] = {2774,2796,2817,2844,2870,2886,2898
 uint16_t OrangeLineTrack2StationSegments[] = {2933,2954,2976,3001,3023,3037,3048,3061,1285,1298,1310,1323,1330,1568,1575,1590,1598,1610,1618,1643,1657,1670,1692,1711};
 
 //Yellow Line
-const uint16_t YellowLineTrack1Domains [][2] = { { 945, 954},{ 956, 968},{ 970, 975},{ 977,1009},{1011,1023},{1025,1035},{1037,1051},{1053,1054},{3124,3145},{2362,2363},{2365,2375},{2377,2380},{1900,1910},{1912,1922},{1924,1931},{1933,1941},{1943,1955},{1957,1970} };
-const uint16_t YellowLineTrack2Domains [][2] = { {1138,1147},{1149,1161},{1163,1169},{1171,1204},{1205,1216},{1218,1229},{1231,1245},{1247,1248},{3105,3123},{2229,2230},{2232,2240},{2242,2245},{1744,1752},{1754,1763},{1765,1772},{1774,1781},{1783,1795},{1797,1808} };
-const uint16_t YellowLineTrack1Segments[] = {944,945,946,947,948,949,950,951,952,953,954,955,956,957,958,959,960,961,962,963,964,965,966,967,968,969,970,971,972,973,974,975,976,977,978,979,980,981,982,983,984,985,986,987,988,989,990,991,992,993,994,995,996,997,998,999,1000,1001,1002,1003,1004,1005,1006,1007,1008,1009,1010,1011,1012,1013,1014,1015,1016,1017,1018,1019,1020,1021,1022,1023,1024,1025,1026,1027,1028,1029,1030,1031,1032,1033,1034,1035,1036,1037,1038,1039,1040,1041,1042,1043,1044,1045,1046,1047,1048,1049,1050,1051,1052,1053,1054,3124,3125,3126,3127,3128,3129,3130,3131,3132,3133,3134,3135,3136,3137,3138,3139,3140,3141,3142,3143,3144,3145,2362,2363,2364,2365,2366,2367,2368,2369,2370,2371,2372,2373,2374,2375,2376,2377,2378,2379,2380,1899,1900,1901,1902,1903,1904,1905,1906,1907,1908,1909,1910,1911,1912,1913,1914,1915,1916,1917,1918,1919,1920,1921,1922,1923,1924,1925,1926,1927,1928,1929,1930,1931,1932,1933,1934,1935,1936,1937,1938,1939,1940,1941,1942,1943,1944,1945,1946,1947,1948,1949,1950,1951,1952,1953,1954,1955,1956,1957,1958,1959,1960,1961,1962,1963,1964,1965,1966,1967,1968,1969,1970,1971};
-const uint16_t YellowLineTrack2Segments [] = {1137,1138,1139,1140,1141,1142,1143,1144,1145,1146,1147,1148,1149,1150,1151,1152,1153,1154,1155,1156,1157,1158,1159,1160,1161,1162,1163,1164,1165,1166,1167,1168,1169,1170,1171,1172,1173,1174,1175,1176,1177,1178,1179,1180,1181,1182,1183,1184,1185,1186,1187,1188,1189,1190,1191,1192,1193,1194,1195,1196,1197,1198,1199,1200,1201,1202,1203,1204,1205,1206,1207,1208,1209,1210,1211,1212,1213,1214,1215,1216,1217,1218,1219,1220,1221,1222,1223,1224,1225,1226,1227,1228,1229,1230,1231,1232,1233,1234,1235,1236,1237,1238,1239,1240,1241,1242,1243,1244,1245,1246,1247,1248,3105,3106,3107,3108,3109,3110,3111,3112,3113,3114,3115,3116,3117,3118,3119,3120,3121,3122,3123,2229,2230,2231,2232,2233,2234,2235,2236,2237,2238,2239,2240,2241,2242,2243,2244,2245,2246,1744,1745,1746,1747,1748,1749,1750,1751,1752,1753,1754,1755,1756,1757,1758,1759,1760,1761,1762,1763,1764,1765,1766,1767,1768,1769,1770,1771,1772,1773,1774,1775,1776,1777,1778,1779,1780,1781,1782,1783,1784,1785,1786,1787,1788,1789,1790,1791,1792,1793,1794,1795,1796,1797,1798,1799,1800,1801,1802,1803,1804,1805,1806,1807,1808,1809};
+uint16_t YellowLineTrack1Domains [][2] = { { 945, 954},{ 956, 968},{ 970, 975},{ 977,1009},{1011,1023},{1025,1035},{1037,1051},{1053,1054},{3124,3145},{2362,2363},{2365,2375},{2377,2380},{1900,1910},{1912,1922},{1924,1931},{1933,1941},{1943,1955},{1957,1970} };
+uint16_t YellowLineTrack2Domains [][2] = { {1138,1147},{1149,1161},{1163,1169},{1171,1204},{1205,1216},{1218,1229},{1231,1245},{1247,1248},{3105,3123},{2229,2230},{2232,2240},{2242,2245},{1744,1752},{1754,1763},{1765,1772},{1774,1781},{1783,1795},{1797,1808} };
+uint16_t YellowLineTrack1Segments[] = {944,945,946,947,948,949,950,951,952,953,954,955,956,957,958,959,960,961,962,963,964,965,966,967,968,969,970,971,972,973,974,975,976,977,978,979,980,981,982,983,984,985,986,987,988,989,990,991,992,993,994,995,996,997,998,999,1000,1001,1002,1003,1004,1005,1006,1007,1008,1009,1010,1011,1012,1013,1014,1015,1016,1017,1018,1019,1020,1021,1022,1023,1024,1025,1026,1027,1028,1029,1030,1031,1032,1033,1034,1035,1036,1037,1038,1039,1040,1041,1042,1043,1044,1045,1046,1047,1048,1049,1050,1051,1052,1053,1054,3124,3125,3126,3127,3128,3129,3130,3131,3132,3133,3134,3135,3136,3137,3138,3139,3140,3141,3142,3143,3144,3145,2362,2363,2364,2365,2366,2367,2368,2369,2370,2371,2372,2373,2374,2375,2376,2377,2378,2379,2380,1899,1900,1901,1902,1903,1904,1905,1906,1907,1908,1909,1910,1911,1912,1913,1914,1915,1916,1917,1918,1919,1920,1921,1922,1923,1924,1925,1926,1927,1928,1929,1930,1931,1932,1933,1934,1935,1936,1937,1938,1939,1940,1941,1942,1943,1944,1945,1946,1947,1948,1949,1950,1951,1952,1953,1954,1955,1956,1957,1958,1959,1960,1961,1962,1963,1964,1965,1966,1967,1968,1969,1970,1971};
+uint16_t YellowLineTrack2Segments [] = {1137,1138,1139,1140,1141,1142,1143,1144,1145,1146,1147,1148,1149,1150,1151,1152,1153,1154,1155,1156,1157,1158,1159,1160,1161,1162,1163,1164,1165,1166,1167,1168,1169,1170,1171,1172,1173,1174,1175,1176,1177,1178,1179,1180,1181,1182,1183,1184,1185,1186,1187,1188,1189,1190,1191,1192,1193,1194,1195,1196,1197,1198,1199,1200,1201,1202,1203,1204,1205,1206,1207,1208,1209,1210,1211,1212,1213,1214,1215,1216,1217,1218,1219,1220,1221,1222,1223,1224,1225,1226,1227,1228,1229,1230,1231,1232,1233,1234,1235,1236,1237,1238,1239,1240,1241,1242,1243,1244,1245,1246,1247,1248,3105,3106,3107,3108,3109,3110,3111,3112,3113,3114,3115,3116,3117,3118,3119,3120,3121,3122,3123,2229,2230,2231,2232,2233,2234,2235,2236,2237,2238,2239,2240,2241,2242,2243,2244,2245,2246,1744,1745,1746,1747,1748,1749,1750,1751,1752,1753,1754,1755,1756,1757,1758,1759,1760,1761,1762,1763,1764,1765,1766,1767,1768,1769,1770,1771,1772,1773,1774,1775,1776,1777,1778,1779,1780,1781,1782,1783,1784,1785,1786,1787,1788,1789,1790,1791,1792,1793,1794,1795,1796,1797,1798,1799,1800,1801,1802,1803,1804,1805,1806,1807,1808,1809};
 
-const uint16_t YellowLineTrack1StationSegments[] = { 944, 955, 969, 976,1010,1024,1036,1052,2364,2376,1899,1911,1923,1932,1942,1956,1071};  
-const uint16_t YellowLineTrack2StationSegments[] = {1137,1148,1162,1170,1204,1217,1230,1246,2231,2241,2246,1753,1764,1773,1782,1796,1789};
+uint16_t YellowLineTrack1StationSegments[] = { 944, 955, 969, 976,1010,1024,1036,1052,2364,2376,1899,1911,1923,1932,1942,1956,1071};  
+uint16_t YellowLineTrack2StationSegments[] = {1137,1148,1162,1170,1204,1217,1230,1246,2231,2241,2246,1753,1764,1773,1782,1796,1789};
 
 //Red LED Arrays
 uint16_t RedLineStationLEDPosition[] = {0,11,22,33,44,56,65,73,79,87,94,99,104,109,138,149,155,165,175,182,192,205,228,242,250,258,266}; //hard coded position of each station within sequential numbering of LEDS (this can be less than the total number of stations if you want (for some odd reason))
@@ -146,7 +146,7 @@ uint16_t RedTrack1PositionCounter = 0;
 uint16_t RedTrack2PositionCounter = RedLineTrack2SegmentCount;
 
 uint16_t BlueTrack1PositionCounter = 0;
-uint16_t BlueTrack2PositionCounter = BlueLineTrack2SegmentDomains;
+uint16_t BlueTrack2PositionCounter = 297;
 
 uint16_t GreenTrack1PositionCounter = 0;
 uint16_t GreenTrack2PositionCounter = GreenLineTrack2SegmentDomains;
@@ -304,13 +304,37 @@ class usermod_v2_ASL : public Usermod {
        // strip.setPixelColor()
        //2trainsim(String LineCode, uint16_t Track1SegmentCount, uint16_t Track2SegmentCount, uint16_t Track1Segments[], uint16_t Track2Segments[]) 
         String JsonPremable = R"=====({"TrainPositions":[)=====";
-        String JsonPostamble = R"=====(]
+        String JsonEpilogue = R"=====(]
         })=====";
-        SimulatedTrains = JsonPremable + TrainSim("RD", RedLineTrack1SegmentCount, RedLineTrack2SegmentCount, RedLineTrack1Segments, RedLineTrack2Segments) + JsonPostamble;
+        SimulatedTrains = JsonPremable + 
+        TrainSim("RD", RedLineTrack1SegmentCount, RedLineTrack2SegmentCount, RedLineTrack1Segments, RedLineTrack2Segments) + "," + 
+        TrainSim("BL", BlueLineTrack1SegmentCount, BlueLineTrack2SegmentCount, BlueLineTrack1Segments, BlueLineTrack2Segments) + "," + 
+        TrainSim("GR", GreenLineTrack1SegmentCount, GreenLineTrack2SegmentCount, GreenLineTrack1Segments, GreenLineTrack2Segments) + "," + 
+        TrainSim("OR", OrangeLineTrack1SegmentCount, OrangeLineTrack2SegmentCount, OrangeLineTrack1Segments, OrangeLineTrack2Segments) + "," + 
+        TrainSim("YL", YellowLineTrack1SegmentCount, YellowLineTrack2SegmentCount, YellowLineTrack1Segments, YellowLineTrack2Segments) 
+        + JsonEpilogue;
         //Serial.println(SimulatedTrains);
-        PlotLEDStations(TargetFrame, RedLineStationLEDPosition, RedLineNumStationsInLine, StationRed, TrackRed, Red_Num_LEDS);
-        PlotLEDTrainPositions(TargetFrame, "RD", RedLineTrack1Domains, RedLineTrack1Segments, RedLineTrack1StationSegments, RedLineNumStationsInLine, RedLineLEDArray, RedLineStationLEDPosition, Red_Num_LED_Domains, TrainRed);
-        PlotLEDTrainPositions(TargetFrame, "RD", RedLineTrack2Domains, RedLineTrack2Segments, RedLineTrack2StationSegments, RedLineNumStationsInLine, RedLineLEDArray, RedLineStationLEDPosition, Red_Num_LED_Domains, TrainRed);
+
+        PlotLEDStations(RedTargetFrame, RedLineStationLEDPosition, RedLineNumStationsInLine, StationRed, TrackRed, Red_Num_LEDS);
+        PlotLEDTrainPositions(RedTargetFrame, "RD", RedLineTrack1Domains, RedLineTrack1Segments, RedLineTrack1StationSegments, RedLineNumStationsInLine, RedLineLEDArray, RedLineStationLEDPosition, Red_Num_LED_Domains, TrainRed);
+        PlotLEDTrainPositions(RedTargetFrame, "RD", RedLineTrack2Domains, RedLineTrack2Segments, RedLineTrack2StationSegments, RedLineNumStationsInLine, RedLineLEDArray, RedLineStationLEDPosition, Red_Num_LED_Domains, TrainRed);
+       
+
+        PlotLEDStations(BlueTargetFrame, BlueLineStationLEDPosition, BlueLineNumStationsInLine, StationBlue, TrackBlue, Blue_Num_LEDS);
+        PlotLEDTrainPositions(BlueTargetFrame, "BL", BlueLineTrack1Domains, BlueLineTrack1Segments, BlueLineTrack1StationSegments, BlueLineNumStationsInLine, BlueLineLEDArray, BlueLineStationLEDPosition, Blue_Num_LED_Domains, TrainBlue);
+        PlotLEDTrainPositions(BlueTargetFrame, "BL", BlueLineTrack2Domains, BlueLineTrack2Segments, BlueLineTrack2StationSegments, BlueLineNumStationsInLine, BlueLineLEDArray, BlueLineStationLEDPosition, Blue_Num_LED_Domains, TrainBlue);
+       
+        PlotLEDStations(GreenTargetFrame, GreenLineStationLEDPosition, GreenLineNumStationsInLine, StationGreen, TrackGreen, Green_Num_LEDS);
+        PlotLEDTrainPositions(GreenTargetFrame, "BL", GreenLineTrack1Domains, GreenLineTrack1Segments, GreenLineTrack1StationSegments, GreenLineNumStationsInLine, GreenLineLEDArray, GreenLineStationLEDPosition, Green_Num_LED_Domains, TrainGreen);
+        PlotLEDTrainPositions(GreenTargetFrame, "BL", GreenLineTrack2Domains, GreenLineTrack2Segments, GreenLineTrack2StationSegments, GreenLineNumStationsInLine, GreenLineLEDArray, GreenLineStationLEDPosition, Green_Num_LED_Domains, TrainGreen);
+       
+        PlotLEDStations(OrangeTargetFrame, OrangeLineStationLEDPosition, OrangeLineNumStationsInLine, StationOrange, TrackOrange, Orange_Num_LEDS);
+        PlotLEDTrainPositions(OrangeTargetFrame, "BL", OrangeLineTrack1Domains, OrangeLineTrack1Segments, OrangeLineTrack1StationSegments, OrangeLineNumStationsInLine, OrangeLineLEDArray, OrangeLineStationLEDPosition, Orange_Num_LED_Domains, TrainOrange);
+        PlotLEDTrainPositions(OrangeTargetFrame, "BL", OrangeLineTrack2Domains, OrangeLineTrack2Segments, OrangeLineTrack2StationSegments, OrangeLineNumStationsInLine, OrangeLineLEDArray, OrangeLineStationLEDPosition, Orange_Num_LED_Domains, TrainOrange);
+       
+        PlotLEDStations(YellowTargetFrame, YellowLineStationLEDPosition, YellowLineNumStationsInLine, StationYellow, TrackYellow, Yellow_Num_LEDS);
+        PlotLEDTrainPositions(YellowTargetFrame, "BL", YellowLineTrack1Domains, YellowLineTrack1Segments, YellowLineTrack1StationSegments, YellowLineNumStationsInLine, YellowLineLEDArray, YellowLineStationLEDPosition, Yellow_Num_LED_Domains, TrainYellow);
+        PlotLEDTrainPositions(YellowTargetFrame, "BL", YellowLineTrack2Domains, YellowLineTrack2Segments, YellowLineTrack2StationSegments, YellowLineNumStationsInLine, YellowLineLEDArray, YellowLineStationLEDPosition, Yellow_Num_LED_Domains, TrainYellow);
        
         // Serial.print("train red = ");
         // Serial.println(TrainRed);
@@ -531,9 +555,9 @@ class usermod_v2_ASL : public Usermod {
     //     Serial.print("HTTP Response code: ");
     //     Serial.println(httpResponseCode);
     //   }
-      payload = SimulatedTrains;
-    //  payload = http.getString(); //write the Wmata response to a String object
-    //  http.end(); //free memory now and clean up 
+    payload = SimulatedTrains;
+      //payload = http.getString(); //write the Wmata response to a String object
+      //http.end(); //free memory now and clean up 
      //Serial.println(payload);
      //Serial.print("State JSON ");
      //Serial.println(state_bri);
@@ -558,24 +582,24 @@ class usermod_v2_ASL : public Usermod {
         String ServiceTypeString((char*)ServiceTypeBuf);
         TrainPositions_ServiceType[i] = ServiceTypeString;
         // Serial.print("in retreival :");
-        // Serial.println(TrainPositions_CarCount[i]);
+        //Serial.println(TrainPositions_TrainId[i]);
         }
    }
 
   //function to plot the stations (specifically) within the lines. The stations don't move.
   void PlotLEDStations(uint32_t LEDArrayToPlot[], uint16_t StationArray[], uint16_t NumStations, uint32_t StationColor, uint32_t TrackColor, uint32_t NumLEDs)
   { 
-    //strip.fill(BLACKa);
+    //strip.fill(BLACK);
     //LEDArrayToPlot->fill(TrackColor); //write the whole allray to very weak red
     for(int i = 0; i < NumLEDs; i++) {
       LEDArrayToPlot[i] = BLACK;
       //strip.setPixelColor(i,BLACK);
     }
-    for(int i = 0; i < (NumStations-1); i++) {
+    for(int i = 0; i < (NumStations); i++) {
       uint16_t StationArrayIndex = StationArray[i];
       LEDArrayToPlot[StationArrayIndex] = StationColor; //write the resulting stations to the array
       //StationArray[i] = StationColor;
-      //Serial.println(StationArrayIndex);
+      //Serial.println((String)"plotting stations " + StationArrayIndex);
     }
   }
 
@@ -590,12 +614,12 @@ class usermod_v2_ASL : public Usermod {
           NumNormalTrains ++;
           for(int x = 0; x < NumStationsInLine; x++){ //run this loop for the total number of stations we have, to cycle through the station array
             if(TrainPositions_CircuitId[i] == StationSegmentArray[x]) { 
-              TargetFrame[(LEDStationArray[x])] = TrainColor; //set the LED to high brightness so that we know theres a train there
+              LEDArrayToPlot[(LEDStationArray[x])] = TrainColor; //set the LED to high brightness so that we know theres a train there
               Serial.println((String)"Train ID " + TrainPositions_TrainId[i] + " is at Station Segment " + StationSegmentArray[x] + " Direction: " + TrainPositions_DirectionNum[i] + " Mapped to " + LineCode + " LED " + LEDStationArray[x]); 
               StationPlotted = 1;
             }else 
             if(TrainPositions_CircuitId[i] == (StationSegmentArray[x]+1) || TrainPositions_CircuitId[i] == (StationSegmentArray[x]-1)) { //if the train is + or - 1 from the station it snaps it to the station. WMATA has documented that the sensor before the platform sometimes trips
-              TargetFrame[(LEDStationArray[x])] = TrainColor;
+              LEDArrayToPlot[(LEDStationArray[x])] = TrainColor;
               Serial.println((String)"Train ID " + TrainPositions_TrainId[i] + " is at Station Segment " + StationSegmentArray[x] + " Direction: " + TrainPositions_DirectionNum[i] + " Snapped to " + LineCode + " LED " + LEDStationArray[x]);
               StationPlotted = 1;
             }
@@ -604,7 +628,7 @@ class usermod_v2_ASL : public Usermod {
             for(int y = 0; y < (NumLEDSegmentDomains); y++) { //cycle through each domain and check to see if it's the domain we want (this is -1 since we're directly counting the number of LEDs and we want the number of domains between them)
               if(TrainPositions_CircuitId[i] >= TrackSegmentArray[y][0] && TrainPositions_CircuitId[i] <= TrackSegmentArray[y][1]){  //we should now have found the correct domain range
                 int MappedLED = mapRound(TrainPositions_CircuitId[i], TrackSegmentArray[y][0], TrackSegmentArray[y][1], LEDTrackArray[y][0], LEDTrackArray[y][1]);
-                TargetFrame[MappedLED] = TrainColor;
+                LEDArrayToPlot[MappedLED] = TrainColor;
                 Serial.println((String)"Train ID " + TrainPositions_TrainId[i] + " at circuit " + TrainPositions_CircuitId[i] + " Direction: " + TrainPositions_DirectionNum[i] + " Mapped to " + LineCode + " LED " + MappedLED);
               }
             }
@@ -685,7 +709,7 @@ class usermod_v2_ASL : public Usermod {
 
       String JsonFormattingPart4 = R"=====(,
          "DestinationStationCode": "Synthetic",
-         "LineCode": ")=====";
+         "LineCode":")=====";
 
       String JsonFormattingPart5 = R"=====(",
          "SecondsAtLocation": 5,
@@ -728,12 +752,12 @@ class usermod_v2_ASL : public Usermod {
     // Serial.println((String)"TempTrain1PositionCounter = " + TempTrain1PositionCounter + " Array Value = " + RedLineTrack1Segments[TempTrain1PositionCounter]);
     // Serial.println((String)"TempTrain2PositionCounter = " + TempTrain2PositionCounter + " Array Value = " + RedLineTrack2Segments[TempTrain2PositionCounter]);
 
-    String FakeDataJson = JsonFormattingPart1 + TempTrain1IDNumber + JsonFormattingPart2 + Train1Direction + JsonFormattingPart3 + Track1Segments[Track1PositionCounter] + JsonFormattingPart4 + LineCode + JsonFormattingPart5 +
+    String FakeJsonBody = JsonFormattingPart1 + TempTrain1IDNumber + JsonFormattingPart2 + Train1Direction + JsonFormattingPart3 + Track1Segments[Track1PositionCounter] + JsonFormattingPart4 + LineCode + JsonFormattingPart5 +
     ","+
     JsonFormattingPart1 + TempTrain2IDNumber + JsonFormattingPart2 + Train2Direction + JsonFormattingPart3 + Track2Segments[Track2PositionCounter] + JsonFormattingPart4 + LineCode + JsonFormattingPart5;
 
     //Serial.println(FakeDataJson);
-    return FakeDataJson;
+    return FakeJsonBody;
   }
 
   String UseFakeData() { //function to allow us to create test JSON data rather than having to get it from WMATA. Below is a representative weekend train load

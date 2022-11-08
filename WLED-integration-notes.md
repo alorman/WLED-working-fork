@@ -78,3 +78,52 @@ set in the defines for FX_fcn.cpp
 
 You'll get an error about pins not being able to be used if they're also defined in the usermod or the cfg.json file. 
 cfg.json doesn't seem to make any difference, it seems to make a new one on the fly even if one exists.
+
+## usermods
+when putting lines into the connected() loop, i can't get them to run. 
+usermods get called before the lights go into their default states. So ccalling getpixelcolor or similar from usermod::setup doesnt work
+
+## storing data in eeprom via the readfromjsonstate
+make sure you write using `addtoconfig` it will automatically read
+
+## to read LED colors
+look to the main state json (which isnt in eerpom and just fires around during runtime)
+state_seg_0_col_0_0 = root["seg"]["0"]["col"]["0"]; // 213
+
+when previewing from the json look at XXXXX/json/state (rather than XXXXX/json. they're not quite the same)
+
+readfromjson state seems to only fire the changing fields around. for instance, when i change strip color, i get 0 on brightness, then changing brightness will put it back to its usual value
+
+# Making a new effect
+(this allows for indivual control over leds and an experiance much more like fastLED or adafruits neopixel library. 
+add a line to FX.cpp with the name of your effect
+
+around line 491 of FX.h, add the mode name and linkage to the class
+in the top of FX.h add a #define line giving the effect a number
+in FX.h add it to the uint16-t list of builtin modes around line 718
+in FX.h at the end, add to the progmem statement in the correct order as defined around line 718
+add the name in your definitions at the top of FX.h
+remember to update #define MODE_COUNT
+recompile the html
+
+the compiler is happier if you have a return statement in the function
+
+## Blink vs Mode_Blink
+they're not the same. blink is the helper object with arguments that gets called by mode_blink. blink itself is never revealed in the UI or as a mode itself. chase is similarly used.
+Overall this architecture allows derivations on a theme and calling of basic helpers within other effects.
+
+#Refresh times
+It seems like if we call the GetWMATAData faster than 1hz it causes an unbootable error.
+
+## using transition delay timing
+you can call the global variable `transitionDelay` to get (in ms) your delay time. It seems like you click the effect again to get it to re-init when applying a new timing change from the gui.
+
+# Global variables
+it really seems like `wled.h` doesn't like fully defined variables. the compiler throws (possibly meaninguless) erros, but ultimately it wont compile. 
+Put global variables in `wled.h` like `WLED_GLOBAL uint8_t devInt;`
+
+
+# Changing WEB GUI
+## 1,2,3 lables
+see around line 107 in index.htm
+
