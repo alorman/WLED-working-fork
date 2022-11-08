@@ -119,16 +119,14 @@
 #define IS_REVERSE      ((SEGMENT.options & REVERSE     ) == REVERSE     )
 #define IS_SELECTED     ((SEGMENT.options & SELECTED    ) == SELECTED    )
 
-#define MODE_COUNT 8
+#define MODE_COUNT 6
 
 #define FX_MODE_STATIC                   0
-#define FX_MODE_BLINK                    1
-#define FX_MODE_RED_LINE                 2
-#define FX_MODE_BLUE_LINE                3
-#define FX_MODE_GREEN_LINE               4
-#define FX_MODE_ORANGE_LINE              5
-#define FX_MODE_YELLOW_LINE              6
-#define FX_MODE_BREATH                   7
+#define FX_MODE_RED_LINE                 1
+#define FX_MODE_BLUE_LINE                2
+#define FX_MODE_GREEN_LINE               3
+#define FX_MODE_ORANGE_LINE              4
+#define FX_MODE_YELLOW_LINE              5
 // #define FX_MODE_COLOR_WIPE               3
 // #define FX_MODE_COLOR_WIPE_RANDOM        4
 // #define FX_MODE_RANDOM_COLOR             5
@@ -503,7 +501,7 @@ class WS2812FX {
       WS2812FX::instance = this;
       //assign each member of the _mode[] array to its respective function reference 
       _mode[FX_MODE_STATIC]                  = &WS2812FX::mode_static;
-      _mode[FX_MODE_BLINK]                   = &WS2812FX::mode_blink;
+      // _mode[FX_MODE_BLINK]                   = &WS2812FX::mode_blink;
       _mode[FX_MODE_RED_LINE]                = &WS2812FX::mode_red_line;
       _mode[FX_MODE_BLUE_LINE]               = &WS2812FX::mode_blue_line;
       _mode[FX_MODE_GREEN_LINE]              = &WS2812FX::mode_green_line;
@@ -562,7 +560,7 @@ class WS2812FX {
       // _mode[FX_MODE_TRICOLOR_CHASE]          = &WS2812FX::mode_tricolor_chase;
       // _mode[FX_MODE_TRICOLOR_WIPE]           = &WS2812FX::mode_tricolor_wipe;
       // _mode[FX_MODE_TRICOLOR_FADE]           = &WS2812FX::mode_tricolor_fade;
-      _mode[FX_MODE_BREATH]                  = &WS2812FX::mode_breath;
+      // _mode[FX_MODE_BREATH]                  = &WS2812FX::mode_breath;
       // _mode[FX_MODE_RUNNING_LIGHTS]          = &WS2812FX::mode_running_lights;
       // _mode[FX_MODE_LIGHTNING]               = &WS2812FX::mode_lightning;
       // _mode[FX_MODE_ICU]                     = &WS2812FX::mode_icu;
@@ -732,12 +730,12 @@ class WS2812FX {
     // builtin modes
     uint16_t
       mode_static(void),
-      mode_blink(void),
+      //mode_blink(void),
       mode_red_line(void),
       mode_blue_line(void),
       mode_green_line(void),
       mode_orange_line(void),
-      mode_yellow_line(void),
+      mode_yellow_line(void);
       // mode_blink_rainbow(void),
       // mode_strobe(void),
       // mode_strobe_rainbow(void),
@@ -747,7 +745,7 @@ class WS2812FX {
       // mode_color_sweep_random(void),
       // mode_random_color(void),
       // mode_dynamic(void),
-      mode_breath(void);
+      //mode_breath(void);
       // mode_fade(void),
       // mode_scan(void),
       // mode_dual_scan(void),
@@ -947,7 +945,7 @@ class WS2812FX {
 
 //10 names per line
 const char JSON_mode_names[] PROGMEM = R"=====([
-"Solid","Blink","Red Line","Blue Line", "Green Line", "Orange Line", "Yellow Line", "Breathe"
+"Solid","Red Line","Blue Line", "Green Line", "Orange Line", "Yellow Line"
 ])=====";
 
 

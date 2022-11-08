@@ -108,7 +108,7 @@ uint16_t BlueLineStationLEDPosition[] = {0,23,56,62,72,82,92,101,121,149,168,178
 uint16_t BlueLineLEDArray [][2] = { {1,22},{24,55},{57,62},{63,71},{73,81},{83,91},{93,100},{102,120},{122,148},{150,167},{169,177},{179,187},{189,194},{196,199},{201,205},{207,223},{225,229},{231,235},{237,244},{246,250},{252,255},{257,266},{268,277},{279,283},{285,289},{291,296} };
 
 //Green LED Arrays
-uint16_t GreenLineStationLEDPosition[] = {0,8,15,2232,48,53,73,80,86,93,104,115,124,134,152,158,166,173,180}; //hard coded position of each station within sequential numbering of LEDS (this can be less than the total number of stations if you want (for some odd reason))
+uint16_t GreenLineStationLEDPosition[] = {0,8,15,22,32,37,48,53,73,80,86,93,104,115,124,134,152,158,166,173,180}; //hard coded position of each station within sequential numbering of LEDS (this can be less than the total number of stations if you want (for some odd reason))
 uint16_t GreenLineLEDArray [][2] = { {1,7},{9,14},{16,21},{23,31},{33,36},{38,47},{49,52},{54,72},{74,79},{81,85},{87,92},{94,103},{105,114},{116,123},{125,133},{135,151,},{153,157,},{159,165},{167,172},{174,179} };
 
 //Orange LED Arrays
@@ -306,12 +306,12 @@ class usermod_v2_ASL : public Usermod {
         String JsonPremable = R"=====({"TrainPositions":[)=====";
         String JsonEpilogue = R"=====(]
         })=====";
-        SimulatedTrains = JsonPremable + 
-        TrainSim("RD", RedLineTrack1SegmentCount, RedLineTrack2SegmentCount, RedLineTrack1Segments, RedLineTrack2Segments) + "," + 
-        TrainSim("BL", BlueLineTrack1SegmentCount, BlueLineTrack2SegmentCount, BlueLineTrack1Segments, BlueLineTrack2Segments) + "," + 
-        TrainSim("GR", GreenLineTrack1SegmentCount, GreenLineTrack2SegmentCount, GreenLineTrack1Segments, GreenLineTrack2Segments) + "," + 
-        TrainSim("OR", OrangeLineTrack1SegmentCount, OrangeLineTrack2SegmentCount, OrangeLineTrack1Segments, OrangeLineTrack2Segments) + "," + 
-        TrainSim("YL", YellowLineTrack1SegmentCount, YellowLineTrack2SegmentCount, YellowLineTrack1Segments, YellowLineTrack2Segments) 
+        SimulatedTrains = JsonPremable //+ 
+        //TrainSim("RD", RedLineTrack1SegmentCount, RedLineTrack2SegmentCount, RedLineTrack1Segments, RedLineTrack2Segments) + "," + 
+        //TrainSim("BL", BlueLineTrack1SegmentCount, BlueLineTrack2SegmentCount, BlueLineTrack1Segments, BlueLineTrack2Segments) + "," + 
+        //TrainSim("GR", GreenLineTrack1SegmentCount, GreenLineTrack2SegmentCount, GreenLineTrack1Segments, GreenLineTrack2Segments) + "," + 
+        //TrainSim("OR", OrangeLineTrack1SegmentCount, OrangeLineTrack2SegmentCount, OrangeLineTrack1Segments, OrangeLineTrack2Segments) + "," + 
+        //TrainSim("YL", YellowLineTrack1SegmentCount, YellowLineTrack2SegmentCount, YellowLineTrack1Segments, YellowLineTrack2Segments) 
         + JsonEpilogue;
         //Serial.println(SimulatedTrains);
 
@@ -325,16 +325,16 @@ class usermod_v2_ASL : public Usermod {
         PlotLEDTrainPositions(BlueTargetFrame, "BL", BlueLineTrack2Domains, BlueLineTrack2Segments, BlueLineTrack2StationSegments, BlueLineNumStationsInLine, BlueLineLEDArray, BlueLineStationLEDPosition, Blue_Num_LED_Domains, TrainBlue);
        
         PlotLEDStations(GreenTargetFrame, GreenLineStationLEDPosition, GreenLineNumStationsInLine, StationGreen, TrackGreen, Green_Num_LEDS);
-        PlotLEDTrainPositions(GreenTargetFrame, "BL", GreenLineTrack1Domains, GreenLineTrack1Segments, GreenLineTrack1StationSegments, GreenLineNumStationsInLine, GreenLineLEDArray, GreenLineStationLEDPosition, Green_Num_LED_Domains, TrainGreen);
-        PlotLEDTrainPositions(GreenTargetFrame, "BL", GreenLineTrack2Domains, GreenLineTrack2Segments, GreenLineTrack2StationSegments, GreenLineNumStationsInLine, GreenLineLEDArray, GreenLineStationLEDPosition, Green_Num_LED_Domains, TrainGreen);
+        PlotLEDTrainPositions(GreenTargetFrame, "GR", GreenLineTrack1Domains, GreenLineTrack1Segments, GreenLineTrack1StationSegments, GreenLineNumStationsInLine, GreenLineLEDArray, GreenLineStationLEDPosition, Green_Num_LED_Domains, TrainGreen);
+        PlotLEDTrainPositions(GreenTargetFrame, "GR", GreenLineTrack2Domains, GreenLineTrack2Segments, GreenLineTrack2StationSegments, GreenLineNumStationsInLine, GreenLineLEDArray, GreenLineStationLEDPosition, Green_Num_LED_Domains, TrainGreen);
        
         PlotLEDStations(OrangeTargetFrame, OrangeLineStationLEDPosition, OrangeLineNumStationsInLine, StationOrange, TrackOrange, Orange_Num_LEDS);
-        PlotLEDTrainPositions(OrangeTargetFrame, "BL", OrangeLineTrack1Domains, OrangeLineTrack1Segments, OrangeLineTrack1StationSegments, OrangeLineNumStationsInLine, OrangeLineLEDArray, OrangeLineStationLEDPosition, Orange_Num_LED_Domains, TrainOrange);
-        PlotLEDTrainPositions(OrangeTargetFrame, "BL", OrangeLineTrack2Domains, OrangeLineTrack2Segments, OrangeLineTrack2StationSegments, OrangeLineNumStationsInLine, OrangeLineLEDArray, OrangeLineStationLEDPosition, Orange_Num_LED_Domains, TrainOrange);
+        PlotLEDTrainPositions(OrangeTargetFrame, "OR", OrangeLineTrack1Domains, OrangeLineTrack1Segments, OrangeLineTrack1StationSegments, OrangeLineNumStationsInLine, OrangeLineLEDArray, OrangeLineStationLEDPosition, Orange_Num_LED_Domains, TrainOrange);
+        PlotLEDTrainPositions(OrangeTargetFrame, "OR", OrangeLineTrack2Domains, OrangeLineTrack2Segments, OrangeLineTrack2StationSegments, OrangeLineNumStationsInLine, OrangeLineLEDArray, OrangeLineStationLEDPosition, Orange_Num_LED_Domains, TrainOrange);
        
         PlotLEDStations(YellowTargetFrame, YellowLineStationLEDPosition, YellowLineNumStationsInLine, StationYellow, TrackYellow, Yellow_Num_LEDS);
-        PlotLEDTrainPositions(YellowTargetFrame, "BL", YellowLineTrack1Domains, YellowLineTrack1Segments, YellowLineTrack1StationSegments, YellowLineNumStationsInLine, YellowLineLEDArray, YellowLineStationLEDPosition, Yellow_Num_LED_Domains, TrainYellow);
-        PlotLEDTrainPositions(YellowTargetFrame, "BL", YellowLineTrack2Domains, YellowLineTrack2Segments, YellowLineTrack2StationSegments, YellowLineNumStationsInLine, YellowLineLEDArray, YellowLineStationLEDPosition, Yellow_Num_LED_Domains, TrainYellow);
+        PlotLEDTrainPositions(YellowTargetFrame, "YL", YellowLineTrack1Domains, YellowLineTrack1Segments, YellowLineTrack1StationSegments, YellowLineNumStationsInLine, YellowLineLEDArray, YellowLineStationLEDPosition, Yellow_Num_LED_Domains, TrainYellow);
+        PlotLEDTrainPositions(YellowTargetFrame, "YL", YellowLineTrack2Domains, YellowLineTrack2Segments, YellowLineTrack2StationSegments, YellowLineNumStationsInLine, YellowLineLEDArray, YellowLineStationLEDPosition, Yellow_Num_LED_Domains, TrainYellow);
        
         // Serial.print("train red = ");
         // Serial.println(TrainRed);
@@ -549,15 +549,15 @@ class usermod_v2_ASL : public Usermod {
      String payload;
      String serverPath = ServerAddressString + "&api_key=" + apiKeyString; //these are defined in globals  
      int16_t httpResponseCode = 0;
-    //  http.begin(serverPath); 
-    //  httpResponseCode = http.GET(); //send the GET Request
+     http.begin(serverPath); 
+     httpResponseCode = http.GET(); //send the GET Request
     //  if (httpResponseCode > 0) {
     //     Serial.print("HTTP Response code: ");
     //     Serial.println(httpResponseCode);
     //   }
-    payload = SimulatedTrains;
-      //payload = http.getString(); //write the Wmata response to a String object
-      //http.end(); //free memory now and clean up 
+    //payload = SimulatedTrains;
+      payload = http.getString(); //write the Wmata response to a String object
+      http.end(); //free memory now and clean up 
      //Serial.println(payload);
      //Serial.print("State JSON ");
      //Serial.println(state_bri);

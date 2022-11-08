@@ -351,7 +351,7 @@ void decodeIR24(uint32_t code)
     case IR24_WHITE     : changeColor(COLOR_WHITE); changeEffect(FX_MODE_STATIC);  break;
     //case IR24_FLASH     : presetFallback(1, FX_MODE_COLORTWINKLE, effectPalette);  break;
     //case IR24_STROBE    : presetFallback(2, FX_MODE_RAINBOW_CYCLE, effectPalette); break;
-    case IR24_FADE      : presetFallback(3, FX_MODE_BREATH, effectPalette);        break;
+    //case IR24_FADE      : presetFallback(3, FX_MODE_BREATH, effectPalette);        break;
     //case IR24_SMOOTH    : presetFallback(4, FX_MODE_RAINBOW, effectPalette);       break;
     default: return;
   }
@@ -383,7 +383,7 @@ void decodeIR24OLD(uint32_t code)
     case IR24_OLD_WHITE     : changeColor(COLOR_WHITE); changeEffect(FX_MODE_STATIC); break;
     //case IR24_OLD_FLASH     : presetFallback(1, FX_MODE_COLORTWINKLE, 0);             break;
     //case IR24_OLD_STROBE    : presetFallback(2, FX_MODE_RAINBOW_CYCLE, 0);            break;
-    case IR24_OLD_FADE      : presetFallback(3, FX_MODE_BREATH, 0);                   break;
+    //case IR24_OLD_FADE      : presetFallback(3, FX_MODE_BREATH, 0);                   break;
     //case IR24_OLD_SMOOTH    : presetFallback(4, FX_MODE_RAINBOW, 0);                  break;
     default: return;
   }
@@ -467,7 +467,7 @@ void decodeIR40(uint32_t code)
     case IR40_JUMP7        : changeEffectIntensity( 16);                 break;
     case IR40_AUTO         : changeEffectIntensity(-16);                 break;
     case IR40_JUMP3        : presetFallback(1, FX_MODE_STATIC,       0); break;
-    case IR40_FADE3        : presetFallback(2, FX_MODE_BREATH,       0); break;
+    //case IR40_FADE3        : presetFallback(2, FX_MODE_BREATH,       0); break;
     //case IR40_FADE7        : presetFallback(3, FX_MODE_FIRE_FLICKER, 0); break;
     //case IR40_FLASH        : presetFallback(4, FX_MODE_RAINBOW,      0); break;
     default: return;
@@ -511,7 +511,7 @@ void decodeIR44(uint32_t code)
     case IR44_QUICK       : changeEffectSpeed( 16);                      break;
     case IR44_SLOW        : changeEffectSpeed(-16);                      break;
     case IR44_DIY1        : presetFallback(1, FX_MODE_STATIC,        0); break;
-    case IR44_DIY2        : presetFallback(2, FX_MODE_BREATH,        0); break;
+    //case IR44_DIY2        : presetFallback(2, FX_MODE_BREATH,        0); break;
     //case IR44_DIY3        : presetFallback(3, FX_MODE_FIRE_FLICKER,  0); break;
     //case IR44_DIY4        : presetFallback(4, FX_MODE_RAINBOW,       0); break;
     //case IR44_DIY5        : presetFallback(5, FX_MODE_METEOR_SMOOTH, 0); break;
@@ -549,7 +549,7 @@ void decodeIR21(uint32_t code)
       case IR21_WHITE:     changeColor(COLOR_WHITE); changeEffect(FX_MODE_STATIC); break;
       //case IR21_FLASH:     presetFallback(1, FX_MODE_COLORTWINKLE,  0);            break;
       //case IR21_STROBE:    presetFallback(2, FX_MODE_RAINBOW_CYCLE, 0);            break;
-      case IR21_FADE:      presetFallback(3, FX_MODE_BREATH,        0);            break;
+      //case IR21_FADE:      presetFallback(3, FX_MODE_BREATH,        0);            break;
       //case IR21_SMOOTH:    presetFallback(4, FX_MODE_RAINBOW,       0);            break;
       default: return;
     }
@@ -595,7 +595,7 @@ void decodeIR9(uint32_t code)
     case IR9_POWER      : toggleOnOff();                                                    break;
     //case IR9_A          : presetFallback(1, FX_MODE_COLORTWINKLE, effectPalette);           break;
     //case IR9_B          : presetFallback(2, FX_MODE_RAINBOW_CYCLE, effectPalette);          break;
-    case IR9_C          : presetFallback(3, FX_MODE_BREATH, effectPalette);                 break;
+    //case IR9_C          : presetFallback(3, FX_MODE_BREATH, effectPalette);                 break;
     case IR9_UP         : incBrightness();                                                  break;
     case IR9_DOWN       : decBrightness();                                                  break;
     case IR9_LEFT       : changeEffectSpeed(-16);                                           break;

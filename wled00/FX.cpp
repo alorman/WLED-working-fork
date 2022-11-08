@@ -46,32 +46,32 @@ uint16_t WS2812FX::mode_static(void) {
  * Alternate between color1 and color2
  * if(strobe == true) then create a strobe effect
  */
-uint16_t WS2812FX::blink(uint32_t color1, uint32_t color2, bool strobe, bool do_palette) {
-  uint32_t cycleTime = (255 - SEGMENT.speed)*20;
-  uint32_t onTime = FRAMETIME;
-  if (!strobe) onTime += ((cycleTime * SEGMENT.intensity) >> 8);
-  cycleTime += FRAMETIME*2;
-  uint32_t it = now / cycleTime;
-  uint32_t rem = now % cycleTime;
+// uint16_t WS2812FX::blink(uint32_t color1, uint32_t color2, bool strobe, bool do_palette) {
+//   uint32_t cycleTime = (255 - SEGMENT.speed)*20;
+//   uint32_t onTime = FRAMETIME;
+//   if (!strobe) onTime += ((cycleTime * SEGMENT.intensity) >> 8);
+//   cycleTime += FRAMETIME*2;
+//   uint32_t it = now / cycleTime;
+//   uint32_t rem = now % cycleTime;
   
-  bool on = false;
-  if (it != SEGENV.step //new iteration, force on state for one frame, even if set time is too brief
-      || rem <= onTime) { 
-    on = true;
-  }
+//   bool on = false;
+//   if (it != SEGENV.step //new iteration, force on state for one frame, even if set time is too brief
+//       || rem <= onTime) { 
+//     on = true;
+//   }
   
-  SEGENV.step = it; //save previous iteration
+//   SEGENV.step = it; //save previous iteration
 
-  uint32_t color = on ? color1 : color2;
-  if (color == color1 && do_palette)
-  {
-    for(uint16_t i = 0; i < SEGLEN; i++) {
-      setPixelColor(i, color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
-    }
-  } else fill(color);
+//   uint32_t color = on ? color1 : color2;
+//   if (color == color1 && do_palette)
+//   {
+//     for(uint16_t i = 0; i < SEGLEN; i++) {
+//       setPixelColor(i, color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
+//     }
+//   } else fill(color);
 
-  return FRAMETIME;
-}
+//   return FRAMETIME;
+// }
 
 //New dev effect
 uint16_t WS2812FX::mode_red_line(void) { 
@@ -333,12 +333,12 @@ uint16_t WS2812FX::mode_yellow_line(void) {
 }
 
 
-/*
- * Normal blinking. 50% on/off time.
- */
-uint16_t WS2812FX::mode_blink(void) {
-  return blink(SEGCOLOR(0), SEGCOLOR(1), false, true);
-}
+// /*
+//  * Normal blinking. 50% on/off time.
+//  */
+// uint16_t WS2812FX::mode_blink(void) {
+//   return blink(SEGCOLOR(0), SEGCOLOR(1), false, true);
+// }
 
 
 // /*
@@ -536,22 +536,22 @@ uint16_t WS2812FX::mode_blink(void) {
 /*
  * Does the "standby-breathing" of well known i-Devices.
  */
-uint16_t WS2812FX::mode_breath(void) {
-  uint16_t var = 0;
-  uint16_t counter = (now * ((SEGMENT.speed >> 3) +10));
-  counter = (counter >> 2) + (counter >> 4); //0-16384 + 0-2048
-  if (counter < 16384) {
-    if (counter > 8192) counter = 8192 - (counter - 8192);
-    var = sin16(counter) / 103; //close to parabolic in range 0-8192, max val. 23170
-  }
+// uint16_t WS2812FX::mode_breath(void) {
+//   uint16_t var = 0;
+//   uint16_t counter = (now * ((SEGMENT.speed >> 3) +10));
+//   counter = (counter >> 2) + (counter >> 4); //0-16384 + 0-2048
+//   if (counter < 16384) {
+//     if (counter > 8192) counter = 8192 - (counter - 8192);
+//     var = sin16(counter) / 103; //close to parabolic in range 0-8192, max val. 23170
+//   }
   
-  uint8_t lum = 30 + var;
-  for(uint16_t i = 0; i < SEGLEN; i++) {
-    setPixelColor(i, color_blend(SEGCOLOR(1), color_from_palette(i, true, PALETTE_SOLID_WRAP, 0), lum));
-  }
+//   uint8_t lum = 30 + var;
+//   for(uint16_t i = 0; i < SEGLEN; i++) {
+//     setPixelColor(i, color_blend(SEGCOLOR(1), color_from_palette(i, true, PALETTE_SOLID_WRAP, 0), lum));
+//   }
 
-  return FRAMETIME;
-}
+//   return FRAMETIME;
+// }
 
 
 // /*
