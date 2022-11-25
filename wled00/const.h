@@ -297,7 +297,7 @@
 #endif
 
 #ifndef ABL_MILLIAMPS_DEFAULT
-  #define ABL_MILLIAMPS_DEFAULT 850  // auto lower brightness to stay close to milliampere limit
+  #define ABL_MILLIAMPS_DEFAULT 15000  // auto lower brightness to stay close to milliampere limit
 #else
   #if ABL_MILLIAMPS_DEFAULT < 250  // make sure value is at least 250
    #define ABL_MILLIAMPS_DEFAULT 250

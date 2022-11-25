@@ -30,7 +30,7 @@
     "hw": {
         "led": {
             "total": 500,
-            "maxpwr": 850,
+            "maxpwr": 12000,
             "ledma": 55,
             "cct": false,
             "cr": false,

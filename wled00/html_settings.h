@@ -96,10 +96,10 @@ Keep at &lt;1A if powering LEDs directly from the ESP 5V pin!<br>
 If you are using an external power supply, enter its rating.<br>
 (Current estimated usage: <span class="pow">unknown</span>)</i><br><br>
 LED voltage (Max. current for a single LED):<br><select name="LAsel" 
-onchange="enLA()"><option value="55" selected="selected">5V default (55mA)
-</option><option value="35">5V efficient (35mA)</option><option value="30">
-12V (30mA)</option><option value="255">WS2815 (12mA)</option><option value="50">
-Custom</option></select><br><span id="LAdis" style="display:none">
+onchange="enLA()"><option value="55">5V default (55mA)</option><option 
+value="35">5V efficient (35mA)</option><option value="30">12V (30mA)</option>
+<option value="255" selected="selected">WS2815 (12mA)</option><option 
+value="50">Custom</option></select><br><span id="LAdis" style="display:none">
 Custom max. current per LED: <input name="LA" type="number" min="0" max="255" 
 id="la" oninput="UI()" required> mA<br></span><i>
 Keep at default if you are unsure about your type of LEDs.</i><br></div><h3>

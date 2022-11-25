@@ -4,6 +4,7 @@
 #include "src/dependencies/json/ArduinoJson-v6.h"
 #include <HTTPClient.h>
 #include <math.h>
+#include "presets.h"
 
 #define MaxNumPossibleTrains 100
 
@@ -237,7 +238,33 @@ class usermod_v2_ASL : public Usermod {
      * You can use it to initialize variables, sensors or similar.
      */
     void setup() {
+      Serial.println("setting up.....");
+      // if (!readObjectFromFile("/presets.json", nullptr, &doc)) {
+
+        
+      // }
+      applyPreset(1);
+
+      //releaseJSONBufferLock();
+      
+      //JsonDocument::add(TrainPlotPreset);
+      //deserializeJson(doc, TrainPlotPreset);
+      //JsonObject obj = doc.as<JsonObject>();
+      //JsonObject& JsonPreset = jsonBuffer.parseObject(TrainPlotPreset);
       //Serial.println("Hello from my usermod!");
+        // if(!WLED_FS.exists("/presets.json")) {
+        // Serial.println("Writing to EEPROM");
+        // const char filename[] = "/presets.json";
+        // uint16_t index = 1;
+        // JsonObject presets = JSONpreset;
+        // writeObjectToFileUsingId(filename, index, &doc);
+        // File f = WLED_FS.open("/presets.json", "w"); //open the file in write mode
+        //   f.print(JSONpreset);
+        //   f.close();
+        // }
+        // serializeJsonPretty(doc, Serial);
+        // writeObjectToFileUsingId("/presets.json", 0, &doc);
+
         DevLEDAddress[0] = 1;
         DevLEDAddress[1] = 4;
         DevLEDAddress[2] = 6;
@@ -280,6 +307,7 @@ class usermod_v2_ASL : public Usermod {
         //Serial.println(ServerAddressString);
         GetWMATAdata();
         Serial.println(steps);
+      Serial.println("Applying preset 1");
         steps++;
         // DynamicJsonDocument doc(16384); //JSON doc size, see JSON arduino assistant for better info
         // HTTPClient http; //establish the HTTPclient object
@@ -426,7 +454,7 @@ class usermod_v2_ASL : public Usermod {
      * addToConfig() will make your settings editable through the Usermod Settings page automatically.
      *
      * Usermod Settings Overview:
-     * - Numeric values are treated as floats in the browser.
+     * - Numeric values are treated as floats in the browsernh    .
      *   - If the numeric value entered into the browser contains a decimal point, it will be parsed as a C float
      *     before being returned to the Usermod.  The float data type has only 6-7 decimal digits of precision, and
      *     doubles are not supported, numbers will be rounded to the nearest float value when being parsed.
@@ -437,7 +465,7 @@ class usermod_v2_ASL : public Usermod {
      *     used in the Usermod when reading the value from ArduinoJson.
      * - Pin values can be treated differently from an integer value by using the key name "pin"
      *   - "pin" can contain a single or array of integer values
-     *   - On the Usermod Settings page there is simple checking for pin conflicts and warnings for special pins
+     *   - On the Usermod Settings page there is simple checpoking for pin conflicts and warnings for special pins
      *     - Red color indicates a conflict.  Yellow color indicates a pin with a warning (e.g. an input-only pin)
      *   - Tip: use int8_t to store the pin value in the Usermod, so a -1 value (pin not set) can be used
      *

@@ -108,6 +108,11 @@ recompile the html
 
 the compiler is happier if you have a return statement in the function
 
+It seems that whenever an effect is applied and you're sourcing `SEGCOLOR` functions, these get applied to the new segment and the old segment, so all segments of that effect become that color palette. 
+
+## SEGENV
+`SEGENV.XXX` is the ability to add persistent variables like timing or counting to each assigned effect. These are defined in fx.h around 356
+ 
 ## Blink vs Mode_Blink
 they're not the same. blink is the helper object with arguments that gets called by mode_blink. blink itself is never revealed in the UI or as a mode itself. chase is similarly used.
 Overall this architecture allows derivations on a theme and calling of basic helpers within other effects.
@@ -127,3 +132,11 @@ Put global variables in `wled.h` like `WLED_GLOBAL uint8_t devInt;`
 ## 1,2,3 lables
 see around line 107 in index.htm
 
+# LittleFS files
+all files in the `/data` folder are transferred when PlatformIO performs a file system write.
+Adding a `/presets.json` file here will make it get written to the file system.
+
+## Presets on boot
+It seems like the software isn't reading the `presets.json` file, even when it exitsts. 
+Using `applyPreset(1);` from any point in the user mode will apply preset `1` (this is present number 1 not preset 0 index).
+per https://github.com/Aircoookie/WLED/issues/2434 wled does not support prettified json 

@@ -84,11 +84,12 @@ uint16_t WS2812FX::mode_red_line(void) {
   TrainRed = SEGCOLOR(1);
   TrackRed = SEGCOLOR(0);
   unsigned long lastTime = 0;
-  //Serial.println("not in loop");
+  //Serial.println("red line activated");
+  if(SEGENV.RedTimer == 0) {
+    strip.fill(BLACK);
+  }
   if (millis() - SEGENV.RedTimer > Fade_Time_ms) {
     //Serial.println("in loop");
-
-
     int DisplayStripNumPixels = SEGLEN; //find the number of pixels we need to iterate on. Assumes that the target frame and display strip are the same.
     for(int i = 0; i < DisplayStripNumPixels; i++){ //for each pixel in the array
         uint32_t TargetFrameRGB = RedTargetFrame[i]; //get the RGB values of the target frame for each pixel
@@ -138,6 +139,9 @@ uint16_t WS2812FX::mode_blue_line(void) {
   TrackBlue = SEGCOLOR(0);
   unsigned long lastTime = 0;
   //Serial.println("blue line activated");
+  if(SEGENV.BlueTimer == 0) {
+    strip.fill(BLACK);
+  }
   if (millis() - SEGENV.BlueTimer > Fade_Time_ms) {
     //Serial.println("in loop");
 
@@ -188,7 +192,11 @@ uint16_t WS2812FX::mode_green_line(void) {
   TrainGreen = SEGCOLOR(1);
   TrackGreen = SEGCOLOR(0);
   unsigned long lastTime = 0;
+  if(SEGENV.GreenTimer == 0) {
+    strip.fill(BLACK);
+  }
   //Serial.println("Green line activated");
+  
   if (millis() - SEGENV.GreenTimer > Fade_Time_ms) {
     //Serial.println("in loop");
 
@@ -241,6 +249,9 @@ uint16_t WS2812FX::mode_orange_line(void) {
   TrackOrange = SEGCOLOR(0);
   unsigned long lastTime = 0;
   //Serial.println("Orange line activated");
+  if(SEGENV.OrangeTimer == 0) {
+    strip.fill(BLACK);
+  }
   if (millis() - SEGENV.OrangeTimer > Fade_Time_ms) {
     //Serial.println("in loop");
 
@@ -293,6 +304,9 @@ uint16_t WS2812FX::mode_yellow_line(void) {
   TrackYellow = SEGCOLOR(0);
   unsigned long lastTime = 0;
   //Serial.println("Yellow line activated");
+  if(SEGENV.YellowTimer == 0) {
+    strip.fill(BLACK);
+  }
   if (millis() - SEGENV.YellowTimer > Fade_Time_ms) {
     //Serial.println("in loop");
 
