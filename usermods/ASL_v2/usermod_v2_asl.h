@@ -158,6 +158,15 @@ uint16_t OrangeTrack2PositionCounter = OrangeLineTrack2SegmentCount;
 uint16_t YellowTrack1PositionCounter = 0;
 uint16_t YellowTrack2PositionCounter = YellowLineTrack2SegmentCount;
 
+//global timing and headway variables
+uint32_t SystemFirstTrainTime = 21600; //second of the day that first train may start
+uint32_t SystemLastTrainTime =  68400; //second of the day that last train of the day starts no later than this time
+uint8_t HeadwayTimeSeconds = 480; //time between trains in seconds
+
+uint8_t DelayAtStationS = 30; //delay of each train at each station
+uint8_t TimeBetweenStationsS = 120; //time taken total between two stations
+
+//uint16_t SimTrainDepartureTime[MaxNumSimTrains]; //the start time of each train in the system
 
 /*
  * ASL's usermod test
@@ -309,6 +318,7 @@ class usermod_v2_ASL : public Usermod {
         Serial.println(steps);
       //Serial.println("Applying preset 1");
         steps++;
+                PlotOfflineTrains();
         // DynamicJsonDocument doc(16384); //JSON doc size, see JSON arduino assistant for better info
         // HTTPClient http; //establish the HTTPclient object
         // String payload;
@@ -345,7 +355,7 @@ class usermod_v2_ASL : public Usermod {
           //Serial.println(SimulatedTrains);
         }
 
-        PlotLEDStations(RedTargetFrame, RedLineStationLEDPosition, RedLineNumStationsInLine, StationRed, TrackRed, Red_Num_LEDS);
+       /*  PlotLEDStations(RedTargetFrame, RedLineStationLEDPosition, RedLineNumStationsInLine, StationRed, TrackRed, Red_Num_LEDS);
         PlotLEDTrainPositions(RedTargetFrame, "RD", RedLineTrack1Domains, RedLineTrack1Segments, RedLineTrack1StationSegments, RedLineNumStationsInLine, RedLineLEDArray, RedLineStationLEDPosition, Red_Num_LED_Domains, TrainRed);
         PlotLEDTrainPositions(RedTargetFrame, "RD", RedLineTrack2Domains, RedLineTrack2Segments, RedLineTrack2StationSegments, RedLineNumStationsInLine, RedLineLEDArray, RedLineStationLEDPosition, Red_Num_LED_Domains, TrainRed);
        
@@ -365,6 +375,8 @@ class usermod_v2_ASL : public Usermod {
         PlotLEDStations(YellowTargetFrame, YellowLineStationLEDPosition, YellowLineNumStationsInLine, StationYellow, TrackYellow, Yellow_Num_LEDS);
         PlotLEDTrainPositions(YellowTargetFrame, "YL", YellowLineTrack1Domains, YellowLineTrack1Segments, YellowLineTrack1StationSegments, YellowLineNumStationsInLine, YellowLineLEDArray, YellowLineStationLEDPosition, Yellow_Num_LED_Domains, TrainYellow);
         PlotLEDTrainPositions(YellowTargetFrame, "YL", YellowLineTrack2Domains, YellowLineTrack2Segments, YellowLineTrack2StationSegments, YellowLineNumStationsInLine, YellowLineLEDArray, YellowLineStationLEDPosition, Yellow_Num_LED_Domains, TrainYellow);
+        */       
+
         // Serial.print("train red = ");
         // Serial.println(TrainRed);
         // Serial.print("station red = ");
@@ -616,6 +628,7 @@ class usermod_v2_ASL : public Usermod {
         TrainPositions_ServiceType[i] = ServiceTypeString;
         // Serial.print("in retreival :");
         //Serial.println(TrainPositions_TrainId[i]);
+        //Serial.println((String)"Local Time: " + minute(localTime));
         }
    }
 
@@ -692,6 +705,40 @@ class usermod_v2_ASL : public Usermod {
     }
   }
 
+  void PlotOfflineTrains()
+  {
+    uint16_t SytemOperatingDurationS = SystemLastTrainTime - SystemFirstTrainTime; //calculate the duration of the system being open
+    uint16_t NumSimTrainsInDay = SytemOperatingDurationS / HeadwayTimeSeconds; // calculate the number of started trains we can fit into that time
+    NumSimTrainsInDay = NumSimTrainsInDay + 1; //add 1, because grasshopper told us to
+    Serial.println((String)"Num sim trains in day: " + NumSimTrainsInDay);
+    uint32_t SimTrainDepartureS[NumSimTrainsInDay]; //create an array of the size of the number of our sim trains
+    uint32_t SimTrainArrivals[NumSimTrainsInDay]; //the array of the finishing times of each train  TODO this may not need to be expicitized
+    uint8_t SimTrainActive[NumSimTrainsInDay];
+
+    uint32_t TrainRunDurationS = (RedLineNumStationsInLine * DelayAtStationS) + (RedLineTrack1SegmentDomains * TimeBetweenStationsS);
+    //Serial.println((String)"Cycle Time: " + TrainRunDurationS);
+
+    for(int i = 0; i < NumSimTrainsInDay; i++) { //cycle through each schedule train
+      SimTrainDepartureS[i] = SystemFirstTrainTime + (HeadwayTimeSeconds * i);  //create their departure time in the array
+      SimTrainArrivals[i] = SimTrainDepartureS[i] + TrainRunDurationS;
+      
+    } 
+    Serial.println((String) "interval number : " + 1 + " DepartureS : " + SimTrainDepartureS[0]);
+
+    uint32_t SecondOfDay = ((hour(localTime) * (60*60)) + (minute(localTime) * 60) + second(localTime)); //calculate the second of the day currently 
+
+    for (int i = 0; i < NumSimTrainsInDay; i++) { //for each train running today, test if it's active at the current time
+      if(SecondOfDay >= SimTrainDepartureS[i] && SecondOfDay <= SimTrainArrivals[i]) {
+        SimTrainActive[i] = 1;
+        Serial.println((String)"Active train on " + i);
+      } else {
+        SimTrainActive[i] = 0;
+      }
+    }
+    Serial.println((String)"Time S = " + SecondOfDay);
+
+
+  }
 
   String TrainSim(String LineCode, uint16_t Track1SegmentCount, uint16_t Track2SegmentCount, uint16_t Track1Segments[], uint16_t Track2Segments[]) { //function thats modular enough to allow line specification for testing. This function does NOT duplicate the representative size of a payload from WMATA
     String DirectionCode = "\"Synthetic\""; //use a null station code. We don't even parse it anyway, but it will allow us to see if data is synthetic

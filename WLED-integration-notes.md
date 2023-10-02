@@ -1,9 +1,11 @@
 # WLED Integration Notes
-Work to integtrate the dc metro map logic and controls into the excellent WLED (wireless LED) project. https://github.com/Aircoookie/WLED/blob/main/usermods/EXAMPLE_v2/usermod_v2_example.h
+Work to integrate the dc metro map logic and controls into the excellent WLED (wireless LED) project. https://github.com/Aircoookie/WLED/blob/main/usermods/EXAMPLE_v2/usermod_v2_example.h
 
 ## Build Environment
 https://kno.wled.ge/advanced/compiling-wled/
 installed vscode and platformio extension per directions. Used sourcetree to clone a personal fork of wled.
+
+Had to install git https://git-scm.com/download/win this allowed platform IO to download the requisite arduino libraries like math.h
 
 had to comment out `default_envs = travis_esp8266, travis_esp32` despite instructions 
 
@@ -17,9 +19,9 @@ Stripped out all usermod folders. code compiles fine.
 
 look at /wled00/usermods_list.cpp for a ton of ifdef statements about usermods. 
 
-To reference usemod name use the class (not public) of the usermod.h
+To reference usermod name use the class (not public) of the usermod.h
 
-once flashed through platform IO unclear how to open the browser window, or how it knows my wifi password (if it does?) it must be stored in eeprom and i hadnt done an eeprom wipe. 
+once flashed through platform IO unclear how to open the browser window, or how it knows my wifi password (if it does?) it must be stored in eeprom and i hadn't done an eeprom wipe. 
 
 To enable serial debugging uncomment `#define WLED_DEBUG` in `wled.h`
 How the actual hell does it know to connect to my wifi? but look for the little plug icon in the lower blue bar of the vscode
@@ -29,7 +31,7 @@ On second exploration this occationally seemed to cause a flash to go poorly and
 
 adding the IP through station mode seems to work nicely. although it's not directly clear which IP it gets unless you look at the debug terminal scroll. 
 
-per https://kno.wled.ge/advanced/custom-features/ to edit the statically baked html files you need to have nodejs installed. I installed from here: https://nodejs.org/en/download/ and installed chocolatey when prompted in the installer. i had to run the installer twice and then it completed. 
+per https://kno.wled.ge/advanced/custom-features/ to edit the statically baked html files you need to have nodejs installed. I installed from here: https://nodejs.org/en/download/ and installed chocolatey when prompted in the installer. i had to run the installer twice and then it completed. I also installed the recommended additional tools. 
 
 Test if npm is present by opening a new cmd window and typing `npm`. Then restart vscode and run it in the command line interface. 
 
@@ -140,3 +142,7 @@ Adding a `/presets.json` file here will make it get written to the file system.
 It seems like the software isn't reading the `presets.json` file, even when it exitsts. 
 Using `applyPreset(1);` from any point in the user mode will apply preset `1` (this is present number 1 not preset 0 index).
 per https://github.com/Aircoookie/WLED/issues/2434 wled does not support prettified json 
+
+## Notes on Time
+`localTime` expresses global epoch time in seconds, adjusted for time zone
+call local times with `minute(localTime)`, year, month, day , hour, minute and second are acceptable inputs. 
