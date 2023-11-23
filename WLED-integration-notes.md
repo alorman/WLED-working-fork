@@ -145,4 +145,5 @@ per https://github.com/Aircoookie/WLED/issues/2434 wled does not support prettif
 
 ## Notes on Time
 `localTime` expresses global epoch time in seconds, adjusted for time zone
-call local times with `minute(localTime)`, year, month, day , hour, minute and second are acceptable inputs. 
+call local times with `minute(localTime)`, year, month, day , hour, minute and second are acceptable inputs. expresses the current holding of those fields
+

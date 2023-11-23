@@ -18,6 +18,8 @@
 #define RedLineTrack1SegmentDomains (sizeof(RedLineTrack1Domains)/sizeof(RedLineTrack1Domains[1,1])) //counts the number of track 1 segment domains (including breaks and stations)
 #define RedLineTrack2SegmentDomains (sizeof(RedLineTrack2Domains)/sizeof(RedLineTrack2Domains[1,1])) //and the same for track 2
 
+#define Red_Num_Track1_Domains (sizeof(RedLineTrack1Domains)/sizeof(RedLineTrack1Domains[0]))
+
 //Blue line
 #define BlueLineNumStationsInLine (sizeof(BlueLineTrack1StationSegments)/sizeof(BlueLineTrack1StationSegments[1])) //counts number of stations we've defined above
 #define Blue_Num_LED_Domains (sizeof(BlueLineLEDArray)/sizeof(BlueLineLEDArray[0])) //counts the number of LED domains we've specified and makes all the LED number comply with that
@@ -60,6 +62,8 @@ uint16_t RedLineTrack1Domains [][2] = { {  8, 31},{ 33, 52},{ 54, 61},{ 63, 79},
 uint16_t RedLineTrack2Domains [][2] ={  {211,231},{233,250},{252,259},{261,277},{279,293},{295,308},{310,325},{327,335},{337,345},{347,355},{357,362},{364,377},{379,388},{390,400},{662,666},{668,676},{678,685},{687,699},{701,716},{718,730},{732,756},{758,784},{786,808},{810,827},{829,845},{847,867} };
 uint16_t RedLineTrack1Segments[] = {7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,160,161,162,163,164,165,166,167,168,169,170,171,172,173,174,175,176,177,178,179,180,181,182,183,184,185,186,187,188,189,190,191,192,193,194,195,196,197,198,199,200,201,202,203,462,463,464,465,466,467,468,469,470,471,472,473,474,475,476,477,478,479,480,481,482,483,484,485,486,487,488,489,490,491,492,493,494,495,496,497,498,499,500,501,502,503,504,505,506,507,508,509,510,511,512,513,514,515,516,517,518,519,520,521,522,523,524,525,526,527,528,529,530,531,532,533,534,535,536,537,538,539,540,541,542,543,544,545,546,547,548,549,550,551,552,553,554,555,556,557,558,559,560,561,562,563,564,565,566,567,568,569,570,571,572,573,574,575,576,577,578,579,580,581,582,583,584,585,586,587,588,589,590,591,592,593,594,595,596,597,598,599,600,601,602,603,604,605,606,607,608,609,610,611,612,613,614,615,616,617,618,619,620,621,622,623,624,625,626,627,628,629,630,631,632,633,634,635,636,637,638,639,640,641,642,643,644,645,646,647,648,649,650,651,652};
 uint16_t RedLineTrack2Segments [] = {210,211,212,213,214,215,216,217,218,219,220,221,222,223,224,225,226,227,228,229,230,231,232,233,234,235,236,237,238,239,240,241,242,243,244,245,246,247,248,249,250,251,252,253,254,255,256,257,258,259,260,261,262,263,264,265,266,267,268,269,270,271,272,273,274,275,276,277,278,279,280,281,282,283,284,285,286,287,288,289,290,291,292,293,294,295,296,297,298,299,300,301,302,303,304,305,306,307,308,309,310,311,312,313,314,315,316,317,318,319,320,321,322,323,324,325,326,327,328,329,330,331,332,333,334,335,336,337,338,339,340,341,342,343,344,345,346,347,348,349,350,351,352,353,354,355,356,357,358,359,360,361,362,363,364,365,366,367,368,369,370,371,372,373,374,375,376,377,378,379,380,381,382,383,384,385,386,387,388,389,390,391,392,393,394,395,396,397,398,399,400,661,662,663,664,665,666,667,668,669,670,671,672,673,674,675,676,677,678,679,680,681,682,683,684,685,686,687,688,689,690,691,692,693,694,695,696,697,698,699,700,701,702,703,704,705,706,707,708,709,710,711,712,713,714,715,716,717,718,719,720,721,722,723,724,725,726,727,728,729,730,731,732,733,734,735,736,737,738,739,740,741,742,743,744,745,746,747,748,749,750,751,752,753,754,755,756,757,758,759,760,761,762,763,764,765,766,767,768,769,770,771,772,773,774,775,776,777,778,779,780,781,782,783,784,785,786,787,788,789,790,791,792,793,794,795,796,797,798,799,800,801,802,803,804,805,806,807,808,809,810,811,812,813,814,815,816,817,818,819,820,821,822,823,824,825,826,827,828,829,830,831,832,833,834,835,836,837,838,839,840,841,842,843,844,845,846,847,848,849,850,851,852,853,854,855,856,857,858,859,860,861,862,863,864,865,866,867,868};
+
+uint16_t RedLineTrack1AdditiveDelaySegments[] = {30,32,34,36,38,40,42,44,46,48,50,52,54,56,58,60,62,64,66,68,70,72,74,76,78,108,110,112,114,116,118,120,122,124,126,128,130,132,134,136,138,140,142,144,146,148,178,180,182,184,186,188,190,192,194,224,226,228,230,232,234,236,238,240,242,244,246,248,250,252,254,256,258,288,290,292,294,296,298,300,302,304,306,308,310,312,314,316,346,348,350,352,354,356,358,360,362,364,366,368,370,372,402,404,406,408,410,412,414,416,418,420,422,424,426,428,430,432,434,464,466,468,470,472,474,476,506,508,510,512,514,516,518,520,522,552,554,556,558,560,562,564,566,568,570,572,574,604,606,608,610,612,614,616,618,620,622,652,654,656,658,660,662,664,666,668,670,672,674,676,678,680,710,712,714,716,718,720,722,724,726,728,730,760,762,764,766,768,770,772,774,776,778,780,782,784,814,816,818,820,822,824,854,856,858,860,862,864,866,868,870,872,902,904,906,908,910,912,914,916,946,948,950,952,954,956,958,960,962,964,966,996,998,1000,1002,1004,1006,1008,1010,1012,1014,1016,1018,1020,1022,1024,1026,1028,1058,1060,1062,1064,1066,1068,1070,1072,1074,1076,1078,1080,1082,1084,1114,1116,1118,1120,1122,1124,1126,1128,1130,1132,1134,1136,1138,1140,1142,1144,1146,1148,1150,1152,1154,1184,1186,1188,1190,1192,1194,1196,1198,1200,1202,1204,1206,1208,1210,1212,1214,1216,1218,1220,1222,1224,1226,1228,1258,1260,1262,1264,1266,1268,1270,1272,1274,1276,1278,1280,1282,1284,1286,1288,1290,1292,1294,1296,1326,1328,1330,1332,1334,1336,1338,1340,1342,1344,1346,1348,1350,1352,1354,1356,1358,1360,1362,1364,1394,1396,1398,1400,1402,1404,1406,1408,1410,1412,1414,1416,1418,1420,1422,1424,1426,1428,1458,1460,1462,1464,1466,1468,1470,1472,1474,1476,1478,1480,1482,1484,1486,1488,1490,1492,1494,1496,1498,1500,1502,1532};
 
 uint16_t RedLineTrack1StationSegments[] = {  7, 32, 53, 62, 80, 95,109,126,133,142,154,164,179,190,203,467,477,485,496,513,527,548,571,591,611,629,652};  
 uint16_t RedLineTrack2StationSegments[] = {210,232,251,260,278,294,309,326,336,346,356,363,378,389,661,667,677,686,700,717,731,757,785,809,828,846,868};
@@ -121,20 +125,20 @@ uint16_t YellowLineStationLEDPosition[] = {0,8,13,18,29,42,47,56,100,107,113,120
 uint16_t YellowLineLEDArray [][2] = { {1,7},{9,12},{14,17},{19,28},{30,41},{43,46},{48,55},{57,99},{101,106},{108,112},{114,119},{121,128},{130,134},{136,151},{153,169},{171,183} };
 
 //train position array fields
-int TrainPositions_TrainId[MaxNumPossibleTrains];
-int TrainPositions_TrainNumber[MaxNumPossibleTrains];
-int TrainPositions_CarCount[MaxNumPossibleTrains];
-int TrainPositions_DirectionNum[MaxNumPossibleTrains];
-int TrainPositions_CircuitId[MaxNumPossibleTrains];
+uint32_t TrainPositions_TrainId[MaxNumPossibleTrains];
+uint32_t TrainPositions_TrainNumber[MaxNumPossibleTrains];
+uint32_t TrainPositions_CarCount[MaxNumPossibleTrains];
+uint32_t TrainPositions_DirectionNum[MaxNumPossibleTrains];
+uint32_t TrainPositions_CircuitId[MaxNumPossibleTrains];
 String TrainPositions_DestinationStationCode[MaxNumPossibleTrains]; 
 String TrainPositions_LineCode[MaxNumPossibleTrains]; 
-long TrainPositions_SecondsAtLocation[MaxNumPossibleTrains];
+uint32_t TrainPositions_SecondsAtLocation[MaxNumPossibleTrains];
 String TrainPositions_ServiceType[MaxNumPossibleTrains];
 
 //train math variables
-int MaxNumTrains = 0; 
-int NormalTrainCount = 0;
-int RedTrainCount = 0;
+uint32_t MaxNumTrains = 0; 
+uint32_t NormalTrainCount = 0;
+uint32_t RedTrainCount = 0;
 
 // test fake train data variable 
 uint8_t UseFakeJsonData = 0;
@@ -158,13 +162,12 @@ uint16_t OrangeTrack2PositionCounter = OrangeLineTrack2SegmentCount;
 uint16_t YellowTrack1PositionCounter = 0;
 uint16_t YellowTrack2PositionCounter = YellowLineTrack2SegmentCount;
 
-//global timing and headway variables
-uint32_t SystemFirstTrainTime = 21600; //second of the day that first train may start
-uint32_t SystemLastTrainTime =  68400; //second of the day that last train of the day starts no later than this time
-uint8_t HeadwayTimeSeconds = 480; //time between trains in seconds
+// PUT GLOBAL HEADWAY TIMES BACK HERE
 
 uint8_t DelayAtStationS = 30; //delay of each train at each station
 uint8_t TimeBetweenStationsS = 120; //time taken total between two stations
+
+uint32_t StartTimeEachSegment [RedLineTrack1SegmentCount]; //additive total time at each segment
 
 //uint16_t SimTrainDepartureTime[MaxNumSimTrains]; //the start time of each train in the system
 
@@ -201,19 +204,19 @@ class usermod_v2_ASL : public Usermod {
 
     // set your config variables to their boot default value (this can also be done in readFromConfig() or a constructor if you prefer)
     bool testBool = false;
-    unsigned long testULong = 42424242;
+    uint32_t testULong = 42424242;
     float testFloat = 42.42;
     String devString = "0";
     String testString = "0";
     String ServerAddressString = "https://api.wmata.com/TrainPositions/TrainPositions?contentType=json";
     String apiKeyString = "44c0d03c967442abad897ca70efd5639";
-    int ServerPollIntervalSeconds = 10;
-    int LEDRefreshIntervalms = 1000;
+    uint32_t ServerPollIntervalSeconds = 10;
+    uint32_t LEDRefreshIntervalms = 1000;
     WS2812FX::Segment &seg = strip.getSegment(0);
     uint32_t steps = 0;
 
     //values unchanged from dc metro code
-    unsigned long RunCycles = 0; 
+    uint32_t RunCycles = 0; 
 
     //Red Line Variables
     
@@ -223,21 +226,21 @@ class usermod_v2_ASL : public Usermod {
     //red line color definitions 
 
     //Loop timing variables
-    unsigned long lastTime = 0;
-    int WMATATimeDelay = 7000; //delay for the task polling WMATA API (data updates every 7-10 seconds, clients are allowed to post GET requests at 10hz or 50k call/day (every 1.7s)
-    const int FakeGETTimeDelay = 1000; //the timer to use when we're using fake data
-    int LEDRefreshTime = 1; //timing for the led updating task. This gets updated by math
+    uint32_t lastTime = 0;
+    uint32_t WMATATimeDelay = 7000; //delay for the task polling WMATA API (data updates every 7-10 seconds, clients are allowed to post GET requests at 10hz or 50k call/day (every 1.7s)
+    uint32_t FakeGETTimeDelay = 1000; //the timer to use when we're using fake data
+    uint32_t LEDRefreshTime = 1; //timing for the led updating task. This gets updated by math
 
 
 
     //LED strip variables
-    int MaxLEDDelta = 0;
-    int AllLEDSBrightness = 255;
+    uint8_t MaxLEDDelta = 0;
+    uint8_t AllLEDSBrightness = 255;
 
 
     // These config variables have defaults set inside readFromConfig()
-    int testInt;
-    long testLong;
+    uint8_t testInt;
+    uint32_t testLong;
     int8_t testPins[2];
 
   public:
@@ -707,35 +710,56 @@ class usermod_v2_ASL : public Usermod {
 
   void PlotOfflineTrains()
   {
-    uint16_t SytemOperatingDurationS = SystemLastTrainTime - SystemFirstTrainTime; //calculate the duration of the system being open
-    uint16_t NumSimTrainsInDay = SytemOperatingDurationS / HeadwayTimeSeconds; // calculate the number of started trains we can fit into that time
+    //global timing and headway variables
+    uint32_t SystemFirstTrainTime = 21600; //second of the day that first train may start
+    uint32_t SystemLastTrainTime =  79200; //second of the day that last train of the day starts no later than this time
+    uint32_t HeadwayTimeSeconds = 480; //time between trains in seconds
+
+
+    uint32_t SytemOperatingDurationS = SystemLastTrainTime - SystemFirstTrainTime; //calculate the duration of the system being open
+    uint32_t NumSimTrainsInDay = SytemOperatingDurationS / HeadwayTimeSeconds; // calculate the number of started trains we can fit into that time
     NumSimTrainsInDay = NumSimTrainsInDay + 1; //add 1, because grasshopper told us to
     Serial.println((String)"Num sim trains in day: " + NumSimTrainsInDay);
     uint32_t SimTrainDepartureS[NumSimTrainsInDay]; //create an array of the size of the number of our sim trains
-    uint32_t SimTrainArrivals[NumSimTrainsInDay]; //the array of the finishing times of each train  TODO this may not need to be expicitized
-    uint8_t SimTrainActive[NumSimTrainsInDay];
+    uint32_t SimTrainArrivalS[NumSimTrainsInDay]; //the array of the finishing times of each train  TODO this may not need to be expicitized
+    bool SimTrainActive[NumSimTrainsInDay];
 
-    uint32_t TrainRunDurationS = (RedLineNumStationsInLine * DelayAtStationS) + (RedLineTrack1SegmentDomains * TimeBetweenStationsS);
-    //Serial.println((String)"Cycle Time: " + TrainRunDurationS);
-
-    for(int i = 0; i < NumSimTrainsInDay; i++) { //cycle through each schedule train
-      SimTrainDepartureS[i] = SystemFirstTrainTime + (HeadwayTimeSeconds * i);  //create their departure time in the array
-      SimTrainArrivals[i] = SimTrainDepartureS[i] + TrainRunDurationS;
-      
-    } 
-    Serial.println((String) "interval number : " + 1 + " DepartureS : " + SimTrainDepartureS[0]);
+    uint32_t TrainRunDurationS = 1532; //TODO make this automatically compute
+    Serial.println((String)"Cycle Time: " + TrainRunDurationS);
 
     uint32_t SecondOfDay = ((hour(localTime) * (60*60)) + (minute(localTime) * 60) + second(localTime)); //calculate the second of the day currently 
+    Serial.println((String)"Second of day " + SecondOfDay);
 
-    for (int i = 0; i < NumSimTrainsInDay; i++) { //for each train running today, test if it's active at the current time
-      if(SecondOfDay >= SimTrainDepartureS[i] && SecondOfDay <= SimTrainArrivals[i]) {
-        SimTrainActive[i] = 1;
-        Serial.println((String)"Active train on " + i);
+    uint32_t SegmentArrivalTimeS [RedLineTrack1SegmentCount]; //create a temp array to then (below) shift per the shifted departure time
+    
+    Serial.print((String)"Active trian binary matrix : ");
+
+    for (int i = 0; i < NumSimTrainsInDay; i++) { //for each train running today, test if it's departure has already happened and it's arrival hasn't yet happened
+      SimTrainDepartureS[i] = (SystemFirstTrainTime + (i * HeadwayTimeSeconds)); //time shift the start times to be multiples of our headway
+      SimTrainArrivalS[i] = SimTrainDepartureS[i] + TrainRunDurationS;
+      if(SecondOfDay > SimTrainDepartureS[i] && SecondOfDay < SimTrainArrivalS[i]) {
+        SimTrainActive[i] = 1; //set this activity into the boolean array
+        Serial.print("1");
+        //Serial.println((String)"Active train on " + i); //note this only prints if a train has been declared active
       } else {
         SimTrainActive[i] = 0;
+        Serial.print("0");
       }
     }
-    Serial.println((String)"Time S = " + SecondOfDay);
+    Serial.println();
+    
+    uint32_t CountSimTrains = 0;
+    for (int i = 0; i < NumSimTrainsInDay; i++) { //for all the possible trains today
+      if(SimTrainActive[i] == 1) { //only manipulate the active ones
+        CountSimTrains ++;
+        for(int y = 0; y < RedLineTrack1SegmentCount; y++) { //for each train sim train search all the segments for the nearest time that matches
+          if(SegmentArrivalTimeS[i] >= RedLineTrack1Segments[y] && SegmentArrivalTimeS[i] < RedLineTrack1Segments[(y+1)]) { //match train to correct nearest segment of time
+            //Serial.println((String)"Matched on time seg " + SegmentArrivalTimeS[i] + " to segment number " + RedLineTrack1Segments[y] );
+          }
+        }
+      }
+    }
+    Serial.println((String)"Num active trains right now: " + CountSimTrains);
 
 
   }
