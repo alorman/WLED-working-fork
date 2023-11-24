@@ -127,18 +127,18 @@ uint16_t YellowLineLEDArray [][2] = { {1,7},{9,12},{14,17},{19,28},{30,41},{43,4
 //train position array fields
 uint32_t TrainPositions_TrainId[MaxNumPossibleTrains];
 uint32_t TrainPositions_TrainNumber[MaxNumPossibleTrains];
-uint32_t TrainPositions_CarCount[MaxNumPossibleTrains];
-uint32_t TrainPositions_DirectionNum[MaxNumPossibleTrains];
+uint8_t TrainPositions_CarCount[MaxNumPossibleTrains];
+uint8_t TrainPositions_DirectionNum[MaxNumPossibleTrains];
 uint32_t TrainPositions_CircuitId[MaxNumPossibleTrains];
 String TrainPositions_DestinationStationCode[MaxNumPossibleTrains]; 
 String TrainPositions_LineCode[MaxNumPossibleTrains]; 
-uint32_t TrainPositions_SecondsAtLocation[MaxNumPossibleTrains];
+uint8_t TrainPositions_SecondsAtLocation[MaxNumPossibleTrains];
 String TrainPositions_ServiceType[MaxNumPossibleTrains];
 
 //train math variables
-uint32_t MaxNumTrains = 0; 
-uint32_t NormalTrainCount = 0;
-uint32_t RedTrainCount = 0;
+uint16_t MaxNumTrains = MaxNumPossibleTrains; 
+uint16_t NormalTrainCount = 0;
+uint16_t RedTrainCount = 0;
 
 // test fake train data variable 
 uint8_t UseFakeJsonData = 0;
@@ -317,11 +317,12 @@ class usermod_v2_ASL : public Usermod {
         Serial.println("I'm alive! in main loop");
         //readFromConfig();
         //Serial.println(ServerAddressString);
-        GetWMATAdata();
+        //GetWMATAdata();
         Serial.println(steps);
       //Serial.println("Applying preset 1");
         steps++;
-                PlotOfflineTrains();
+        OfflinePlotTrains();
+        TrainStats();
         // DynamicJsonDocument doc(16384); //JSON doc size, see JSON arduino assistant for better info
         // HTTPClient http; //establish the HTTPclient object
         // String payload;
@@ -358,27 +359,26 @@ class usermod_v2_ASL : public Usermod {
           //Serial.println(SimulatedTrains);
         }
 
-       /*  PlotLEDStations(RedTargetFrame, RedLineStationLEDPosition, RedLineNumStationsInLine, StationRed, TrackRed, Red_Num_LEDS);
+        // PlotLEDStations(RedTargetFrame, RedLineStationLEDPosition, RedLineNumStationsInLine, StationRed, TrackRed, Red_Num_LEDS);
         PlotLEDTrainPositions(RedTargetFrame, "RD", RedLineTrack1Domains, RedLineTrack1Segments, RedLineTrack1StationSegments, RedLineNumStationsInLine, RedLineLEDArray, RedLineStationLEDPosition, Red_Num_LED_Domains, TrainRed);
-        PlotLEDTrainPositions(RedTargetFrame, "RD", RedLineTrack2Domains, RedLineTrack2Segments, RedLineTrack2StationSegments, RedLineNumStationsInLine, RedLineLEDArray, RedLineStationLEDPosition, Red_Num_LED_Domains, TrainRed);
+        // PlotLEDTrainPositions(RedTargetFrame, "RD", RedLineTrack2Domains, RedLineTrack2Segments, RedLineTrack2StationSegments, RedLineNumStationsInLine, RedLineLEDArray, RedLineStationLEDPosition, Red_Num_LED_Domains, TrainRed);
        
 
-        PlotLEDStations(BlueTargetFrame, BlueLineStationLEDPosition, BlueLineNumStationsInLine, StationBlue, TrackBlue, Blue_Num_LEDS);
-        PlotLEDTrainPositions(BlueTargetFrame, "BL", BlueLineTrack1Domains, BlueLineTrack1Segments, BlueLineTrack1StationSegments, BlueLineNumStationsInLine, BlueLineLEDArray, BlueLineStationLEDPosition, Blue_Num_LED_Domains, TrainBlue);
-        PlotLEDTrainPositions(BlueTargetFrame, "BL", BlueLineTrack2Domains, BlueLineTrack2Segments, BlueLineTrack2StationSegments, BlueLineNumStationsInLine, BlueLineLEDArray, BlueLineStationLEDPosition, Blue_Num_LED_Domains, TrainBlue);
+        // PlotLEDStations(BlueTargetFrame, BlueLineStationLEDPosition, BlueLineNumStationsInLine, StationBlue, TrackBlue, Blue_Num_LEDS);
+        // PlotLEDTrainPositions(BlueTargetFrame, "BL", BlueLineTrack1Domains, BlueLineTrack1Segments, BlueLineTrack1StationSegments, BlueLineNumStationsInLine, BlueLineLEDArray, BlueLineStationLEDPosition, Blue_Num_LED_Domains, TrainBlue);
+        // PlotLEDTrainPositions(BlueTargetFrame, "BL", BlueLineTrack2Domains, BlueLineTrack2Segments, BlueLineTrack2StationSegments, BlueLineNumStationsInLine, BlueLineLEDArray, BlueLineStationLEDPosition, Blue_Num_LED_Domains, TrainBlue);
        
-        PlotLEDStations(GreenTargetFrame, GreenLineStationLEDPosition, GreenLineNumStationsInLine, StationGreen, TrackGreen, Green_Num_LEDS);
-        PlotLEDTrainPositions(GreenTargetFrame, "GR", GreenLineTrack1Domains, GreenLineTrack1Segments, GreenLineTrack1StationSegments, GreenLineNumStationsInLine, GreenLineLEDArray, GreenLineStationLEDPosition, Green_Num_LED_Domains, TrainGreen);
-        PlotLEDTrainPositions(GreenTargetFrame, "GR", GreenLineTrack2Domains, GreenLineTrack2Segments, GreenLineTrack2StationSegments, GreenLineNumStationsInLine, GreenLineLEDArray, GreenLineStationLEDPosition, Green_Num_LED_Domains, TrainGreen);
+        // PlotLEDStations(GreenTargetFrame, GreenLineStationLEDPosition, GreenLineNumStationsInLine, StationGreen, TrackGreen, Green_Num_LEDS);
+        // PlotLEDTrainPositions(GreenTargetFrame, "GR", GreenLineTrack1Domains, GreenLineTrack1Segments, GreenLineTrack1StationSegments, GreenLineNumStationsInLine, GreenLineLEDArray, GreenLineStationLEDPosition, Green_Num_LED_Domains, TrainGreen);
+        // PlotLEDTrainPositions(GreenTargetFrame, "GR", GreenLineTrack2Domains, GreenLineTrack2Segments, GreenLineTrack2StationSegments, GreenLineNumStationsInLine, GreenLineLEDArray, GreenLineStationLEDPosition, Green_Num_LED_Domains, TrainGreen);
        
-        PlotLEDStations(OrangeTargetFrame, OrangeLineStationLEDPosition, OrangeLineNumStationsInLine, StationOrange, TrackOrange, Orange_Num_LEDS);
-        PlotLEDTrainPositions(OrangeTargetFrame, "OR", OrangeLineTrack1Domains, OrangeLineTrack1Segments, OrangeLineTrack1StationSegments, OrangeLineNumStationsInLine, OrangeLineLEDArray, OrangeLineStationLEDPosition, Orange_Num_LED_Domains, TrainOrange);
-        PlotLEDTrainPositions(OrangeTargetFrame, "OR", OrangeLineTrack2Domains, OrangeLineTrack2Segments, OrangeLineTrack2StationSegments, OrangeLineNumStationsInLine, OrangeLineLEDArray, OrangeLineStationLEDPosition, Orange_Num_LED_Domains, TrainOrange);
+        // PlotLEDStations(OrangeTargetFrame, OrangeLineStationLEDPosition, OrangeLineNumStationsInLine, StationOrange, TrackOrange, Orange_Num_LEDS);
+        // PlotLEDTrainPositions(OrangeTargetFrame, "OR", OrangeLineTrack1Domains, OrangeLineTrack1Segments, OrangeLineTrack1StationSegments, OrangeLineNumStationsInLine, OrangeLineLEDArray, OrangeLineStationLEDPosition, Orange_Num_LED_Domains, TrainOrange);
+        // PlotLEDTrainPositions(OrangeTargetFrame, "OR", OrangeLineTrack2Domains, OrangeLineTrack2Segments, OrangeLineTrack2StationSegments, OrangeLineNumStationsInLine, OrangeLineLEDArray, OrangeLineStationLEDPosition, Orange_Num_LED_Domains, TrainOrange);
        
-        PlotLEDStations(YellowTargetFrame, YellowLineStationLEDPosition, YellowLineNumStationsInLine, StationYellow, TrackYellow, Yellow_Num_LEDS);
-        PlotLEDTrainPositions(YellowTargetFrame, "YL", YellowLineTrack1Domains, YellowLineTrack1Segments, YellowLineTrack1StationSegments, YellowLineNumStationsInLine, YellowLineLEDArray, YellowLineStationLEDPosition, Yellow_Num_LED_Domains, TrainYellow);
-        PlotLEDTrainPositions(YellowTargetFrame, "YL", YellowLineTrack2Domains, YellowLineTrack2Segments, YellowLineTrack2StationSegments, YellowLineNumStationsInLine, YellowLineLEDArray, YellowLineStationLEDPosition, Yellow_Num_LED_Domains, TrainYellow);
-        */       
+        // PlotLEDStations(YellowTargetFrame, YellowLineStationLEDPosition, YellowLineNumStationsInLine, StationYellow, TrackYellow, Yellow_Num_LEDS);
+        // PlotLEDTrainPositions(YellowTargetFrame, "YL", YellowLineTrack1Domains, YellowLineTrack1Segments, YellowLineTrack1StationSegments, YellowLineNumStationsInLine, YellowLineLEDArray, YellowLineStationLEDPosition, Yellow_Num_LED_Domains, TrainYellow);
+        // PlotLEDTrainPositions(YellowTargetFrame, "YL", YellowLineTrack2Domains, YellowLineTrack2Segments, YellowLineTrack2StationSegments, YellowLineNumStationsInLine, YellowLineLEDArray, YellowLineStationLEDPosition, Yellow_Num_LED_Domains, TrainYellow);     
 
         // Serial.print("train red = ");
         // Serial.println(TrainRed);
@@ -659,7 +659,7 @@ class usermod_v2_ASL : public Usermod {
     int NumNormalTrains = 0;
     for (int i = 0; i < MaxNumTrains; i++) { //run this for the max number of trains
       int8_t StationPlotted = 0;
-      if(TrainPositions_ServiceType[i] == "Normal" && TrainPositions_LineCode[i] == LineCode){
+      if(TrainPositions_ServiceType[i] == "Normal" && TrainPositions_LineCode[i] == "RD"){
           NumNormalTrains ++;
           for(int x = 0; x < NumStationsInLine; x++){ //run this loop for the total number of stations we have, to cycle through the station array
             if(TrainPositions_CircuitId[i] == StationSegmentArray[x]) { 
@@ -697,9 +697,10 @@ class usermod_v2_ASL : public Usermod {
   {
     NormalTrainCount = 0;
     RedTrainCount = 0;
+    Serial.println("Train Stats");
     for (int i = 0; i <= MaxNumTrains; i++) {
-      if (TrainPositions_ServiceType[i] == "Normal"){
-      //Serial.println((String)"Train " + i + ", ID: " + TrainPositions_TrainId[i] + " Position : " + TrainPositions_CircuitId[i]);
+      if(TrainPositions_ServiceType[i] == "Normal" && TrainPositions_LineCode[i] == "RD"){
+      Serial.println((String)"Train " + i + ", ID: " + TrainPositions_TrainId[i] + " Position : " + TrainPositions_CircuitId[i] + " Line Code: " + TrainPositions_LineCode[i] + " Status: " + TrainPositions_ServiceType[i]);
       NormalTrainCount++;
       }
       if (TrainPositions_LineCode[i] == "RD"){
@@ -708,20 +709,21 @@ class usermod_v2_ASL : public Usermod {
     }
   }
 
-  void PlotOfflineTrains()
+  void OfflinePlotTrains()
   {
     //global timing and headway variables
     uint32_t SystemFirstTrainTime = 21600; //second of the day that first train may start
     uint32_t SystemLastTrainTime =  79200; //second of the day that last train of the day starts no later than this time
     uint32_t HeadwayTimeSeconds = 480; //time between trains in seconds
 
+    ClearTrainArrays();
 
     uint32_t SytemOperatingDurationS = SystemLastTrainTime - SystemFirstTrainTime; //calculate the duration of the system being open
     uint32_t NumSimTrainsInDay = SytemOperatingDurationS / HeadwayTimeSeconds; // calculate the number of started trains we can fit into that time
     NumSimTrainsInDay = NumSimTrainsInDay + 1; //add 1, because grasshopper told us to
     Serial.println((String)"Num sim trains in day: " + NumSimTrainsInDay);
     uint32_t SimTrainDepartureS[NumSimTrainsInDay]; //create an array of the size of the number of our sim trains
-    uint32_t SimTrainArrivalS[NumSimTrainsInDay]; //the array of the finishing times of each train  TODO this may not need to be expicitized
+    //uint32_t SimTrainArrivalS[NumSimTrainsInDay]; //the array of the finishing times of each train  TODO this may not need to be expicitized
     bool SimTrainActive[NumSimTrainsInDay];
 
     uint32_t TrainRunDurationS = 1532; //TODO make this automatically compute
@@ -734,12 +736,14 @@ class usermod_v2_ASL : public Usermod {
     
     Serial.print((String)"Active trian binary matrix : ");
 
+    uint32_t ShiftedDelaySegments[RedLineTrack1SegmentCount];
+
     for (int i = 0; i < NumSimTrainsInDay; i++) { //for each train running today, test if it's departure has already happened and it's arrival hasn't yet happened
       SimTrainDepartureS[i] = (SystemFirstTrainTime + (i * HeadwayTimeSeconds)); //time shift the start times to be multiples of our headway
-      SimTrainArrivalS[i] = SimTrainDepartureS[i] + TrainRunDurationS;
-      if(SecondOfDay > SimTrainDepartureS[i] && SecondOfDay < SimTrainArrivalS[i]) {
+      if(SecondOfDay > SimTrainDepartureS[i] && SecondOfDay < (SimTrainDepartureS[i] + TrainRunDurationS)) {
         SimTrainActive[i] = 1; //set this activity into the boolean array
         Serial.print("1");
+        //TrainPositions_TrainId[i] 
         //Serial.println((String)"Active train on " + i); //note this only prints if a train has been declared active
       } else {
         SimTrainActive[i] = 0;
@@ -747,6 +751,24 @@ class usermod_v2_ASL : public Usermod {
       }
     }
     Serial.println();
+
+   for (int i = 0; i < NumSimTrainsInDay; i++) {
+    if(SimTrainActive[i] == 1) {
+      //Serial.println("pinging on active train");
+      for(int x = 0; x < RedLineTrack1SegmentCount; x++) { //if this train is active move shift the segments with time
+      ShiftedDelaySegments[x]= RedLineTrack1AdditiveDelaySegments[x] + SimTrainDepartureS[i];
+      }
+      //Serial.println((String)"Departure time originally " + RedLineTrack1AdditiveDelaySegments[0] + " shifted " + ShiftedDelaySegments[0]);
+      for(int y = 0; y < RedLineTrack1SegmentCount; y++) {
+        if(SecondOfDay > ShiftedDelaySegments[y] && SecondOfDay < ShiftedDelaySegments[(y+1)]) {
+        InjectSimTrainData(i, 1, RedLineTrack1Segments[y], 5);
+        //TrainPositions_TrainId[i] = RedLineTrack1Segments[y];
+        Serial.println((String)"Sim Train matched to " + TrainPositions_TrainId[i]);
+        }
+      }
+      }
+   }
+
     
     uint32_t CountSimTrains = 0;
     for (int i = 0; i < NumSimTrainsInDay; i++) { //for all the possible trains today
@@ -760,8 +782,54 @@ class usermod_v2_ASL : public Usermod {
       }
     }
     Serial.println((String)"Num active trains right now: " + CountSimTrains);
+    
+    WriteGlobalPositionTable();
 
 
+  }
+
+  void ClearTrainArrays() {
+    //blow out the current train global arrays
+    for(int i =0; i < MaxNumPossibleTrains; i++) {
+      TrainPositions_TrainId[i] = 0;
+      TrainPositions_TrainNumber[i] = 0;
+      TrainPositions_CarCount[i] = 0;
+      TrainPositions_DirectionNum[i] = 0;
+      TrainPositions_CircuitId[i] = 0;
+      TrainPositions_DestinationStationCode[i] = "";
+      TrainPositions_LineCode[i] = "";
+      TrainPositions_SecondsAtLocation[i] = 0;
+      TrainPositions_ServiceType[i] = "";
+    }
+  }
+
+
+  void InjectSimTrainData(uint8_t SimTrainIndex, uint8_t SimTrainDirectionNum, uint16_t SimTrainCircuitID, uint8_t SimTrainSecondsAtLocation) {
+    //set variables for the rest of the train data
+    uint32_t SimTrainTrainID = SimTrainIndex;
+    uint32_t SimTrainTrainNumer = random(100,200);
+    uint8_t SimTrainCarCount = 8;
+    //we calcilate circuit ID later on
+    String SimTrainDestinationCode = String("Mars");
+    String SimTrainLineCode = "RD";
+    String SimTrainServiceType = "Normal";
+
+    //assemble and populate the array
+    TrainPositions_TrainId[SimTrainIndex] = SimTrainTrainID;
+    TrainPositions_TrainNumber[SimTrainIndex] = SimTrainTrainNumer;
+    TrainPositions_CarCount[SimTrainIndex] = SimTrainCarCount;
+    TrainPositions_DirectionNum[SimTrainIndex] = SimTrainDirectionNum;
+    TrainPositions_CircuitId[SimTrainIndex] = SimTrainCircuitID;
+    TrainPositions_DestinationStationCode[SimTrainIndex] = SimTrainDestinationCode;
+    TrainPositions_LineCode[SimTrainIndex] = "RD";
+    TrainPositions_SecondsAtLocation[SimTrainIndex] = SimTrainSecondsAtLocation;
+    TrainPositions_ServiceType[SimTrainIndex] = "Normal";
+  }
+
+  void WriteGlobalPositionTable() {
+    for(int i = 0; i < 10; i++) {
+      Serial.println((String)"Circuit ID: " + TrainPositions_CircuitId[i] + " Line Code: " + TrainPositions_LineCode[i] + " Service Type: " + TrainPositions_ServiceType[i] );
+    }
   }
 
   String TrainSim(String LineCode, uint16_t Track1SegmentCount, uint16_t Track2SegmentCount, uint16_t Track1Segments[], uint16_t Track2Segments[]) { //function thats modular enough to allow line specification for testing. This function does NOT duplicate the representative size of a payload from WMATA
