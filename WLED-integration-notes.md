@@ -88,6 +88,9 @@ usermods get called before the lights go into their default states. So ccalling 
 ## storing data in eeprom via the readfromjsonstate
 make sure you write using `addtoconfig` it will automatically read
 
+## Erase eeprom 
+in vscode, navigate to the platformio CLI. run `pio run --target erase`. If there is an access denied issue, close the serial monitor 
+
 ## to read LED colors
 look to the main state json (which isnt in eerpom and just fires around during runtime)
 state_seg_0_col_0_0 = root["seg"]["0"]["col"]["0"]; // 213

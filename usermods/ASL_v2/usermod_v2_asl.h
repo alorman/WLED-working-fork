@@ -18,7 +18,7 @@
 #define RedLineTrack1SegmentDomains (sizeof(RedLineTrack1Domains)/sizeof(RedLineTrack1Domains[1,1])) //counts the number of track 1 segment domains (including breaks and stations)
 #define RedLineTrack2SegmentDomains (sizeof(RedLineTrack2Domains)/sizeof(RedLineTrack2Domains[1,1])) //and the same for track 2
 
-#define Red_Num_Track1_Domains (sizeof(RedLineTrack1Domains)/sizeof(RedLineTrack1Domains[0]))
+//#define Red_Num_Track1_Domains (sizeof(RedLineTrack1Domains)/sizeof(RedLineTrack1Domains[1]))
 
 //Blue line
 #define BlueLineNumStationsInLine (sizeof(BlueLineTrack1StationSegments)/sizeof(BlueLineTrack1StationSegments[1])) //counts number of stations we've defined above
@@ -65,6 +65,8 @@ uint16_t RedLineTrack2Segments [] = {210,211,212,213,214,215,216,217,218,219,220
 
 uint16_t RedLineTrack1AdditiveDelaySegments[] = {30,32,34,36,38,40,42,44,46,48,50,52,54,56,58,60,62,64,66,68,70,72,74,76,78,108,110,112,114,116,118,120,122,124,126,128,130,132,134,136,138,140,142,144,146,148,178,180,182,184,186,188,190,192,194,224,226,228,230,232,234,236,238,240,242,244,246,248,250,252,254,256,258,288,290,292,294,296,298,300,302,304,306,308,310,312,314,316,346,348,350,352,354,356,358,360,362,364,366,368,370,372,402,404,406,408,410,412,414,416,418,420,422,424,426,428,430,432,434,464,466,468,470,472,474,476,506,508,510,512,514,516,518,520,522,552,554,556,558,560,562,564,566,568,570,572,574,604,606,608,610,612,614,616,618,620,622,652,654,656,658,660,662,664,666,668,670,672,674,676,678,680,710,712,714,716,718,720,722,724,726,728,730,760,762,764,766,768,770,772,774,776,778,780,782,784,814,816,818,820,822,824,854,856,858,860,862,864,866,868,870,872,902,904,906,908,910,912,914,916,946,948,950,952,954,956,958,960,962,964,966,996,998,1000,1002,1004,1006,1008,1010,1012,1014,1016,1018,1020,1022,1024,1026,1028,1058,1060,1062,1064,1066,1068,1070,1072,1074,1076,1078,1080,1082,1084,1114,1116,1118,1120,1122,1124,1126,1128,1130,1132,1134,1136,1138,1140,1142,1144,1146,1148,1150,1152,1154,1184,1186,1188,1190,1192,1194,1196,1198,1200,1202,1204,1206,1208,1210,1212,1214,1216,1218,1220,1222,1224,1226,1228,1258,1260,1262,1264,1266,1268,1270,1272,1274,1276,1278,1280,1282,1284,1286,1288,1290,1292,1294,1296,1326,1328,1330,1332,1334,1336,1338,1340,1342,1344,1346,1348,1350,1352,1354,1356,1358,1360,1362,1364,1394,1396,1398,1400,1402,1404,1406,1408,1410,1412,1414,1416,1418,1420,1422,1424,1426,1428,1458,1460,1462,1464,1466,1468,1470,1472,1474,1476,1478,1480,1482,1484,1486,1488,1490,1492,1494,1496,1498,1500,1502,1532};
 
+#define RedLineTrack1AdditiveDelaySegmentsCount (sizeof(RedLineTrack1AdditiveDelaySegments)/sizeof(RedLineTrack1AdditiveDelaySegments[1]))
+
 uint16_t RedLineTrack1StationSegments[] = {  7, 32, 53, 62, 80, 95,109,126,133,142,154,164,179,190,203,467,477,485,496,513,527,548,571,591,611,629,652};  
 uint16_t RedLineTrack2StationSegments[] = {210,232,251,260,278,294,309,326,336,346,356,363,378,389,661,667,677,686,700,717,731,757,785,809,828,846,868};
 
@@ -102,6 +104,8 @@ uint16_t YellowLineTrack1Segments [] = {944,945,946,947,948,949,950,951,952,953,
 uint16_t YellowLineTrack2Segments[] = {1137,1138,1139,1140,1141,1142,1143,1144,1145,1146,1147,1148,1149,1150,1151,1152,1153,1154,1155,1156,1157,1158,1159,1160,1161,1162,1163,1164,1165,1166,1167,1168,1169,1170,1171,1172,1173,1174,1175,1176,1177,1178,1179,1180,1181,1182,1183,1184,1185,1186,1187,1188,1189,1190,1191,1192,1193,1194,1195,1196,1197,1198,1199,1200,1201,1202,1203,1204,1205,1206,1207,1208,1209,1210,1211,1212,1213,1214,1215,1216,1217,1218,1219,1220,1221,1222,1223,1224,1225,1226,1227,1228,1229,1230,1231,1232,1233,1234,1235,1236,1237,1238,1239,1240,1241,1242,1243,1244,1245,1246,1247,1248,3105,3106,3107,3108,3109,3110,3111,3112,3113,3114,3115,3116,3117,3118,3119,3120,3121,3122,3123,2229,2230,2231,2232,2233,2234,2235,2236,2237,2238,2239,2240,2241,2242,2243,2244,2245,2246,1744,1745,1746,1747,1748,1749,1750,1751,1752,1753,1754,1755,1756,1757,1758,1759,1760,1761,1762,1763,1764,1765,1766,1767,1768,1769,1770,1771,1772,1773,1774,1775,1776,1777,1778,1779,1780,1781,1782,1783,1784,1785,1786,1787,1788,1789,1790,1791,1792,1793,1794,1795,1796,1797,1798,1799,1800,1801,1802,1803,1804,1805,1806,1807,1808,1809};
 
 uint16_t YellowLineTrack1AdditiveDelaySegments[] = {30,32,34,36,38,40,42,44,46,48,50,52,54,56,58,60,62,64,66,68,70,72,74,76,78,108,110,112,114,116,118,120,122,124,126,128,130,132,134,136,138,140,142,144,146,148,178,180,182,184,186,188,190,192,194,224,226,228,230,232,234,236,238,240,242,244,246,248,250,252,254,256,258,288,290,292,294,296,298,300,302,304,306,308,310,312,314,316,346,348,350,352,354,356,358,360,362,364,366,368,370,372,402,404,406,408,410,412,414,416,418,420,422,424,426,428,430,432,434,464,466,468,470,472,474,476,506,508,510,512,514,516,518,520,522,552,554,556,558,560,562,564,566,568,570,572,574,604,606,608,610,612,614,616,618,620,622,652,654,656,658,660,662,664,666,668,670,672,674,676,678,680,710,712,714,716,718,720,722,724,726,728,730,760,762,764,766,768,770,772,774,776,778,780,782,784,814,816,818,820,822,824,854,856,858,860,862,864,866,868,870,872,902,904,906,908,910,912,914,916,946,948,950,952,954};
+
+#define YellowLineTrack1AdditiveDelaySegmentsCount (sizeof(YellowLineTrack1AdditiveDelaySegments)/sizeof(YellowLineTrack1AdditiveDelaySegments[1]))
 
 uint16_t YellowLineTrack1StationSegments[] = { 944, 955, 969, 976,1010,1024,1036,1054,2362,2376,1899,1911,1923,1932,1942,1956,1071};  
 uint16_t YellowLineTrack2StationSegments[] = {1137,1148,1162,1170,1204,1217,1230,1248,2229,2241,2246,1753,1764,1773,1782,1796,1789};
@@ -329,9 +333,9 @@ class usermod_v2_ASL : public Usermod {
       //Serial.println("Applying preset 1");
         steps++;
         ClearTrainArrays();
-        OfflineSimTrains("RD", 1, RedLineTrack1Segments, RedLineTrack1SegmentCount, RedLineTrack1AdditiveDelaySegments);
-        OfflineSimTrains("YL", 1, YellowLineTrack1Segments, YellowLineTrack1SegmentCount, YellowLineTrack1AdditiveDelaySegments);
-        PrintGlobalPositionTable();
+        OfflineSimTrains("RD", 1, RedLineTrack1Segments, RedLineTrack1SegmentCount, RedLineTrack1AdditiveDelaySegments, 225);
+        OfflineSimTrains("YL", 1, YellowLineTrack1Segments, YellowLineTrack1SegmentCount, YellowLineTrack1AdditiveDelaySegments, YellowLineTrack1AdditiveDelaySegmentsCount);
+        //PrintGlobalPositionTable();
         //TrainStats();
         // DynamicJsonDocument doc(16384); //JSON doc size, see JSON arduino assistant for better info
         // HTTPClient http; //establish the HTTPclient object
@@ -369,9 +373,9 @@ class usermod_v2_ASL : public Usermod {
           //Serial.println(SimulatedTrains);
         }
 
-        // PlotLEDStations(RedTargetFrame, RedLineStationLEDPosition, RedLineNumStationsInLine, StationRed, TrackRed, Red_Num_LEDS);
+        PlotLEDStations(RedTargetFrame, RedLineStationLEDPosition, RedLineNumStationsInLine, StationRed, TrackRed, Red_Num_LEDS);
         PlotLEDTrainPositions(RedTargetFrame, "RD", RedLineTrack1Domains, RedLineTrack1Segments, RedLineTrack1StationSegments, RedLineNumStationsInLine, RedLineLEDArray, RedLineStationLEDPosition, Red_Num_LED_Domains, TrainRed);
-        // PlotLEDTrainPositions(RedTargetFrame, "RD", RedLineTrack2Domains, RedLineTrack2Segments, RedLineTrack2StationSegments, RedLineNumStationsInLine, RedLineLEDArray, RedLineStationLEDPosition, Red_Num_LED_Domains, TrainRed);
+        PlotLEDTrainPositions(RedTargetFrame, "RD", RedLineTrack2Domains, RedLineTrack2Segments, RedLineTrack2StationSegments, RedLineNumStationsInLine, RedLineLEDArray, RedLineStationLEDPosition, Red_Num_LED_Domains, TrainRed);
        
 
         // PlotLEDStations(BlueTargetFrame, BlueLineStationLEDPosition, BlueLineNumStationsInLine, StationBlue, TrackBlue, Blue_Num_LEDS);
@@ -386,9 +390,9 @@ class usermod_v2_ASL : public Usermod {
         // PlotLEDTrainPositions(OrangeTargetFrame, "OR", OrangeLineTrack1Domains, OrangeLineTrack1Segments, OrangeLineTrack1StationSegments, OrangeLineNumStationsInLine, OrangeLineLEDArray, OrangeLineStationLEDPosition, Orange_Num_LED_Domains, TrainOrange);
         // PlotLEDTrainPositions(OrangeTargetFrame, "OR", OrangeLineTrack2Domains, OrangeLineTrack2Segments, OrangeLineTrack2StationSegments, OrangeLineNumStationsInLine, OrangeLineLEDArray, OrangeLineStationLEDPosition, Orange_Num_LED_Domains, TrainOrange);
        
-        // PlotLEDStations(YellowTargetFrame, YellowLineStationLEDPosition, YellowLineNumStationsInLine, StationYellow, TrackYellow, Yellow_Num_LEDS);
+        PlotLEDStations(YellowTargetFrame, YellowLineStationLEDPosition, YellowLineNumStationsInLine, StationYellow, TrackYellow, Yellow_Num_LEDS);
         PlotLEDTrainPositions(YellowTargetFrame, "YL", YellowLineTrack1Domains, YellowLineTrack1Segments, YellowLineTrack1StationSegments, YellowLineNumStationsInLine, YellowLineLEDArray, YellowLineStationLEDPosition, Yellow_Num_LED_Domains, TrainYellow);
-        // PlotLEDTrainPositions(YellowTargetFrame, "YL", YellowLineTrack2Domains, YellowLineTrack2Segments, YellowLineTrack2StationSegments, YellowLineNumStationsInLine, YellowLineLEDArray, YellowLineStationLEDPosition, Yellow_Num_LED_Domains, TrainYellow);     
+        PlotLEDTrainPositions(YellowTargetFrame, "YL", YellowLineTrack2Domains, YellowLineTrack2Segments, YellowLineTrack2StationSegments, YellowLineNumStationsInLine, YellowLineLEDArray, YellowLineStationLEDPosition, Yellow_Num_LED_Domains, TrainYellow);     
 
         // Serial.print("train red = ");
         // Serial.println(TrainRed);
@@ -719,8 +723,10 @@ class usermod_v2_ASL : public Usermod {
     }
   }
 
-  void OfflineSimTrains(String SimLineColor, uint8_t SimTrainDirection, uint16_t TrackSegmentList[], uint16_t TrackSegmentCount, uint16_t AdditiveTrackDelaySegments[])
+  void OfflineSimTrains(String SimLineColor, uint8_t SimTrainDirection, uint16_t TrackSegmentList[], uint16_t TrackSegmentCount, uint16_t AdditiveTrackDelaySegments[], uint16_t AdditiveTrackDelaySegmentsCount)
   {
+
+    Serial.println((String)"Color: " + SimLineColor + " TrackSegmentList[0]: " + TrackSegmentList[0] + " Track SegmentCount: " + TrackSegmentCount + " Additive delay start: " + AdditiveTrackDelaySegments[0] + " End: " + AdditiveTrackDelaySegments[AdditiveTrackDelaySegmentsCount]);
     uint32_t CountSimTrains = 0;
 
     uint32_t ShiftedDelaySegments[TrackSegmentCount];
@@ -729,11 +735,11 @@ class usermod_v2_ASL : public Usermod {
     uint32_t NumSimTrainsInDay = SytemOperatingDurationS / HeadwayTimeSeconds; // calculate the number of started trains we can fit into that time
     NumSimTrainsInDay = NumSimTrainsInDay + 1; //add 1, because grasshopper told us to
     uint32_t SimTrainDepartureS[NumSimTrainsInDay]; //create an array of the size of the number of our sim trains
-    //uint32_t SimTrainArrivalS[NumSimTrainsInDay]; //the array of the finishing times of each train  TODO this may not need to be expicitized
-    bool SimTrainActive[NumSimTrainsInDay];
 
     SecondOfDay = ((hour(localTime) * (60*60)) + (minute(localTime) * 60) + second(localTime)); //calculate the second of the day currently 
-    uint32_t TrainRunDurationS = AdditiveTrackDelaySegments[(sizeof(AdditiveTrackDelaySegments)/sizeof(AdditiveTrackDelaySegments[0])) -1];
+    //uint32_t TrainRunDurationS = AdditiveTrackDelaySegments[((sizeof(AdditiveTrackDelaySegments)/sizeof(AdditiveTrackDelaySegments[1])) -1)];
+    uint32_t TrainRunDurationS = AdditiveTrackDelaySegments[AdditiveTrackDelaySegmentsCount];
+
     uint32_t SegmentArrivalTimeS [TrackSegmentCount]; //create a temp array to then (below) shift per the shifted departure time
 
     //Serial.println((String)"Num sim trains in day: " + NumSimTrainsInDay);
@@ -744,43 +750,55 @@ class usermod_v2_ASL : public Usermod {
     for (int i = 0; i < NumSimTrainsInDay; i++) { //for each train running today, test if it's departure has already happened and it's arrival hasn't yet happened
       SimTrainDepartureS[i] = (SystemFirstTrainTime + (i * HeadwayTimeSeconds)); //time shift the start times to be multiples of our headway
       if(SecondOfDay > SimTrainDepartureS[i] && SecondOfDay < (SimTrainDepartureS[i] + TrainRunDurationS)) {
-        SimTrainActive[i] = 1; //set this activity into the boolean array
         Serial.print("1");
-        //Serial.println((String)"Active train on " + i); //note this only prints if a train has been declared active
-      } else {
-        SimTrainActive[i] = 0;
-        Serial.print("0");
+        for(int x = 0; x < TrackSegmentCount; x++) { //if this train is active shift the segments with time of day the train is in operation
+          ShiftedDelaySegments[x]= AdditiveTrackDelaySegments[x] + SimTrainDepartureS[i];
+         }
+        //Serial.println((String)"Departure time originally " + AdditiveTrackDelaySegments[0] + " shifted " + ShiftedDelaySegments[0]);
+        for(int y = 0; y < TrackSegmentCount; y++) {
+          if(SecondOfDay >= ShiftedDelaySegments[y] && SecondOfDay < ShiftedDelaySegments[(y+1)]) {
+            CountSimTrains ++;
+            //Serial.println((String)"injecting data: " + i + "," + SimTrainDirection + "," + TrackSegmentList[y] + "," + SimLineColor );
+            InjectSimTrainData(i, SimTrainDirection, TrackSegmentList[y], SimLineColor, 2);
+          //InjectSimTrainData(i, 1, TrackSegmentList[y], "YL", 5);
+          //Serial.println((String)"Sim Train matched to " + TrainPositions_TrainId[i]);
+          }
       }
+        //Serial.println((String)"Active train on " + i); //note this only prints if a train has been declared active
+    } else {
+      Serial.print("0");
+    }
     }
     Serial.println();
 
-   for (int i = 0; i < NumSimTrainsInDay; i++) {
-    if(SimTrainActive[i] == 1) {
-      for(int x = 0; x < TrackSegmentCount; x++) { //if this train is active shift the segments with time of day the train is in operation
-        ShiftedDelaySegments[x]= AdditiveTrackDelaySegments[x] + SimTrainDepartureS[i];
-      }
-      //Serial.println((String)"Departure time originally " + AdditiveTrackDelaySegments[0] + " shifted " + ShiftedDelaySegments[0]);
-      for(int y = 0; y < TrackSegmentCount; y++) {
-        if(SecondOfDay > ShiftedDelaySegments[y] && SecondOfDay < ShiftedDelaySegments[(y+1)]) {
-          Serial.println("injecting data");
-          InjectSimTrainData(i, SimTrainDirection, TrackSegmentList[y], SimLineColor, 5);
-        //InjectSimTrainData(i, 1, TrackSegmentList[y], "YL", 5);
-        //Serial.println((String)"Sim Train matched to " + TrainPositions_TrainId[i]);
-        }
-      }
-      }
-   }
 
-    for (int i = 0; i < NumSimTrainsInDay; i++) { //for all the possible trains today
-      if(SimTrainActive[i] == 1) { //only manipulate the active ones
-        CountSimTrains ++;
-        for(int y = 0; y < TrackSegmentCount; y++) { //for each train sim train search all the segments for the nearest time that matches
-          if(SegmentArrivalTimeS[i] >= TrackSegmentList[y] && SegmentArrivalTimeS[i] < TrackSegmentList[(y+1)]) { //match train to correct nearest segment of time
-            //Serial.println((String)"Matched on time seg " + SegmentArrivalTimeS[i] + " to segment number " + TrackSegmentList[y] );
-          }
-        }
-      }
-    }
+  //  for (int i = 0; i < NumSimTrainsInDay; i++) {
+  //   if(SimTrainActive[i] == 1) {
+  //     for(int x = 0; x < TrackSegmentCount; x++) { //if this train is active shift the segments with time of day the train is in operation
+  //       ShiftedDelaySegments[x]= AdditiveTrackDelaySegments[x] + SimTrainDepartureS[i];
+  //     }
+  //     //Serial.println((String)"Departure time originally " + AdditiveTrackDelaySegments[0] + " shifted " + ShiftedDelaySegments[0]);
+  //     for(int y = 0; y < TrackSegmentCount; y++) {
+  //       if(SecondOfDay > ShiftedDelaySegments[y] && SecondOfDay < ShiftedDelaySegments[(y+1)]) {
+  //         Serial.println((String)"injecting data: " + i + "," + SimTrainDirection + "," + TrackSegmentList[y]);
+  //         InjectSimTrainData(i, SimTrainDirection, TrackSegmentList[y], SimLineColor, 2);
+  //       //InjectSimTrainData(i, 1, TrackSegmentList[y], "YL", 5);
+  //       //Serial.println((String)"Sim Train matched to " + TrainPositions_TrainId[i]);
+  //       }
+  //     }
+  //   }
+  //  }
+
+    // for (int i = 0; i < NumSimTrainsInDay; i++) { //for all the possible trains today
+    //   if(SimTrainActive[i] == 1) { //only manipulate the active ones
+
+    //     for(int y = 0; y < TrackSegmentCount; y++) { //for each train sim train search all the segments for the nearest time that matches
+    //       if(SegmentArrivalTimeS[i] >= TrackSegmentList[y] && SegmentArrivalTimeS[i] < TrackSegmentList[(y+1)]) { //match train to correct nearest segment of time
+    //         //Serial.println((String)"Matched on time seg " + SegmentArrivalTimeS[i] + " to segment number " + TrackSegmentList[y] );
+    //       }
+    //     }
+    //   }
+    // }
 
   }
 
@@ -803,7 +821,7 @@ class usermod_v2_ASL : public Usermod {
   void InjectSimTrainData(uint8_t SimTrainIndex, uint8_t SimTrainDirectionNum, uint16_t SimTrainCircuitID, String SimTrainLineCode, uint8_t SimTrainSecondsAtLocation) {
     //set variables for the rest of the train data
     uint32_t SimTrainTrainID = SimTrainIndex;
-    uint32_t SimTrainTrainNumer = random(0,100);
+    uint32_t SimTrainTrainNumer = random(0,MaxNumPossibleTrains);
     uint8_t SimTrainCarCount = 8;
     //we calcilate circuit ID later on
     String SimTrainDestinationCode = "Mars";
@@ -813,30 +831,28 @@ class usermod_v2_ASL : public Usermod {
     //only write data to the next free slot in the array so that we came come back to this from different calls
     uint16_t NextFreeTrainSlot = 0;
 
-    Serial.println(TrainPositions_TrainId[1]);
+    //Serial.println(TrainPositions_TrainId[1]);
 
     for(int i = 0; i < MaxNumPossibleTrains; i++) {
       if(TrainPositions_TrainId[i] == 0) {
-        NextFreeTrainSlot = i;
+        NextFreeTrainSlot = (i);
         //Serial.println((String)"Adjusted index " + NextFreeTrainSlot);
         break;
         }
       }
-    
-    SimTrainIndex = NextFreeTrainSlot;
 
     for(int i = 0; i < MaxNumPossibleTrains; i++) {
      // if(TrainPositions_TrainId[i] == 0) {
-        TrainPositions_TrainId[SimTrainIndex] = SimTrainTrainID;
+        TrainPositions_TrainId[NextFreeTrainSlot] = SimTrainTrainID;
         //Serial.println((String)"Train ID = " + SimTrainTrainID);
-        TrainPositions_TrainNumber[SimTrainIndex] = SimTrainTrainNumer;
-        TrainPositions_CarCount[SimTrainIndex] = SimTrainCarCount;
-        TrainPositions_DirectionNum[SimTrainIndex] = SimTrainDirectionNum;
-        TrainPositions_CircuitId[SimTrainIndex] = SimTrainCircuitID;
-        TrainPositions_DestinationStationCode[SimTrainIndex] = SimTrainDestinationCode;
-        TrainPositions_LineCode[SimTrainIndex] = SimTrainLineCode;
-        TrainPositions_SecondsAtLocation[SimTrainIndex] = SimTrainSecondsAtLocation;
-        TrainPositions_ServiceType[SimTrainIndex] = "Normal";
+        TrainPositions_TrainNumber[NextFreeTrainSlot] = SimTrainTrainNumer;
+        TrainPositions_CarCount[NextFreeTrainSlot] = SimTrainCarCount;
+        TrainPositions_DirectionNum[NextFreeTrainSlot] = SimTrainDirectionNum;
+        TrainPositions_CircuitId[NextFreeTrainSlot] = SimTrainCircuitID;
+        TrainPositions_DestinationStationCode[NextFreeTrainSlot] = SimTrainDestinationCode;
+        TrainPositions_LineCode[NextFreeTrainSlot] = SimTrainLineCode;
+        TrainPositions_SecondsAtLocation[NextFreeTrainSlot] = SimTrainSecondsAtLocation;
+        TrainPositions_ServiceType[NextFreeTrainSlot] = "Normal";
       }
 
     //}
@@ -856,7 +872,7 @@ class usermod_v2_ASL : public Usermod {
     for(int i = 0; i < 10; i++) {
       Serial.println((String)"Circuit ID: " + TrainPositions_CircuitId[i] + " Line Code: " + TrainPositions_LineCode[i] + " Service Type: " + TrainPositions_ServiceType[i] );
     }
-    Serial.println((String)"Number of total active trains is: " + NextFreeTrainSlot);
+    //Serial.println((String)"Number of total active trains is: " + NextFreeTrainSlot);
   }
 
   String TrainSim(String LineCode, uint16_t Track1SegmentCount, uint16_t Track2SegmentCount, uint16_t Track1Segments[], uint16_t Track2Segments[]) { //function thats modular enough to allow line specification for testing. This function does NOT duplicate the representative size of a payload from WMATA
