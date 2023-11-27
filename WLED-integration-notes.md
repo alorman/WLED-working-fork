@@ -71,7 +71,7 @@ I also disabled the pushbuttons
 Make sure to adjust the total current limiter. If all LEDS are blank, this is probably what is kicking in
 
 ## Setting trains to be preset
-Set each segment to the correct line FX and desired color. Then Press `Save Preset` give it preset number 1. Then go to `Config > Default preset` to 1 and set `show prset on boot`. You may also have to disable `Show LEDs on during first boot`.
+Set each segment to the correct line FX and desired color. Then Press `Save Preset` give it preset number 1. Then go to `Config > Default preset` to 1 and set `show prset on boot`. You may also have to disable `Turn LEDs on after power up/reset`.
 
 ## interacting with littlefs
 https://randomnerdtutorials.com/esp8266-nodemcu-vs-code-platformio-littlefs/
