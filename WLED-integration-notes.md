@@ -70,6 +70,9 @@ We probably want to tick `Make a segment for each output` else WLED will (very c
 I also disabled the pushbuttons
 Make sure to adjust the total current limiter. If all LEDS are blank, this is probably what is kicking in
 
+## Setting trains to be preset
+Set each segment to the correct line FX and desired color. Then Press `Save Preset` give it preset number 1. Then go to `Config > Default preset` to 1 and set `show prset on boot`. You may also have to disable `Show LEDs on during first boot`.
+
 ## interacting with littlefs
 https://randomnerdtutorials.com/esp8266-nodemcu-vs-code-platformio-littlefs/
 Use the ant symbol in the left of platform IO to do SPIFFS commands.
@@ -150,3 +153,7 @@ per https://github.com/Aircoookie/WLED/issues/2434 wled does not support prettif
 `localTime` expresses global epoch time in seconds, adjusted for time zone
 call local times with `minute(localTime)`, year, month, day , hour, minute and second are acceptable inputs. expresses the current holding of those fields
 
+# How the LEDS are plotted
+after calculation, the LED values are written to `[color]DisplayFrame`, which is a global array variable declared as a `WLED_GLOBAL` in the wmata usermod.  
+After that it goes to the FX.cpp and each displayframe is taken apart and plotted.  
+At the end of each fx function, `return FRAMETIME` is called, which allows the actual plotting code to plot. 
