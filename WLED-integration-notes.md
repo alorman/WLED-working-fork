@@ -91,6 +91,11 @@ usermods get called before the lights go into their default states. So ccalling 
 ## storing data in eeprom via the readfromjsonstate
 make sure you write using `addtoconfig` it will automatically read
 
+## To add data fields to the `Usermod` Space in the web GUI
+- add the field to the `void addtoconfig` routine. If desired, establish the variable with global scope. If the global is defined in `void setup` it will read the state into the webGUI and pre-populate
+
+To have the data from the web read back into the program a line must be added to the `readFromConfig` routine 
+
 ## Erase eeprom 
 in vscode, navigate to the platformio CLI. run `pio run --target erase`. If there is an access denied issue, close the serial monitor 
 
@@ -137,7 +142,7 @@ Put global variables in `wled.h` like `WLED_GLOBAL uint8_t devInt;`
 
 
 # Changing WEB GUI
-## 1,2,3 lables
+## 1,2,3 labels
 see around line 107 in index.htm
 
 # LittleFS files
@@ -145,13 +150,16 @@ all files in the `/data` folder are transferred when PlatformIO performs a file 
 Adding a `/presets.json` file here will make it get written to the file system.
 
 ## Presets on boot
-It seems like the software isn't reading the `presets.json` file, even when it exitsts. 
+It seems like the software isn't reading the `presets.json` file, even when it exists. 
 Using `applyPreset(1);` from any point in the user mode will apply preset `1` (this is present number 1 not preset 0 index).
 per https://github.com/Aircoookie/WLED/issues/2434 wled does not support prettified json 
 
 ## Notes on Time
 `localTime` expresses global epoch time in seconds, adjusted for time zone
 call local times with `minute(localTime)`, year, month, day , hour, minute and second are acceptable inputs. expresses the current holding of those fields
+
+## If LEDs arent lighting up but the code appears to otherwise function....
+Check that you've set the time zone offeset correct in the web gui under `Time and Macros`
 
 # How the LEDS are plotted
 after calculation, the LED values are written to `[color]DisplayFrame`, which is a global array variable declared as a `WLED_GLOBAL` in the wmata usermod.  
