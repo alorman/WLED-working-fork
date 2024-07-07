@@ -174,35 +174,36 @@ uint16_t RedTrainCount = 0;
 // uint8_t UseFakeJsonData = 0;
 String SimulatedTrains;
 
+//These are used in the old sim method
+// uint16_t TempTrain1PositionCounter = 0;
+// uint16_t TempTrain2PositionCounter = 399;
 
-uint16_t TempTrain1PositionCounter = 0;
-uint16_t TempTrain2PositionCounter = 399;
+// uint16_t RedTrack1PositionCounter = 0;
+// uint16_t RedTrack2PositionCounter = RedLineTrack2SegmentCount;
 
-uint16_t RedTrack1PositionCounter = 0;
-uint16_t RedTrack2PositionCounter = RedLineTrack2SegmentCount;
+// uint16_t BlueTrack1PositionCounter = 0;
+// uint16_t BlueTrack2PositionCounter = BlueLineTrack2SegmentCount;
 
-uint16_t BlueTrack1PositionCounter = 0;
-uint16_t BlueTrack2PositionCounter = BlueLineTrack2SegmentCount;
+// uint16_t GreenTrack1PositionCounter = 0;
+// uint16_t GreenTrack2PositionCounter = GreenLineTrack2SegmentCount;
 
-uint16_t GreenTrack1PositionCounter = 0;
-uint16_t GreenTrack2PositionCounter = GreenLineTrack2SegmentCount;
+// uint16_t OrangeTrack1PositionCounter = 0;
+// uint16_t OrangeTrack2PositionCounter = OrangeLineTrack2SegmentCount;
 
-uint16_t OrangeTrack1PositionCounter = 0;
-uint16_t OrangeTrack2PositionCounter = OrangeLineTrack2SegmentCount;
-
-uint16_t YellowTrack1PositionCounter = 0;
-uint16_t YellowTrack2PositionCounter = YellowLineTrack2SegmentCount;
+// uint16_t YellowTrack1PositionCounter = 0;
+// uint16_t YellowTrack2PositionCounter = YellowLineTrack2SegmentCount;
 
 //global timing and headway variables
-uint32_t SystemFirstTrainTime = 21600; //second of the day that first train may start
+uint32_t SystemFirstTrainTime = 0; //second of the day that first train may start
 uint32_t SystemLastTrainTime =  79200; //second of the day that last train of the day starts no later than this time
 uint32_t HeadwayTimeSeconds = 480; //time between trains in seconds
 uint32_t SecondOfDay = 0;
+uint32_t StationDwellTimeS = 10; //time each train spends at each station. Used in Sim Mode.
 
 // uint8_t DelayAtStationS = 30; //delay of each train at each station
 // uint8_t TimeBetweenStationsS = 120; //time taken total between two stations
 
-uint32_t StartTimeEachSegment [RedLineTrack1SegmentCount]; //additive total time at each segment
+//uint32_t StartTimeEachSegment [RedLineTrack1SegmentCount]; //additive total time at each segment
 
 //uint16_t SimTrainDepartureTime[MaxNumSimTrains]; //the start time of each train in the system
 
@@ -364,9 +365,11 @@ class usermod_v2_ASL : public Usermod {
         Serial.println(steps);
       //Serial.println("Applying preset 1");
         steps++;
+        SecondOfDay = ((hour(localTime) * (60*60)) + (minute(localTime) * 60) + second(localTime)); //calculate the second of the day currently 
+        Serial.println((String)"Second of day " + SecondOfDay);
         ClearTrainArrays();
         if (SimModeEnable == 1) { //if the train system is set to sim mode in the web gui, compute the sim positions based on current time
-        Serial.println("In Sim mode");
+        Serial.println("*** IN SIM MODE ***");
           OfflineSimTrains("RD", 1, RedLineTrack1Segments, RedLineTrack1SegmentCount, RedLineTrack1AdditiveDelaySegments, RedLineTrack1AdditiveDelaySegmentsCount);
           OfflineSimTrains("RD", 2, RedLineTrack2Segments, RedLineTrack2SegmentCount, RedLineTrack2AdditiveDelaySegments, RedLineTrack1AdditiveDelaySegmentsCount);
 
@@ -551,6 +554,10 @@ class usermod_v2_ASL : public Usermod {
       top["Server Address"] = ServerAddressString;
       top["API Key"] = apiKeyString;
       top["Enable Train Sim Mode"] = SimModeEnable;
+      top["System Open Time (in seconds)"] = SystemFirstTrainTime;
+      top["System Close Time (in seconds)"] = SystemLastTrainTime;
+      top["Headway Time Between Trains (in seconds)"] = HeadwayTimeSeconds;
+      top["Station Dwell Time"] = StationDwellTimeS;
       top["testInt"] = testInt;
       top["testLong"] = testLong;
       top["testULong"] = testULong;
@@ -595,6 +602,10 @@ class usermod_v2_ASL : public Usermod {
       configComplete &= getJsonValue(top["testBool"], testBool);
       configComplete &= getJsonValue(top["Enable Train Sim Mode"], SimModeEnable);
       configComplete &= getJsonValue(top["Server Address"], ServerAddressString);
+      configComplete &= getJsonValue(top["System Open Time (in seconds)"], SystemFirstTrainTime);
+      configComplete &= getJsonValue(top["System Close Time (in seconds)"], SystemLastTrainTime);
+      configComplete &= getJsonValue(top["Headway Time Between Trains (in seconds)"], HeadwayTimeSeconds);
+      configComplete &= getJsonValue(top["Station Dwell Time"], StationDwellTimeS);
       configComplete &= getJsonValue(top["API Key"], apiKeyString);
       configComplete &= getJsonValue(top["testULong"], testULong);
       configComplete &= getJsonValue(top["testFloat"], testFloat);
@@ -785,7 +796,6 @@ class usermod_v2_ASL : public Usermod {
     NumSimTrainsInDay = NumSimTrainsInDay + 1; //add 1, because grasshopper told us to
     uint32_t SimTrainDepartureS[NumSimTrainsInDay]; //create an array of the size of the number of our sim trains
 
-    SecondOfDay = ((hour(localTime) * (60*60)) + (minute(localTime) * 60) + second(localTime)); //calculate the second of the day currently 
     //uint32_t TrainRunDurationS = AdditiveTrackDelaySegments[((sizeof(AdditiveTrackDelaySegments)/sizeof(AdditiveTrackDelaySegments[1])) -1)];
     uint32_t TrainRunDurationS = AdditiveTrackDelaySegments[AdditiveTrackDelaySegmentsCount];
 
@@ -911,8 +921,6 @@ class usermod_v2_ASL : public Usermod {
 
   void PrintGlobalPositionTable(uint16_t CycleCount) {
     uint16_t NextFreeTrainSlot = 0;
-
-    Serial.println((String)"Second of day " + SecondOfDay);
     for(int i = 0; i < MaxNumPossibleTrains; i++) {
       if(TrainPositions_TrainId[i] == 0) {
         NextFreeTrainSlot = i;
@@ -921,7 +929,9 @@ class usermod_v2_ASL : public Usermod {
         }
     }
     for(int i = 0; i < CycleCount; i++) {
-      Serial.println((String)"Circuit ID: " + TrainPositions_CircuitId[i] + " Line Code: " + TrainPositions_LineCode[i] + " Service Type: " + TrainPositions_ServiceType[i] );
+      if(TrainPositions_ServiceType[i] == "Normal"){
+        Serial.println((String)"Circuit ID: " + TrainPositions_CircuitId[i] + " Line Code: " + TrainPositions_LineCode[i] + " Service Type: " + TrainPositions_ServiceType[i] );
+      }
     }
     //Serial.println((String)"Number of total active trains is: " + NextFreeTrainSlot);
   }
