@@ -230,7 +230,7 @@ uint32_t StationDwellTimeS = 10; //time each train spends at each station. Used 
 class usermod_v2_ASL : public Usermod {
   private:
     //Private class members. You can declare variables and functions only accessible to your usermod here
-    uint32_t state_seg_0_col_0_0 = 0;
+    //uint32_t state_seg_0_col_0_0 = 0;
     //String state_bri = "0";
 
     //Max number of trains
@@ -248,7 +248,7 @@ class usermod_v2_ASL : public Usermod {
     String ServerAddressString = "http://api.wmata.com/TrainPositions/TrainPositions?contentType=json";
     String apiKeyString = "44c0d03c967442abad897ca70efd5639 ";
     uint32_t ServerPollIntervalSeconds = 10;
-    uint32_t LEDRefreshIntervalms = 1000;
+    uint32_t PlotRefreshIntervalmS = 1000;
     WS2812FX::Segment &seg = strip.getSegment(0);
     uint32_t steps = 0;
 
@@ -354,7 +354,7 @@ class usermod_v2_ASL : public Usermod {
      */
     void loop() {
      //Serial.println("Connected to WiFi!");
-      if (millis() - lastTime > 7000) {
+      if (millis() - lastTime > PlotRefreshIntervalmS) {
         Serial.println("I'm alive! in main loop");
         //readFromConfig();
         //Serial.println(ServerAddressString);
@@ -366,10 +366,10 @@ class usermod_v2_ASL : public Usermod {
       //Serial.println("Applying preset 1");
         steps++;
         SecondOfDay = ((hour(localTime) * (60*60)) + (minute(localTime) * 60) + second(localTime)); //calculate the second of the day currently 
-        Serial.println((String)"Second of day " + SecondOfDay);
+        Serial.println((String)"Second of day: " + SecondOfDay);
         ClearTrainArrays();
         if (SimModeEnable == 1) { //if the train system is set to sim mode in the web gui, compute the sim positions based on current time
-        Serial.println("*** IN SIM MODE ***");
+          Serial.println("*** IN SIM MODE ***");
           OfflineSimTrains("RD", 1, RedLineTrack1Segments, RedLineTrack1SegmentCount, RedLineTrack1AdditiveDelaySegments, RedLineTrack1AdditiveDelaySegmentsCount);
           OfflineSimTrains("RD", 2, RedLineTrack2Segments, RedLineTrack2SegmentCount, RedLineTrack2AdditiveDelaySegments, RedLineTrack1AdditiveDelaySegmentsCount);
 
@@ -385,7 +385,7 @@ class usermod_v2_ASL : public Usermod {
           OfflineSimTrains("OR", 1, OrangeLineTrack1Segments, OrangeLineTrack1SegmentCount, OrangeLineTrack1AdditiveDelaySegments, OrangeLineTrack1AdditiveDelaySegmentsCount);
           OfflineSimTrains("OR", 2, OrangeLineTrack2Segments, OrangeLineTrack2SegmentCount, OrangeLineTrack2AdditiveDelaySegments, OrangeLineTrack2AdditiveDelaySegmentsCount);
         }
-        PrintGlobalPositionTable(25);
+        //PrintGlobalPositionTable(25); //(i have no idea why we feed this the number 25) also this seems to be largely duplicative of TrainStats
         TrainStats();
         // DynamicJsonDocument doc(16384); //JSON doc size, see JSON arduino assistant for better info
         // HTTPClient http; //establish the HTTPclient object
@@ -567,7 +567,7 @@ class usermod_v2_ASL : public Usermod {
       //top["ServerAddressString"] = ServerAddressString;
       //top["apiKeyString"] = apiKeyString;
       top["ServerPollIntervalSeconds"] = ServerPollIntervalSeconds;
-      top["LEDRefreshIntervalms"] = LEDRefreshIntervalms;
+      top["Plot Refresh Intrval (either sim or real) in mS"] = PlotRefreshIntervalmS;
       JsonArray pinArray = top.createNestedArray("pin");
       pinArray.add(testPins[0]);
       pinArray.add(testPins[1]); 
@@ -606,6 +606,7 @@ class usermod_v2_ASL : public Usermod {
       configComplete &= getJsonValue(top["System Close Time (in seconds)"], SystemLastTrainTime);
       configComplete &= getJsonValue(top["Headway Time Between Trains (in seconds)"], HeadwayTimeSeconds);
       configComplete &= getJsonValue(top["Station Dwell Time"], StationDwellTimeS);
+      configComplete &= getJsonValue(top["Plot Refresh Intrval (either sim or real) in mS"], PlotRefreshIntervalmS);
       configComplete &= getJsonValue(top["API Key"], apiKeyString);
       configComplete &= getJsonValue(top["testULong"], testULong);
       configComplete &= getJsonValue(top["testFloat"], testFloat);
@@ -786,8 +787,8 @@ class usermod_v2_ASL : public Usermod {
   void OfflineSimTrains(String SimLineColor, uint8_t SimTrainDirection, uint16_t TrackSegmentList[], uint16_t TrackSegmentCount, uint16_t AdditiveTrackDelaySegments[], uint16_t AdditiveTrackDelaySegmentsCount)
   {
 
-    Serial.println((String)"Color: " + SimLineColor + " TrackSegmentList[0]: " + TrackSegmentList[0] + " Track SegmentCount: " + TrackSegmentCount + " Additive delay start: " + AdditiveTrackDelaySegments[0] + " End: " + AdditiveTrackDelaySegments[AdditiveTrackDelaySegmentsCount]);
-    uint32_t CountSimTrains = 0;
+    Serial.println((String)"Color: " + SimLineColor + " TrackSegmentList[0]: " + TrackSegmentList[0] + " Track SegmentCount: " + TrackSegmentCount + " Additive delay start: " + AdditiveTrackDelaySegments[0] + "s, End: " + AdditiveTrackDelaySegments[AdditiveTrackDelaySegmentsCount] + "s");
+    //uint32_t CountSimTrains = 0;
 
     uint32_t ShiftedDelaySegments[TrackSegmentCount];
 
@@ -797,7 +798,7 @@ class usermod_v2_ASL : public Usermod {
     uint32_t SimTrainDepartureS[NumSimTrainsInDay]; //create an array of the size of the number of our sim trains
 
     //uint32_t TrainRunDurationS = AdditiveTrackDelaySegments[((sizeof(AdditiveTrackDelaySegments)/sizeof(AdditiveTrackDelaySegments[1])) -1)];
-    uint32_t TrainRunDurationS = AdditiveTrackDelaySegments[AdditiveTrackDelaySegmentsCount];
+    uint32_t TrainRunDurationS = AdditiveTrackDelaySegments[AdditiveTrackDelaySegmentsCount]; //grab the max additive value of the run duration. 
 
     uint32_t SegmentArrivalTimeS [TrackSegmentCount]; //create a temp array to then (below) shift per the shifted departure time
 
@@ -811,17 +812,16 @@ class usermod_v2_ASL : public Usermod {
       SimTrainDepartureS[i] = (SystemFirstTrainTime + (i * HeadwayTimeSeconds)); //time shift the start times to be multiples of our headway
       if(SecondOfDay > SimTrainDepartureS[i] && SecondOfDay < (SimTrainDepartureS[i] + TrainRunDurationS)) {
         Serial.print("1");
-        for(int x = 0; x < TrackSegmentCount; x++) { //if this train is active shift the segments with time of day the train is in operation
+        for(int x = 0; x < TrackSegmentCount; x++) { //if this train has theoretically depart,ed but not yet finished; shift the segments with time of day the train is in operation
           ShiftedDelaySegments[x]= AdditiveTrackDelaySegments[x] + SimTrainDepartureS[i];
          }
         //Serial.println((String)"Departure time originally " + AdditiveTrackDelaySegments[0] + " shifted " + ShiftedDelaySegments[0]);
-        for(int y = 0; y < TrackSegmentCount; y++) {
-          if(SecondOfDay >= ShiftedDelaySegments[y] && SecondOfDay < ShiftedDelaySegments[(y+1)]) {
-            CountSimTrains ++;
-            //Serial.println((String)"injecting data: " + i + "," + SimTrainDirection + "," + TrackSegmentList[y] + "," + SimLineColor );
-            InjectSimTrainData(i, SimTrainDirection, TrackSegmentList[y], SimLineColor, 2);
-          //InjectSimTrainData(i, 1, TrackSegmentList[y], "YL", 5);
-          //Serial.println((String)"Sim Train matched to " + TrainPositions_TrainId[i]);
+        for(int y = 0; y < TrackSegmentCount; y++) { //interate through the track segment counts
+          if(SecondOfDay <= ShiftedDelaySegments[y] && y == 0) { //account for our 0th entity
+            InjectSimTrainData(i, SimTrainDirection, TrackSegmentList[y], SimLineColor, 2); //the "2" is the Second At Location parameter
+          } 
+          else if(SecondOfDay <= ShiftedDelaySegments[y] && SecondOfDay > ShiftedDelaySegments[(y-1)]) { //match the time to the current location of the active train
+            InjectSimTrainData(i, SimTrainDirection, TrackSegmentList[y], SimLineColor, 2); //the "2" is the Second At Location parameter
           }
       }
         //Serial.println((String)"Active train on " + i); //note this only prints if a train has been declared active
@@ -884,7 +884,7 @@ class usermod_v2_ASL : public Usermod {
     //uint32_t SimTrainTrainNumer = random(0,MaxNumPossibleTrains);
     uint8_t SimTrainCarCount = 8;
     //we calcilate circuit ID later on
-    String SimTrainDestinationCode = "Mars";
+    String SimTrainDestinationCode = "**SIM**";
     String SimTrainServiceType = "Normal";
 
     //assemble and populate the array
@@ -929,8 +929,8 @@ class usermod_v2_ASL : public Usermod {
         }
     }
     for(int i = 0; i < CycleCount; i++) {
-      if(TrainPositions_ServiceType[i] == "Normal"){
-        Serial.println((String)"Circuit ID: " + TrainPositions_CircuitId[i] + " Line Code: " + TrainPositions_LineCode[i] + " Service Type: " + TrainPositions_ServiceType[i] );
+      if(TrainPositions_ServiceType[i] == "Normal"){ //without this, we get lots of non-useful output when in sim mode. 
+        Serial.println((String)"Train at Circuit ID: " + TrainPositions_CircuitId[i] + " Line Code: " + TrainPositions_LineCode[i] + " Service Type: " + TrainPositions_ServiceType[i] );
       }
     }
     //Serial.println((String)"Number of total active trains is: " + NextFreeTrainSlot);
