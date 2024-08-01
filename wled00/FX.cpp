@@ -29,8 +29,8 @@
 
 #define IBN 5100
 #define PALETTE_SOLID_WRAP (paletteBlend == 1 || paletteBlend == 3)
-#define Fade_Time_ms 20
-//
+#define Fade_Time_ms 200
+
 
 /*
  * No blinking. Just plain old static light.

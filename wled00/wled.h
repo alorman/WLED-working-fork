@@ -283,6 +283,8 @@ WLED_GLOBAL uint32_t StationYellow;
 WLED_GLOBAL uint32_t TrainYellow;
 WLED_GLOBAL uint32_t TrackYellow;
 
+//dev timing globals 
+//WLED_GLOBAL uint32_t Fade_Time_ms;
 
 //WLED_GLOBAL byte presetToApply _INIT(0);
 

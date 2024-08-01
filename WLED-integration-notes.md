@@ -165,3 +165,11 @@ Check that you've set the time zone offeset correct in the web gui under `Time a
 after calculation, the LED values are written to `[color]DisplayFrame`, which is a global array variable declared as a `WLED_GLOBAL` in the wmata usermod.  
 After that it goes to the FX.cpp and each displayframe is taken apart and plotted.  
 At the end of each fx function, `return FRAMETIME` is called, which allows the actual plotting code to plot. 
+
+# Refresh rate
+in our case, for whatever reason `handleOverlayDraw` does not work to change timings.
+Instead we need to change the `Fade_Time_ms` in FX.cpp. I assume minimum is 1 ms and max is? something?
+
+## Open notes
+- not able to change fade time currently
+- it seems like the sim train function progressively accelerates steps through time, why exactly isn't clear

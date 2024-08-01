@@ -72,10 +72,14 @@
 //Track Domains
 //Red Line
 uint16_t RedLineTrack1Domains [][2] = { {  8, 31},{ 33, 52},{ 54, 61},{ 63, 79},{ 81, 94},{ 96,108},{110,125},{127,132},{134,141},{143,153},{155,163},{165,178},{180,189},{191,202},{462,466},{468,476},{478,484},{486,495},{497,512},{514,526},{528,547},{549,570},{572,590},{592,610},{612,628},{630,651} };
-uint16_t RedLineTrack2Domains [][2] ={  {211,231},{233,250},{252,259},{261,277},{279,293},{295,308},{310,325},{327,335},{337,345},{347,355},{357,362},{364,377},{379,388},{390,400},{662,666},{668,676},{678,685},{687,699},{701,716},{718,730},{732,756},{758,784},{786,808},{810,827},{829,845},{847,867} };
+uint16_t RedLineTrack2Domains [][2] = {  {211,231},{233,250},{252,259},{261,277},{279,293},{295,308},{310,325},{327,335},{337,345},{347,355},{357,362},{364,377},{379,388},{390,400},{662,666},{668,676},{678,685},{687,699},{701,716},{718,730},{732,756},{758,784},{786,808},{810,827},{829,845},{847,867} };
 uint16_t RedLineTrack1Segments[] = {7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,160,161,162,163,164,165,166,167,168,169,170,171,172,173,174,175,176,177,178,179,180,181,182,183,184,185,186,187,188,189,190,191,192,193,194,195,196,197,198,199,200,201,202,203,462,463,464,465,466,467,468,469,470,471,472,473,474,475,476,477,478,479,480,481,482,483,484,485,486,487,488,489,490,491,492,493,494,495,496,497,498,499,500,501,502,503,504,505,506,507,508,509,510,511,512,513,514,515,516,517,518,519,520,521,522,523,524,525,526,527,528,529,530,531,532,533,534,535,536,537,538,539,540,541,542,543,544,545,546,547,548,549,550,551,552,553,554,555,556,557,558,559,560,561,562,563,564,565,566,567,568,569,570,571,572,573,574,575,576,577,578,579,580,581,582,583,584,585,586,587,588,589,590,591,592,593,594,595,596,597,598,599,600,601,602,603,604,605,606,607,608,609,610,611,612,613,614,615,616,617,618,619,620,621,622,623,624,625,626,627,628,629,630,631,632,633,634,635,636,637,638,639,640,641,642,643,644,645,646,647,648,649,650,651,652};
 uint16_t RedLineTrack2Segments [] = {868,867,866,865,864,863,862,861,860,859,858,857,856,855,854,853,852,851,850,849,848,847,846,845,844,843,842,841,840,839,838,837,836,835,834,833,832,831,830,829,828,827,826,825,824,823,822,821,820,819,818,817,816,815,814,813,812,811,810,809,808,807,806,805,804,803,802,801,800,799,798,797,796,795,794,793,792,791,790,789,788,787,786,785,784,783,782,781,780,779,778,777,776,775,774,773,772,771,770,769,768,767,766,765,764,763,762,761,760,759,758,757,756,755,754,753,752,751,750,749,748,747,746,745,744,743,742,741,740,739,738,737,736,735,734,733,732,731,730,729,728,727,726,725,724,723,722,721,720,719,718,717,716,715,714,713,712,711,710,709,708,707,706,705,704,703,702,701,700,699,698,697,696,695,694,693,692,691,690,689,688,687,686,685,684,683,682,681,680,679,678,677,676,675,674,673,672,671,670,669,668,667,666,665,664,663,662,661,400,399,398,397,396,395,394,393,392,391,390,389,388,387,386,385,384,383,382,381,380,379,378,377,376,375,374,373,372,371,370,369,368,367,366,365,364,363,362,361,360,359,358,357,356,355,354,353,352,351,350,349,348,347,346,345,344,343,342,341,340,339,338,337,336,335,334,333,332,331,330,329,328,327,326,325,324,323,322,321,320,319,318,317,316,315,314,313,312,311,310,309,308,307,306,305,304,303,302,301,300,299,298,297,296,295,294,293,292,291,290,289,288,287,286,285,284,283,282,281,280,279,278,277,276,275,274,273,272,271,270,269,268,267,266,265,264,263,262,261,260,259,258,257,256,255,254,253,252,251,250,249,248,247,246,245,244,243,242,241,240,239,238,237,236,235,234,233,232,231,230,229,228,227,226,225,224,223,222,221,220,219,218,217,216,215,214,213,212,211,210};
 
+uint16_t RedLineTrack1DelaySegTotal[]= {24,20,8,17,14,13,16,6,8,11,9,14,10,12,5,9,7,16,13,20,22,19,19,17,22};
+uint16_t RedLineTrack1DelayDomainsS[] = {120,120,120,180,120,120,120,180,120,180,180,180,180,240,120,120,120,240,120,180,180,180,180,180,240};
+
+uint16_t RedLineTrack1NewAdditiveDelaySegs [] = {3,3,3,3,3,60,3,3,3,3,60,3,3,3,3,3,3,3,3,3,3,3,96,99,102,132,135,138,141,144,147,150,153,156,159,162,165,168,171,174,177,180,183,186,189,192,222,225,228,231,234,237,240,243,246,276,279,282,285,288,291,294,297,300,303,306,309,312,315,318,321,324,327,357,360,363,366,369,372,375,378,381,384,387,390,393,396,399,429,432,435,438,441,444,447,450,453,456,459,462,465,468,498,501,504,507,510,513,516,519,522,525,528,531,534,537,540,543,546,576,579,582,585,588,591,594,624,627,630,633,636,639,642,645,648,678,681,684,687,690,693,696,699,702,705,708,711,741,744,747,750,753,756,759,762,765,768,798,801,804,807,810,813,816,819,822,825,828,831,834,837,840,870,873,876,879,882,885,888,891,894,897,900,930,933,936,939,942,945,948,951,954,957,960,963,966,996,999,1002,1005,1008,1011,1041,1044,1047,1050,1053,1056,1059,1062,1065,1068,1098,1101,1104,1107,1110,1113,1116,1119,1149,1152,1155,1158,1161,1164,1167,1170,1173,1176,1179,1209,1212,1215,1218,1221,1224,1227,1230,1233,1236,1239,1242,1245,1248,1251,1254,1257,1287,1290,1293,1296,1299,1302,1305,1308,1311,1314,1317,1320,1323,1326,1356,1359,1362,1365,1368,1371,1374,1377,1380,1383,1386,1389,1392,1395,1398,1401,1404,1407,1410,1413,1416,1446,1449,1452,1455,1458,1461,1464,1467,1470,1473,1476,1479,1482,1485,1488,1491,1494,1497,1500,1503,1506,1509,1512,1542,1545,1548,1551,1554,1557,1560,1563,1566,1569,1572,1575,1578,1581,1584,1587,1590,1593,1596,1599,1629,1632,1635,1638,1641,1644,1647,1650,1653,1656,1659,1662,1665,1668,1671,1674,1677,1680,1683,1686,1716,1719,1722,1725,1728,1731,1734,1737,1740,1743,1746,1749,1752,1755,1758,1761,1764,1767,1797,1800,1803,1806,1809,1812,1815,1818,1821,1824,1827,1830,1833,1836,1839,1842,1845,1848,1851,1854,1857,1860,1863,1893};
 uint16_t RedLineTrack1AdditiveDelaySegments[] = {30,33,36,39,42,45,48,51,54,57,60,63,66,69,72,75,78,81,84,87,90,93,96,99,102,132,135,138,141,144,147,150,153,156,159,162,165,168,171,174,177,180,183,186,189,192,222,225,228,231,234,237,240,243,246,276,279,282,285,288,291,294,297,300,303,306,309,312,315,318,321,324,327,357,360,363,366,369,372,375,378,381,384,387,390,393,396,399,429,432,435,438,441,444,447,450,453,456,459,462,465,468,498,501,504,507,510,513,516,519,522,525,528,531,534,537,540,543,546,576,579,582,585,588,591,594,624,627,630,633,636,639,642,645,648,678,681,684,687,690,693,696,699,702,705,708,711,741,744,747,750,753,756,759,762,765,768,798,801,804,807,810,813,816,819,822,825,828,831,834,837,840,870,873,876,879,882,885,888,891,894,897,900,930,933,936,939,942,945,948,951,954,957,960,963,966,996,999,1002,1005,1008,1011,1041,1044,1047,1050,1053,1056,1059,1062,1065,1068,1098,1101,1104,1107,1110,1113,1116,1119,1149,1152,1155,1158,1161,1164,1167,1170,1173,1176,1179,1209,1212,1215,1218,1221,1224,1227,1230,1233,1236,1239,1242,1245,1248,1251,1254,1257,1287,1290,1293,1296,1299,1302,1305,1308,1311,1314,1317,1320,1323,1326,1356,1359,1362,1365,1368,1371,1374,1377,1380,1383,1386,1389,1392,1395,1398,1401,1404,1407,1410,1413,1416,1446,1449,1452,1455,1458,1461,1464,1467,1470,1473,1476,1479,1482,1485,1488,1491,1494,1497,1500,1503,1506,1509,1512,1542,1545,1548,1551,1554,1557,1560,1563,1566,1569,1572,1575,1578,1581,1584,1587,1590,1593,1596,1599,1629,1632,1635,1638,1641,1644,1647,1650,1653,1656,1659,1662,1665,1668,1671,1674,1677,1680,1683,1686,1716,1719,1722,1725,1728,1731,1734,1737,1740,1743,1746,1749,1752,1755,1758,1761,1764,1767,1797,1800,1803,1806,1809,1812,1815,1818,1821,1824,1827,1830,1833,1836,1839,1842,1845,1848,1851,1854,1857,1860,1863,1893};
 uint16_t RedLineTrack2AdditiveDelaySegments[] = {30,33,36,39,42,45,48,51,54,57,60,63,66,69,72,75,78,81,84,87,90,93,123,126,129,132,135,138,141,144,147,150,153,156,159,162,165,168,171,174,177,207,210,213,216,219,222,225,228,231,261,264,267,270,273,276,279,282,285,288,291,294,297,300,303,306,309,312,342,345,348,351,354,357,360,363,366,369,372,375,378,381,384,387,417,420,423,426,429,432,435,438,441,444,447,450,453,456,459,489,492,495,498,501,504,507,510,513,516,519,522,525,528,531,534,537,567,570,573,576,579,582,585,588,591,594,624,627,630,633,636,639,642,645,648,651,681,684,687,690,693,696,699,702,705,708,738,741,744,747,750,753,756,786,789,792,795,798,801,804,807,810,813,816,819,822,825,828,858,861,864,867,870,873,876,879,882,885,888,918,921,924,927,930,933,936,939,942,945,948,951,981,984,987,990,993,996,1026,1029,1032,1035,1038,1041,1044,1047,1050,1053,1083,1086,1089,1092,1095,1098,1101,1104,1107,1137,1140,1143,1146,1149,1152,1155,1158,1161,1164,1167,1170,1173,1176,1206,1209,1212,1215,1218,1221,1224,1227,1230,1233,1236,1239,1242,1245,1248,1251,1254,1284,1287,1290,1293,1296,1299,1302,1305,1308,1311,1314,1317,1320,1323,1353,1356,1359,1362,1365,1368,1371,1374,1377,1380,1383,1386,1389,1392,1395,1398,1401,1404,1407,1410,1413,1416,1419,1422,1425,1428,1458,1461,1464,1467,1470,1473,1476,1479,1482,1485,1488,1491,1494,1497,1500,1503,1506,1509,1512,1515,1518,1521,1524,1527,1530,1533,1536,1539,1569,1572,1575,1578,1581,1584,1587,1590,1593,1596,1599,1602,1605,1608,1611,1614,1617,1620,1623,1626,1629,1632,1635,1638,1668,1671,1674,1677,1680,1683,1686,1689,1692,1695,1698,1701,1704,1707,1710,1713,1716,1719,1722,1752,1755,1758,1761,1764,1767,1770,1773,1776,1779,1782,1785,1788,1791,1794,1797,1800,1803,1833,1836,1839,1842,1845,1848,1851,1854,1857,1860,1863,1866,1869,1872,1875,1878,1881,1884,1887,1890,1893,1896,1926};
 
@@ -174,6 +178,7 @@ uint16_t RedTrainCount = 0;
 // uint8_t UseFakeJsonData = 0;
 String SimulatedTrains;
 
+uint16_t TrainsRacked = 0;
 //These are used in the old sim method
 // uint16_t TempTrain1PositionCounter = 0;
 // uint16_t TempTrain2PositionCounter = 399;
@@ -196,7 +201,7 @@ String SimulatedTrains;
 //global timing and headway variables
 uint32_t SystemFirstTrainTime = 0; //second of the day that first train may start
 uint32_t SystemLastTrainTime =  79200; //second of the day that last train of the day starts no later than this time
-uint32_t HeadwayTimeSeconds = 480; //time between trains in seconds
+uint32_t HeadwayTimeSeconds = 360; //time between trains in seconds
 uint32_t SecondOfDay = 0;
 uint32_t StationDwellTimeS = 10; //time each train spends at each station. Used in Sim Mode.
 
@@ -243,12 +248,14 @@ class usermod_v2_ASL : public Usermod {
     bool SimModeEnable = false;
     uint32_t testULong = 42424242;
     float testFloat = 42.42;
+    uint32_t localFadeTimemS = 100;
     String devString = "0";
     String testString = "0";
     String ServerAddressString = "http://api.wmata.com/TrainPositions/TrainPositions?contentType=json";
     String apiKeyString = "44c0d03c967442abad897ca70efd5639 ";
     uint32_t ServerPollIntervalSeconds = 10;
-    uint32_t PlotRefreshIntervalmS = 1000;
+    uint32_t PlotRefreshIntervalmS = 5000; //note: setting this below 3.5 seconds will eventually cause wmata servers to be angry
+    uint32_t DrawRefreshIntervalmS = 5000;
     WS2812FX::Segment &seg = strip.getSegment(0);
     uint32_t steps = 0;
 
@@ -265,10 +272,6 @@ class usermod_v2_ASL : public Usermod {
     //Loop timing variables
     uint32_t lastTime = 0;
     uint32_t WMATATimeDelay = 7000; //delay for the task polling WMATA API (data updates every 7-10 seconds, clients are allowed to post GET requests at 10hz or 50k call/day (every 1.7s)
-    uint32_t FakeGETTimeDelay = 1000; //the timer to use when we're using fake data
-    uint32_t LEDRefreshTime = 1; //timing for the led updating task. This gets updated by math
-
-
 
     //LED strip variables
     uint8_t MaxLEDDelta = 0;
@@ -288,6 +291,7 @@ class usermod_v2_ASL : public Usermod {
      */
     void setup() {
       Serial.println("setting up.....");
+      //Fade_Time_ms = 1000;
       // if (!readObjectFromFile("/presets.json", nullptr, &doc)) {
       // ClearLEDString(RedTargetFrame, Red_Num_LEDS);
       // ClearLEDString(BlueTargetFrame, Blue_Num_LEDS);
@@ -387,6 +391,7 @@ class usermod_v2_ASL : public Usermod {
         }
         //PrintGlobalPositionTable(25); //(i have no idea why we feed this the number 25) also this seems to be largely duplicative of TrainStats
         TrainStats();
+        CalculateAdditiveDelays();
         // DynamicJsonDocument doc(16384); //JSON doc size, see JSON arduino assistant for better info
         // HTTPClient http; //establish the HTTPclient object
         // String payload;
@@ -446,9 +451,10 @@ class usermod_v2_ASL : public Usermod {
         //   Serial.print(" ");
         //   Serial.print(RedLineFrameTarget[i]);
         // }
-        lastTime = millis();
 
+      lastTime = millis();
       }
+
       // if (millis() - lastTime > 1000) {
       //   //Serial.println("I'm alive!");
       //   lastTime = millis();
@@ -564,10 +570,9 @@ class usermod_v2_ASL : public Usermod {
       top["testFloat"] = testFloat;
       top["testString"] = String ("written from addconfig");
       top["DevString"] = String ("written from addconfig");
-      //top["ServerAddressString"] = ServerAddressString;
-      //top["apiKeyString"] = apiKeyString;
       top["ServerPollIntervalSeconds"] = ServerPollIntervalSeconds;
       top["Plot Refresh Intrval (either sim or real) in mS"] = PlotRefreshIntervalmS;
+      //top["LED Draw Refresh Intrval (either sim or real) in mS"] = Fade_Time_ms;
       JsonArray pinArray = top.createNestedArray("pin");
       pinArray.add(testPins[0]);
       pinArray.add(testPins[1]); 
@@ -607,11 +612,8 @@ class usermod_v2_ASL : public Usermod {
       configComplete &= getJsonValue(top["Headway Time Between Trains (in seconds)"], HeadwayTimeSeconds);
       configComplete &= getJsonValue(top["Station Dwell Time"], StationDwellTimeS);
       configComplete &= getJsonValue(top["Plot Refresh Intrval (either sim or real) in mS"], PlotRefreshIntervalmS);
+      //configComplete &= getJsonValue(top["LED Draw Refresh Intrval (either sim or real) in mS"], Fade_Time_ms);
       configComplete &= getJsonValue(top["API Key"], apiKeyString);
-      configComplete &= getJsonValue(top["testULong"], testULong);
-      configComplete &= getJsonValue(top["testFloat"], testFloat);
-      configComplete &= getJsonValue(top["testString"], testString);
-      configComplete &= getJsonValue(top["devString"], devString);
 
       // A 3-argument getJsonValue() assigns the 3rd argument as a default value if the Json value is missing
       configComplete &= getJsonValue(top["testInt"], testInt, 42);  
@@ -620,8 +622,6 @@ class usermod_v2_ASL : public Usermod {
       configComplete &= getJsonValue(top["DevString"], devString, "set from 3 arg");
       //configComplete &= getJsonValue(top["pin"][0], testPins[0], 26);
       //configComplete &= getJsonValue(top["pin"][1], testPins[1], 27);
-      //configComplete &= getJsonValue(top["ServerAddressString"], ServerAddressString);
-      //configComplete &= getJsonValue(top["apiKeyString"], apiKeyString);
 
       return configComplete;
     }
@@ -632,15 +632,14 @@ class usermod_v2_ASL : public Usermod {
      * Use this to blank out some LEDs or set them to a different color regardless of the set effect mode.
      * Commonly used for custom clocks (Cronixie, 7 segment)
      */
-    void handleOverlayDraw()
-    {
+    //{
       // #define SEGCOLOR(x)      _colors_t[x]
       // for(int i=0; i < 50; i++){
       //     strip.setPixelColor(i, SEGCOLOR(0)); // set the first pixel to black
       // }
       //strip.setPixelColor(steps, color_from_palette(1, true, false, 0, 255));
 
-    }
+    //}
 
    
     /*
@@ -800,7 +799,7 @@ class usermod_v2_ASL : public Usermod {
     //uint32_t TrainRunDurationS = AdditiveTrackDelaySegments[((sizeof(AdditiveTrackDelaySegments)/sizeof(AdditiveTrackDelaySegments[1])) -1)];
     uint32_t TrainRunDurationS = AdditiveTrackDelaySegments[AdditiveTrackDelaySegmentsCount]; //grab the max additive value of the run duration. 
 
-    uint32_t SegmentArrivalTimeS [TrackSegmentCount]; //create a temp array to then (below) shift per the shifted departure time
+    uint32_t SegmentArrivalTimeS[TrackSegmentCount]; //create a temp array to then (below) shift per the shifted departure time
 
     //Serial.println((String)"Num sim trains in day: " + NumSimTrainsInDay);
     //Serial.println((String)"Cycle Time: " + TrainRunDurationS);
@@ -830,7 +829,6 @@ class usermod_v2_ASL : public Usermod {
     }
     }
     Serial.println();
-
 
   //  for (int i = 0; i < NumSimTrainsInDay; i++) {
   //   if(SimTrainActive[i] == 1) {
@@ -884,7 +882,7 @@ class usermod_v2_ASL : public Usermod {
     //uint32_t SimTrainTrainNumer = random(0,MaxNumPossibleTrains);
     uint8_t SimTrainCarCount = 8;
     //we calcilate circuit ID later on
-    String SimTrainDestinationCode = "**SIM**";
+    String SimTrainDestinationCode = "***SIM***";
     String SimTrainServiceType = "Normal";
 
     //assemble and populate the array
@@ -918,6 +916,53 @@ class usermod_v2_ASL : public Usermod {
 
     //}
   }
+
+
+  void CalculateAdditiveDelays() {
+  //seed the delay array, then worry about adding it all together.
+  //Delay segs and segments should be the same length
+  uint16_t IsStation = 0;
+  uint16_t CountReset = 0;
+  uint16_t StationTimeS = 45;
+  uint16_t Runcount = 0;
+  if(TrainsRacked == 1) {
+    return;
+  }
+  for(int i = 0; i < 388; i++) {
+    RedLineTrack1NewAdditiveDelaySegs[i] = 0;
+  }
+
+  Serial.print("additive delays: ");
+  for(int i = 0; i < 388; i++) { //cycles through every segment
+    for(int x = 0; x < RedLineNumStationsInLine; x++) {
+      if(RedLineTrack1Segments[i] == RedLineTrack1StationSegments[x]) {
+        RedLineTrack1NewAdditiveDelaySegs[i] = 45;
+        IsStation++;
+        break;
+      }
+      RedLineTrack1NewAdditiveDelaySegs[i] = (RedLineTrack1DelayDomainsS[IsStation-1] / RedLineTrack1DelaySegTotal[IsStation-1]); //add integer seconds of delay for each seg
+
+      }
+    }
+    Runcount ++;
+  
+  Serial.println("Additive delay array: ");
+  for(int i = 0; i < 388; i++) {
+    Serial.print(RedLineTrack1NewAdditiveDelaySegs[i]);
+    Serial.print(",");
+  }
+  // now combine them all together
+  Serial.println("adding array");
+  for(int i = 0; i < 388; i++) {
+    RedLineTrack1NewAdditiveDelaySegs[i+1] = RedLineTrack1NewAdditiveDelaySegs[i] + RedLineTrack1NewAdditiveDelaySegs[i+1];
+    Serial.print(RedLineTrack1NewAdditiveDelaySegs[i]);
+    Serial.print(",");
+  }
+  TrainsRacked = 1;
+}
+
+
+  
 
   void PrintGlobalPositionTable(uint16_t CycleCount) {
     uint16_t NextFreeTrainSlot = 0;
