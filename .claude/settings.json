@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C \"c:/Users/al/Documents/WLED-working-fork\" status --short)",
+      "Bash(git -C \"c:/Users/al/Documents/WLED-working-fork\" branch --show-current)",
+      "Bash(git -C \"c:/Users/al/Documents/WLED-working-fork\" log --oneline -3)",
+      "Bash(git -C \"c:/Users/al/Documents/WLED-working-fork\" ls-files)",
+      "Bash(git -C \"c:/Users/al/Documents/WLED-working-fork\" show asl-variable-station-sim-delays:usermods/ASL_v2/usermod_v2_asl.h)",
+      "Bash(git -C \"c:/Users/al/Documents/WLED-working-fork\" diff --stat 19c8b4fe asl-variable-station-sim-delays -- wled00/)",
+      "Bash(git -C \"c:/Users/al/Documents/WLED-working-fork\" grep -n \"uint32_t TrainRed\\\\|uint32_t RedTargetFrame\\\\|RedTargetFrame\\\\[\\\\]\\\\|DevLEDAddress\\\\[\" asl-variable-station-sim-delays -- wled00/FX.h wled00/wled.h wled00/FX.cpp wled00/FX_fcn.cpp)"
+    ]
+  }
+}
