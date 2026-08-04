@@ -92,7 +92,7 @@ void Usermod_BH1750::loop()
           mqttInitialized = true;
         }
       mqtt->publish(mqttLuminanceTopic.c_str(), 0, true, String(lux).c_str());
-      DEBUG_PRINTLN(F("Brightness: ") + String(lux) + F("lx"));
+      DEBUG_PRINTLN(String(F("Brightness: ")) + String(lux) + F("lx"));
     }
     else
     {

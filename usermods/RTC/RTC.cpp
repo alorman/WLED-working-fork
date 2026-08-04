@@ -10,14 +10,25 @@ class RTCUsermod : public Usermod {
   public:
 
     void setup() {
-      if (i2c_scl<0 || i2c_sda<0) { disabled = true; return; }
+      if (i2c_scl<0 || i2c_sda<0) {
+        DEBUG_PRINTLN(F("RTC: I2C pins not configured, disabling."));
+        disabled = true;
+        return;
+      }
       RTC.begin();
       time_t rtcTime = RTC.get();
       if (rtcTime) {
         toki.setTime(rtcTime,TOKI_NO_MS_ACCURACY,TOKI_TS_RTC);
         updateLocalTime();
+        DEBUG_PRINTF_P(PSTR("RTC: got time %04d-%02d-%02d %02d:%02d:%02d\n"),
+          year(rtcTime), month(rtcTime), day(rtcTime), hour(rtcTime), minute(rtcTime), second(rtcTime));
       } else {
-        if (!RTC.chipPresent()) disabled = true; //don't waste time if H/W error
+        if (!RTC.chipPresent()) {
+          DEBUG_PRINTLN(F("RTC: chip not found on I2C bus, disabling."));
+          disabled = true; //don't waste time if H/W error
+        } else {
+          DEBUG_PRINTLN(F("RTC: chip present but time invalid/unset."));
+        }
       }
     }
 
@@ -25,7 +36,11 @@ class RTCUsermod : public Usermod {
       if (disabled || strip.isUpdating()) return;
       if (toki.isTick()) {
         time_t t = toki.second();
-        if (t != RTC.get()) RTC.set(t); //set RTC to NTP/UI-provided value
+        if (t != RTC.get()) {
+          RTC.set(t); //set RTC to NTP/UI-provided value
+          DEBUG_PRINTF_P(PSTR("RTC: clock updated to %04d-%02d-%02d %02d:%02d:%02d\n"),
+            year(t), month(t), day(t), hour(t), minute(t), second(t));
+        }
       }
     }
 
