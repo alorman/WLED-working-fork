@@ -1,0 +1,5 @@
+{
+  "name": "ASL_v2",
+  "build": { "libArchive": false },
+  "dependencies": {}
+}
