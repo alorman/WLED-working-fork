@@ -11,11 +11,17 @@
  * from the live WMATA TrainPositions API or from an offline schedule simulator.
  *
  * Architecture:
- *  - The usermod periodically plots a "meaning frame" per line: one byte per
- *    LED holding which segment color slot to show (0=track, 1=train, 2=station).
- *  - Five registered effects ("ASL Red Line" etc.) draw those frames each
- *    strip refresh, resolving colors live from the segment's color slots, so
- *    color changes in the UI apply instantly. Transitions/blending are left to
+ *  - The usermod periodically plots a per-line scenery frame (one byte per
+ *    LED: track or station) and reconciles the train table into a sprite
+ *    list: each train glides from where it is rendered to the fractional LED
+ *    of its latest data point over one plot interval, easing in/out of stops.
+ *  - Five registered effects ("ASL Red Line" etc.) draw scenery + sprites on
+ *    every strip refresh, resolving colors live from the segment's color
+ *    slots. Sprites render with two-LED anti-aliasing through a perceptual
+ *    (inverse-gamma) weight curve so apparent brightness stays constant
+ *    mid-glide. New trains fade in, vanished trains fade out after one cycle
+ *    of grace, and implausible jumps (junk/reacquired API data) dissolve
+ *    out+in instead of gliding across the map. UI transitions are left to
  *    the WLED core.
  *
  * Setup: create one segment per line sized to that line's LED count, assign
@@ -28,33 +34,181 @@
 
 // pixel meaning codes; value doubles as the SEGCOLOR() slot index
 #define ASL_PX_TRACK   0
-#define ASL_PX_TRAIN   1
+#define ASL_PX_TRAIN   1   // color slot only — trains render as moving sprites, not frame pixels
 #define ASL_PX_STATION 2
 
-// per-line meaning frames (written by the usermod, read by the effects)
+// line indices into aslLines[]; order matches the effect registration order
+#define ASL_LINE_RED    0
+#define ASL_LINE_BLUE   1
+#define ASL_LINE_GREEN  2
+#define ASL_LINE_ORANGE 3
+#define ASL_LINE_YELLOW 4
+
+// per-line scenery frames, track + stations only (written by the usermod,
+// read by the effects)
 static uint8_t RedFrame[Red_Num_LEDS + 1];
 static uint8_t BlueFrame[Blue_Num_LEDS + 1];
 static uint8_t GreenFrame[Green_Num_LEDS + 1];
 static uint8_t OrangeFrame[Orange_Num_LEDS + 1];
 static uint8_t YellowFrame[Yellow_Num_LEDS + 1];
 
-// ---- effects: paint the current meaning frame, colors from segment slots ----
-static void aslDrawFrame(const uint8_t* frame, uint16_t frameLen) {
+// ---- per-line map-data descriptor (indices match ASL_LINE_*) ----
+struct AslLineDef {
+  char code[3];                    // WMATA line code
+  const uint16_t (*domains[2])[2]; // per-track circuit domains
+  const uint16_t *stationSegs[2];  // per-track station circuits
+  const uint16_t (*ledArray)[2];   // domain -> LED range (shared by both tracks)
+  const uint16_t *stationLEDPos;
+  uint16_t numStations;
+  uint16_t numDomains;
+};
+
+static const AslLineDef aslLines[5] = {
+  { "RD", { RedLineTrack1Domains,    RedLineTrack2Domains    }, { RedLineTrack1StationSegments,    RedLineTrack2StationSegments    }, RedLineLEDArray,    RedLineStationLEDPosition,    RedLineNumStationsInLine,    Red_Num_LED_Domains    },
+  { "BL", { BlueLineTrack1Domains,   BlueLineTrack2Domains   }, { BlueLineTrack1StationSegments,   BlueLineTrack2StationSegments   }, BlueLineLEDArray,   BlueLineStationLEDPosition,   BlueLineNumStationsInLine,   Blue_Num_LED_Domains   },
+  { "GR", { GreenLineTrack1Domains,  GreenLineTrack2Domains  }, { GreenLineTrack1StationSegments,  GreenLineTrack2StationSegments  }, GreenLineLEDArray,  GreenLineStationLEDPosition,  GreenLineNumStationsInLine,  Green_Num_LED_Domains  },
+  { "OR", { OrangeLineTrack1Domains, OrangeLineTrack2Domains }, { OrangeLineTrack1StationSegments, OrangeLineTrack2StationSegments }, OrangeLineLEDArray, OrangeLineStationLEDPosition, OrangeLineNumStationsInLine, Orange_Num_LED_Domains },
+  { "YL", { YellowLineTrack1Domains, YellowLineTrack2Domains }, { YellowLineTrack1StationSegments, YellowLineTrack2StationSegments }, YellowLineLEDArray, YellowLineStationLEDPosition, YellowLineNumStationsInLine, Yellow_Num_LED_Domains },
+};
+
+// ---- moving-train sprites ----
+// Trains are not baked into the frames; each is a sprite gliding toward the
+// fractional LED position of its latest data point, re-targeted every plot
+// cycle and rendered with two-LED anti-aliasing at the strip frame rate.
+#define ASL_MAX_SPRITES   128   // active trains (<= MAX_TRAINS) + fading ghosts
+#define ASL_FADE_MS       400   // spawn/despawn fade; also each half of a dissolve
+#define ASL_TELEPORT_LEDS 8.0f  // moves larger than this dissolve instead of gliding
+#define ASL_AA_GAMMA      2.2f  // perceptual boost exponent for coverage weights
+
+enum : uint8_t { ASL_SPR_FREE = 0, ASL_SPR_LIVE = 1, ASL_SPR_GHOST = 2 };
+
+struct AslSprite {
+  uint8_t  mode;         // ASL_SPR_*
+  uint8_t  lineIdx;      // ASL_LINE_*
+  uint8_t  dir;          // track/direction number, part of the identity key
+  uint8_t  missed;       // consecutive plot cycles without a data point
+  bool     seen;         // matched during the current reconciliation pass
+  uint32_t id;           // train ID (live: WMATA TrainId; sim: departure index + 1)
+  float    startPos;     // glide origin (fractional LED)
+  float    targetPos;    // glide destination (fractional LED)
+  uint32_t moveStartMs;
+  uint32_t moveDurMs;    // 0 = parked at targetPos
+  uint32_t fadeStartMs;  // spawn (fade-in) or ghost (fade-out) start
+};
+
+static AslSprite aslSprites[ASL_MAX_SPRITES];
+static uint8_t aslPerceptLUT[256]; // coverage -> blend amount, filled in setup()
+
+// eased (smoothstep) sprite position: accelerates away from a stop, brakes
+// into the next one
+static float aslSpritePos(const AslSprite& s, uint32_t nowMs) {
+  if (s.moveDurMs == 0) return s.targetPos;
+  uint32_t el = nowMs - s.moveStartMs;
+  if (el >= s.moveDurMs) return s.targetPos;
+  float t = (float)el / (float)s.moveDurMs;
+  t = t * t * (3.0f - 2.0f * t);
+  return s.startPos + (s.targetPos - s.startPos) * t;
+}
+
+// current fade alpha (0-255): rises after spawn, falls after ghosting
+static uint8_t aslSpriteAlpha(const AslSprite& s, uint32_t nowMs) {
+  uint32_t el = nowMs - s.fadeStartMs;
+  uint32_t a  = (el >= ASL_FADE_MS) ? 255 : (el * 255) / ASL_FADE_MS;
+  return (s.mode == ASL_SPR_GHOST) ? (uint8_t)(255 - a) : (uint8_t)a;
+}
+
+// fractional LED for one track's data point: station snap (+/-1 circuit)
+// first, then linear interpolation within the containing domain — the float
+// analogue of the old integer mapRound() plot
+static bool aslTargetForTrack(const AslLineDef& L, uint8_t track, uint32_t circuit, float& out) {
+  const uint16_t* segs = L.stationSegs[track];
+  for (uint16_t x = 0; x < L.numStations; x++) {
+    if (circuit + 1 >= segs[x] && circuit <= (uint32_t)segs[x] + 1) {
+      out = (float)L.stationLEDPos[x];
+      return true;
+    }
+  }
+  const uint16_t (*dom)[2] = L.domains[track];
+  for (uint16_t y = 0; y < L.numDomains; y++) {
+    if (circuit >= dom[y][0] && circuit <= dom[y][1]) {
+      uint16_t c0 = dom[y][0], c1 = dom[y][1];
+      uint16_t l0 = L.ledArray[y][0], l1 = L.ledArray[y][1];
+      out = (c1 > c0) ? (float)l0 + (float)(circuit - c0) * (float)(l1 - l0) / (float)(c1 - c0)
+                      : 0.5f * (float)(l0 + l1);
+      return true;
+    }
+  }
+  return false;
+}
+
+static bool aslTargetLED(uint8_t lineIdx, uint32_t circuit, float& out) {
+  const AslLineDef& L = aslLines[lineIdx];
+  return aslTargetForTrack(L, 0, circuit, out) || aslTargetForTrack(L, 1, circuit, out);
+}
+
+static int8_t aslLineIndex(const char* code) {
+  for (uint8_t i = 0; i < 5; i++) if (strncmp(code, aslLines[i].code, 2) == 0) return (int8_t)i;
+  return -1;
+}
+
+static AslSprite* aslFindSprite(uint8_t lineIdx, uint8_t dir, uint32_t id) {
+  for (auto &s : aslSprites)
+    if (s.mode == ASL_SPR_LIVE && s.lineIdx == lineIdx && s.dir == dir && s.id == id) return &s;
+  return nullptr;
+}
+
+static void aslSpawnSprite(uint8_t lineIdx, uint8_t dir, uint32_t id, float pos, uint32_t nowMs) {
+  for (auto &s : aslSprites) {
+    if (s.mode != ASL_SPR_FREE) continue;
+    s = { ASL_SPR_LIVE, lineIdx, dir, 0, true, id, pos, pos, nowMs, 0, nowMs };
+    return;
+  } // table full: the train simply appears on a later cycle
+}
+
+static void aslGhostSprite(AslSprite& s, uint32_t nowMs) {
+  s.startPos = s.targetPos = aslSpritePos(s, nowMs); // freeze in place while fading out
+  s.moveDurMs   = 0;
+  s.mode        = ASL_SPR_GHOST;
+  s.fadeStartMs = nowMs;
+  s.seen        = false;
+}
+
+// ---- effects: paint scenery from the frame, then the train sprites on top ----
+static void aslDrawFrame(const uint8_t* frame, uint16_t frameLen, uint8_t lineIdx) {
   const int len = SEGLEN;
   for (int i = 0; i < len; i++) {
     uint8_t m = (i < frameLen) ? frame[i] : ASL_PX_TRACK;
     uint32_t c = SEGCOLOR(m);
-    if      (m == ASL_PX_TRAIN)   c = color_fade(c, SEGMENT.intensity); // "Train brightness" slider
-    else if (m == ASL_PX_STATION) c = color_fade(c, SEGMENT.custom1);   // "Station brightness" slider
+    if (m == ASL_PX_STATION) c = color_fade(c, SEGMENT.custom1); // "Station brightness" slider
     SEGMENT.setPixelColor(i, c);
+  }
+
+  const uint32_t trainC = color_fade(SEGCOLOR(ASL_PX_TRAIN), SEGMENT.intensity); // "Train brightness" slider
+  const uint32_t nowMs  = millis();
+  for (unsigned n = 0; n < ASL_MAX_SPRITES; n++) {
+    const AslSprite& s = aslSprites[n];
+    if (s.mode == ASL_SPR_FREE || s.lineIdx != lineIdx) continue;
+    uint8_t alpha = aslSpriteAlpha(s, nowMs);
+    if (alpha == 0) continue;
+    float pos  = aslSpritePos(s, nowMs);
+    int   i0   = (int)floorf(pos);
+    float frac = pos - (float)i0;
+    // split coverage * fade alpha across the two straddled LEDs, boosted
+    // through the perceptual LUT so apparent brightness holds mid-glide
+    unsigned w0 = (unsigned)((1.0f - frac) * alpha + 0.5f);
+    unsigned w1 = (unsigned)(frac * alpha + 0.5f);
+    if (w0 > 0 && i0 >= 0 && i0 < len)
+      SEGMENT.setPixelColor(i0, color_blend(SEGMENT.getPixelColor(i0), trainC, aslPerceptLUT[w0 > 255 ? 255 : w0]));
+    if (w1 > 0 && i0 + 1 >= 0 && i0 + 1 < len)
+      SEGMENT.setPixelColor(i0 + 1, color_blend(SEGMENT.getPixelColor(i0 + 1), trainC, aslPerceptLUT[w1 > 255 ? 255 : w1]));
   }
 }
 
-static void mode_asl_red(void)    { aslDrawFrame(RedFrame,    sizeof(RedFrame)); }
-static void mode_asl_blue(void)   { aslDrawFrame(BlueFrame,   sizeof(BlueFrame)); }
-static void mode_asl_green(void)  { aslDrawFrame(GreenFrame,  sizeof(GreenFrame)); }
-static void mode_asl_orange(void) { aslDrawFrame(OrangeFrame, sizeof(OrangeFrame)); }
-static void mode_asl_yellow(void) { aslDrawFrame(YellowFrame, sizeof(YellowFrame)); }
+static void mode_asl_red(void)    { aslDrawFrame(RedFrame,    sizeof(RedFrame),    ASL_LINE_RED);    }
+static void mode_asl_blue(void)   { aslDrawFrame(BlueFrame,   sizeof(BlueFrame),   ASL_LINE_BLUE);   }
+static void mode_asl_green(void)  { aslDrawFrame(GreenFrame,  sizeof(GreenFrame),  ASL_LINE_GREEN);  }
+static void mode_asl_orange(void) { aslDrawFrame(OrangeFrame, sizeof(OrangeFrame), ASL_LINE_ORANGE); }
+static void mode_asl_yellow(void) { aslDrawFrame(YellowFrame, sizeof(YellowFrame), ASL_LINE_YELLOW); }
 
 static const char _data_FX_ASL_RED[]    PROGMEM = "ASL Red Line@,Train brightness,Station brightness;Track,Train,Station;;1;ix=255,c1=255";
 static const char _data_FX_ASL_BLUE[]   PROGMEM = "ASL Blue Line@,Train brightness,Station brightness;Track,Train,Station;;1;ix=255,c1=255";
@@ -108,11 +262,6 @@ class UsermodASL : public Usermod {
 
     static const char _name[];
     static const char _enabled[];
-
-    // rounded linear map of a circuit ID within its domain onto an LED range
-    static int mapRound(int x, int in_min, int in_max, int out_min, int out_max) {
-      return (x - in_min) * (out_max - out_min + 1) / (in_max - in_min + 1) + out_min;
-    }
 
     // "HH:MM" -> second of day; returns fallback on malformed/out-of-range input
     static uint32_t parseHHMM(const char* s, uint32_t fallback) {
@@ -249,63 +398,63 @@ class UsermodASL : public Usermod {
       }
     }
 
-    // place every matching train of one track onto the line's frame:
-    // trains at (or within +/-1 of) a station circuit snap to the station LED,
-    // otherwise the circuit is mapped proportionally within its domain.
-    void plotTrains(uint8_t frame[], uint16_t frameLen, const char* lineCode,
-                    const uint16_t trackDomains[][2], const uint16_t stationSegs[],
-                    uint16_t numStations, const uint16_t ledArray[][2],
-                    const uint16_t stationLEDPos[], uint16_t numDomains) {
+    // reconcile the train table into the sprite list: matched trains re-target
+    // (gliding there over one plot interval), new trains fade in, vanished
+    // trains get one cycle of grace then fade out, and implausible jumps
+    // dissolve out+in instead of gliding (junk/reacquired API data)
+    void updateTrainSprites(uint32_t nowMs) {
+      for (auto &s : aslSprites) {
+        if (s.mode == ASL_SPR_GHOST && nowMs - s.fadeStartMs >= ASL_FADE_MS) s.mode = ASL_SPR_FREE;
+        s.seen = false;
+      }
       for (uint16_t i = 0; i < numTrains; i++) {
-        if (!trainNormal[i] || strncmp(trainLine[i], lineCode, 2) != 0) continue;
-        bool plotted = false;
-        for (uint16_t x = 0; x < numStations; x++) {
-          if (trainCircuit[i] >= (uint32_t)stationSegs[x] - 1 && trainCircuit[i] <= (uint32_t)stationSegs[x] + 1) {
-            if (stationLEDPos[x] < frameLen) frame[stationLEDPos[x]] = ASL_PX_TRAIN;
-            plotted = true;
-            break;
-          }
+        if (!trainNormal[i]) continue;
+        int8_t li = aslLineIndex(trainLine[i]);
+        if (li < 0) continue;
+        float target;
+        if (!aslTargetLED(li, trainCircuit[i], target)) continue; // circuit outside the mapped domains
+        AslSprite* s = aslFindSprite(li, trainDirection[i], trainId[i]);
+        if (!s) {
+          aslSpawnSprite(li, trainDirection[i], trainId[i], target, nowMs);
+          continue;
         }
-        if (plotted) continue;
-        for (uint16_t y = 0; y < numDomains; y++) {
-          if (trainCircuit[i] >= trackDomains[y][0] && trainCircuit[i] <= trackDomains[y][1]) {
-            int led = mapRound(trainCircuit[i], trackDomains[y][0], trackDomains[y][1], ledArray[y][0], ledArray[y][1]);
-            if (led >= 0 && led < frameLen) frame[led] = ASL_PX_TRAIN;
-            break;
-          }
+        s->seen = true;
+        s->missed = 0;
+        float cur = aslSpritePos(*s, nowMs);
+        if (fabsf(target - cur) <= ASL_TELEPORT_LEDS) {
+          s->startPos    = cur;
+          s->targetPos   = target;
+          s->moveStartMs = nowMs;
+          s->moveDurMs   = plotRefreshIntervalMs;
+        } else {
+          aslGhostSprite(*s, nowMs);
+          aslSpawnSprite(li, trainDirection[i], trainId[i], target, nowMs);
         }
+      }
+      for (auto &s : aslSprites) {
+        if (s.mode == ASL_SPR_LIVE && !s.seen && ++s.missed > 1) aslGhostSprite(s, nowMs);
       }
     }
 
-    void plotAllLines() {
+    void plotScenery() {
       clearFrame(RedFrame, sizeof(RedFrame));
       plotStations(RedFrame, sizeof(RedFrame), RedLineStationLEDPosition, RedLineNumStationsInLine);
-      plotTrains(RedFrame, sizeof(RedFrame), "RD", RedLineTrack1Domains, RedLineTrack1StationSegments, RedLineNumStationsInLine, RedLineLEDArray, RedLineStationLEDPosition, Red_Num_LED_Domains);
-      plotTrains(RedFrame, sizeof(RedFrame), "RD", RedLineTrack2Domains, RedLineTrack2StationSegments, RedLineNumStationsInLine, RedLineLEDArray, RedLineStationLEDPosition, Red_Num_LED_Domains);
-
       clearFrame(BlueFrame, sizeof(BlueFrame));
       plotStations(BlueFrame, sizeof(BlueFrame), BlueLineStationLEDPosition, BlueLineNumStationsInLine);
-      plotTrains(BlueFrame, sizeof(BlueFrame), "BL", BlueLineTrack1Domains, BlueLineTrack1StationSegments, BlueLineNumStationsInLine, BlueLineLEDArray, BlueLineStationLEDPosition, Blue_Num_LED_Domains);
-      plotTrains(BlueFrame, sizeof(BlueFrame), "BL", BlueLineTrack2Domains, BlueLineTrack2StationSegments, BlueLineNumStationsInLine, BlueLineLEDArray, BlueLineStationLEDPosition, Blue_Num_LED_Domains);
-
       clearFrame(GreenFrame, sizeof(GreenFrame));
       plotStations(GreenFrame, sizeof(GreenFrame), GreenLineStationLEDPosition, GreenLineNumStationsInLine);
-      plotTrains(GreenFrame, sizeof(GreenFrame), "GR", GreenLineTrack1Domains, GreenLineTrack1StationSegments, GreenLineNumStationsInLine, GreenLineLEDArray, GreenLineStationLEDPosition, Green_Num_LED_Domains);
-      plotTrains(GreenFrame, sizeof(GreenFrame), "GR", GreenLineTrack2Domains, GreenLineTrack2StationSegments, GreenLineNumStationsInLine, GreenLineLEDArray, GreenLineStationLEDPosition, Green_Num_LED_Domains);
-
       clearFrame(OrangeFrame, sizeof(OrangeFrame));
       plotStations(OrangeFrame, sizeof(OrangeFrame), OrangeLineStationLEDPosition, OrangeLineNumStationsInLine);
-      plotTrains(OrangeFrame, sizeof(OrangeFrame), "OR", OrangeLineTrack1Domains, OrangeLineTrack1StationSegments, OrangeLineNumStationsInLine, OrangeLineLEDArray, OrangeLineStationLEDPosition, Orange_Num_LED_Domains);
-      plotTrains(OrangeFrame, sizeof(OrangeFrame), "OR", OrangeLineTrack2Domains, OrangeLineTrack2StationSegments, OrangeLineNumStationsInLine, OrangeLineLEDArray, OrangeLineStationLEDPosition, Orange_Num_LED_Domains);
-
       clearFrame(YellowFrame, sizeof(YellowFrame));
       plotStations(YellowFrame, sizeof(YellowFrame), YellowLineStationLEDPosition, YellowLineNumStationsInLine);
-      plotTrains(YellowFrame, sizeof(YellowFrame), "YL", YellowLineTrack1Domains, YellowLineTrack1StationSegments, YellowLineNumStationsInLine, YellowLineLEDArray, YellowLineStationLEDPosition, Yellow_Num_LED_Domains);
-      plotTrains(YellowFrame, sizeof(YellowFrame), "YL", YellowLineTrack2Domains, YellowLineTrack2StationSegments, YellowLineNumStationsInLine, YellowLineLEDArray, YellowLineStationLEDPosition, Yellow_Num_LED_Domains);
     }
 
   public:
     void setup() override {
+      // perceptual anti-alias curve: boost fractional coverage by 1/gamma so a
+      // train split across two LEDs reads as bright as one fully lit LED
+      for (int i = 0; i < 256; i++)
+        aslPerceptLUT[i] = (uint8_t)(powf((float)i / 255.0f, 1.0f / ASL_AA_GAMMA) * 255.0f + 0.5f);
       strip.addEffect(255, &mode_asl_red,    _data_FX_ASL_RED);
       strip.addEffect(255, &mode_asl_blue,   _data_FX_ASL_BLUE);
       strip.addEffect(255, &mode_asl_green,  _data_FX_ASL_GREEN);
@@ -337,7 +486,8 @@ class UsermodASL : public Usermod {
       } else if (WLED_CONNECTED) {
         getWMATAData();
       }
-      plotAllLines();
+      plotScenery();
+      updateTrainSprites(millis());
     }
 
     void addToJsonInfo(JsonObject& root) override {

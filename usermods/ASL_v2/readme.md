@@ -17,10 +17,13 @@ the five line effects are registered at runtime from `setup()` via
 
 ## How it renders
 
-Every *Plot Refresh Interval* the usermod computes a per-line "meaning frame"
-(one byte per LED: track / train / station). The five registered effects
-("ASL Red Line" … "ASL Yellow Line") paint that frame on every strip refresh,
-resolving actual colors from the segment's color slots at draw time:
+Every *Plot Refresh Interval* the usermod computes a per-line scenery frame
+(one byte per LED: track / station) and reconciles the train data into a
+sprite list: each train glides from where it is currently rendered to the
+fractional LED position of its latest data point over one plot interval,
+easing out of and into stops (smoothstep). The five registered effects
+("ASL Red Line" … "ASL Yellow Line") paint scenery + sprites on every strip
+refresh, resolving actual colors from the segment's color slots at draw time:
 
 | Segment color slot | Meaning |
 |---|---|
@@ -36,9 +39,16 @@ draw time (both default to full, and global brightness applies on top):
 | Train brightness (intensity) | train pixels |
 | Station brightness (custom1) | station pixels |
 
-The old hand-rolled per-pixel crossfade is gone — transitions are left to the
-WLED core, and color changes in the UI apply instantly without waiting for the
-next plot cycle.
+Trains render with two-LED anti-aliasing: a sprite at LED 47.4 lights LED 47
+at 60% and LED 48 at 40% coverage, with weights boosted through a perceptual
+(inverse-gamma, exponent `ASL_AA_GAMMA` = 2.2) curve so apparent brightness
+stays constant mid-glide. New trains fade in (`ASL_FADE_MS` = 400 ms),
+vanished trains get one plot cycle of grace (live data routinely drops a
+train for one fetch) then fade out, and moves larger than `ASL_TELEPORT_LEDS`
+(8) dissolve out+in instead of gliding — junk or reacquired API data, or a
+turnback at a terminal (direction is part of the sprite identity). UI
+transitions are left to the WLED core, and color changes apply instantly
+without waiting for the next plot cycle.
 
 ## Setup
 
