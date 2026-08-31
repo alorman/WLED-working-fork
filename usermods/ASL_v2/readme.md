@@ -6,8 +6,9 @@ moving pixels. Train positions come from either:
 
 - **Live mode**: the [WMATA TrainPositions API](https://developer.wmata.com/) (requires an API key), or
 - **Sim mode**: an offline schedule simulator (a train departs every *headway*
-  interval between the open and close times and moves along a per-segment
-  cumulative timetable).
+  interval between the open and close times — every *rush hour headway* inside
+  the morning/evening rush windows — and moves along a per-segment cumulative
+  timetable).
 
 This is the modern self-contained port of the original `ASL_v2` usermod
 (branch `asl-variable-station-sim-delays`), which required edits to `wled.h`,
@@ -68,8 +69,11 @@ plot cycle.
 | Enable Train Sim Mode | on | off = fetch live WMATA data |
 | Server Address | WMATA TrainPositions URL | `api_key` is appended automatically |
 | API Key | *(empty)* | live mode does nothing without it |
-| System Open/Close Time | 05:00 / 22:00 | HH:MM time pickers; first/last train departure (sim). Close earlier than open wraps past midnight (e.g. 22:00–02:00); equal times = 24-hour service |
+| System Open/Close Time | 05:00 / 00:00 | HH:MM time pickers; first/last train departure (sim), defaults match WMATA weekday hours (5am–midnight). Close earlier than open wraps past midnight (e.g. 22:00–02:00); equal times = 24-hour service |
 | Train Headway | 6 | minutes between departures, decimals ok (sim); stored as seconds internally |
+| Morning Rush Hour Start/End | 07:00 / 09:00 | rush window (sim); same-day only, start at/after end disables it |
+| Evening Rush Hour Start/End | 16:00 / 18:00 | rush window (sim); same-day only, start at/after end disables it |
+| Rush Hour Train Headway | 4 | minutes between departures inside rush windows (0 = no rush service). Applies at the terminals, so the density wave sweeps down each line at travel speed. Defaults match WMATA's published FY2026 peak service |
 | Station Dwell Time (seconds) | 10 | time at each station (sim) |
 | Plot Refresh Interval (ms) | 5000 | data refresh + glide duration; keep ≥ 3500 in live mode or WMATA will get angry |
 | Fade Milliseconds | 400 | train appear/vanish fade (0 = instant, clamped to 5000) |

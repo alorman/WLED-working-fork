@@ -77,7 +77,7 @@ static const AslLineDef aslLines[5] = {
 // Trains are not baked into the frames; each is a sprite gliding toward the
 // fractional LED position of its latest data point, re-targeted every plot
 // cycle and rendered with two-LED anti-aliasing at the strip frame rate.
-#define ASL_MAX_SPRITES    128   // active trains (<= MAX_TRAINS) + fading ghosts
+#define ASL_MAX_SPRITES    256   // active trains (<= MAX_TRAINS) + fading ghosts
 #define ASL_DEF_FADE_MS    400   // default spawn/despawn fade ("Fade Milliseconds" setting)
 #define ASL_TELEPORT_LEDS  8.0f  // moves larger than this dissolve instead of gliding
 #define ASL_DEF_AA_GAMMA   2.2f  // default perceptual boost exponent ("Gamma" setting)
@@ -234,16 +234,25 @@ static const char _data_FX_ASL_YELLOW[] PROGMEM = "ASL Yellow Line@;Train,Statio
 
 class UsermodASL : public Usermod {
   private:
-    static const uint16_t MAX_TRAINS = 100;
+    static const uint16_t MAX_TRAINS = 256; // all 10 tracks at rush headway fit comfortably
 
     // factory defaults — single source of truth: they initialize the members
     // below, back every readFromConfig fallback, and thus pre-populate the
     // settings boxes on a device with no saved config
+    // WMATA weekday hours: open 05:00, close midnight (00:00 wraps via the
+    // modulo schedule math; Fri/Sat really close at 02:00 but the sim has one schedule)
     static const uint32_t DEF_OPEN_S     = 18000;  // 05:00
-    static const uint32_t DEF_CLOSE_S    = 79200;  // 22:00
+    static const uint32_t DEF_CLOSE_S    = 0;      // 00:00 = midnight
     static const uint32_t DEF_HEADWAY_S  = 360;    // 6 min
     static const uint32_t DEF_DWELL_S    = 10;
     static const uint32_t DEF_REFRESH_MS = 5000;
+    // rush defaults per WMATA's published FY2026 peak service (7-9am, 4-6pm,
+    // Red line "at least every four minutes")
+    static const uint32_t DEF_AM_RUSH_START_S = 25200; // 07:00
+    static const uint32_t DEF_AM_RUSH_END_S   = 32400; // 09:00
+    static const uint32_t DEF_PM_RUSH_START_S = 57600; // 16:00
+    static const uint32_t DEF_PM_RUSH_END_S   = 64800; // 18:00
+    static const uint32_t DEF_RUSH_HEADWAY_S  = 240;   // 4 min
 
     bool enabled = true;
     bool initDone = false;
@@ -258,6 +267,11 @@ class UsermodASL : public Usermod {
     uint32_t systemFirstTrainTime = DEF_OPEN_S;    // second of day the first train departs
     uint32_t systemLastTrainTime  = DEF_CLOSE_S;   // second of day the last train departs
     uint32_t headwayTimeSeconds   = DEF_HEADWAY_S; // seconds between train departures
+    uint32_t amRushStartTime = DEF_AM_RUSH_START_S; // rush windows: same-day seconds; start >= end disables the window
+    uint32_t amRushEndTime   = DEF_AM_RUSH_END_S;
+    uint32_t pmRushStartTime = DEF_PM_RUSH_START_S;
+    uint32_t pmRushEndTime   = DEF_PM_RUSH_END_S;
+    uint32_t rushHeadwayTimeSeconds = DEF_RUSH_HEADWAY_S; // 0 = no rush service
     uint32_t stationDwellTimeS    = DEF_DWELL_S;   // sim: time each train sits at a station
     uint32_t plotRefreshIntervalMs = DEF_REFRESH_MS; // data refresh; below ~3.5s angers WMATA servers
 
@@ -304,24 +318,38 @@ class UsermodASL : public Usermod {
       trainNormal[i]       = true;
     }
 
+    // headway in effect for a departure at this second of day: rush windows
+    // shorten it; a window with start >= end is disabled, rush headway 0
+    // disables rush entirely
+    uint32_t headwayAt(uint32_t sod) const {
+      if (rushHeadwayTimeSeconds == 0) return headwayTimeSeconds;
+      if ((amRushStartTime < amRushEndTime && sod >= amRushStartTime && sod < amRushEndTime) ||
+          (pmRushStartTime < pmRushEndTime && sod >= pmRushStartTime && sod < pmRushEndTime))
+        return rushHeadwayTimeSeconds;
+      return headwayTimeSeconds;
+    }
+
     // simulate all trains currently en route on one track of one line:
-    // a train departs every headway between open and close; its position is the
-    // segment whose cumulative arrival time brackets "now - departure". All
-    // schedule math is modulo 24h, so service may span midnight (close before
-    // open) and late runs keep going past the date line.
+    // trains depart from open to close, each gap set by the headway in effect
+    // at the departure it follows (rush windows shorten it); a train's position
+    // is the segment whose cumulative arrival time brackets "now - departure".
+    // All schedule math is modulo 24h, so service may span midnight (close
+    // before open, open == close = 24h) and late runs keep going past the
+    // date line.
     void offlineSimTrains(const char* lineCode, uint8_t dir,
                           const uint16_t trackSegs[], uint16_t segCount,
                           const uint16_t addDelay[], uint16_t delayCount) {
       if (delayCount == 0 || headwayTimeSeconds == 0) return;
       uint32_t opDuration = (systemLastTrainTime > systemFirstTrainTime)
                           ? systemLastTrainTime - systemFirstTrainTime
-                          : 86400UL - systemFirstTrainTime + systemLastTrainTime; // wraps past midnight; open == close = 24h
-      uint32_t numSimTrains = opDuration / headwayTimeSeconds + 1;
+                          : 86400UL - systemFirstTrainTime + systemLastTrainTime;
       uint32_t runDuration = addDelay[delayCount - 1]; // total end-to-end run time
       uint16_t lastSeg = (segCount < delayCount) ? segCount : delayCount;
 
-      for (uint32_t i = 0; i < numSimTrains; i++) {
-        uint32_t departure = (systemFirstTrainTime + i * headwayTimeSeconds) % 86400UL;
+      uint32_t elapsed = 0; // seconds from open to this departure
+      for (uint32_t i = 0; elapsed <= opDuration && i < 4096; i++) {
+        uint32_t departure = (systemFirstTrainTime + elapsed) % 86400UL;
+        elapsed += headwayAt(departure);
         uint32_t t = (secondOfDay + 86400UL - departure) % 86400UL; // seconds into this train's run, wrap-safe
         if (t == 0 || t >= runDuration) continue;
         for (uint16_t y = 0; y < lastSeg; y++) {
@@ -535,6 +563,15 @@ class UsermodASL : public Usermod {
       formatHHMM(systemLastTrainTime, hhmm, sizeof(hhmm));
       top[F("System Close Time")]         = hhmm;
       top[F("Train Headway")]             = headwayTimeSeconds / 60.0f;
+      formatHHMM(amRushStartTime, hhmm, sizeof(hhmm));
+      top[F("Morning Rush Hour Start")]   = hhmm;
+      formatHHMM(amRushEndTime, hhmm, sizeof(hhmm));
+      top[F("Morning Rush Hour End")]     = hhmm;
+      formatHHMM(pmRushStartTime, hhmm, sizeof(hhmm));
+      top[F("Evening Rush Hour Start")]   = hhmm;
+      formatHHMM(pmRushEndTime, hhmm, sizeof(hhmm));
+      top[F("Evening Rush Hour End")]     = hhmm;
+      top[F("Rush Hour Train Headway")]   = rushHeadwayTimeSeconds / 60.0f;
       top[F("Station Dwell Time (seconds)")] = stationDwellTimeS;
       top[F("Plot Refresh Interval (ms)")] = plotRefreshIntervalMs;
       top[F("Fade Milliseconds")]         = aslFadeMs;
@@ -561,6 +598,20 @@ class UsermodASL : public Usermod {
       headwayTimeSeconds = (headwayMin > 0.0f) ? (uint32_t)(headwayMin * 60.0f + 0.5f) : 0;
       if (headwayTimeSeconds == 0) headwayTimeSeconds = DEF_HEADWAY_S; // missing, non-positive, or rounds to zero
 
+      configComplete &= getJsonValue(top[F("Morning Rush Hour Start")], hhmm, "");
+      amRushStartTime = parseHHMM(hhmm.c_str(), DEF_AM_RUSH_START_S);
+      configComplete &= getJsonValue(top[F("Morning Rush Hour End")], hhmm, "");
+      amRushEndTime   = parseHHMM(hhmm.c_str(), DEF_AM_RUSH_END_S);
+      configComplete &= getJsonValue(top[F("Evening Rush Hour Start")], hhmm, "");
+      pmRushStartTime = parseHHMM(hhmm.c_str(), DEF_PM_RUSH_START_S);
+      configComplete &= getJsonValue(top[F("Evening Rush Hour End")], hhmm, "");
+      pmRushEndTime   = parseHHMM(hhmm.c_str(), DEF_PM_RUSH_END_S);
+
+      // 0 (or negative) rush headway = rush disabled; missing = default 3 min
+      float rushMin = 0.0f;
+      configComplete &= getJsonValue(top[F("Rush Hour Train Headway")], rushMin, DEF_RUSH_HEADWAY_S / 60.0f);
+      rushHeadwayTimeSeconds = (rushMin > 0.0f) ? (uint32_t)(rushMin * 60.0f + 0.5f) : 0;
+
       // any open/close combination is valid: close before open wraps past
       // midnight, open == close means 24-hour service
 
@@ -583,11 +634,15 @@ class UsermodASL : public Usermod {
       // upgrade the open/close text fields to native HH:MM time pickers;
       // [0] of each named pair is the hidden type field, [1] the visible input
       settingsScript.printf_P(PSTR(
-        "for(let n of['System Open Time','System Close Time']){"
+        "for(let n of['System Open Time','System Close Time',"
+          "'Morning Rush Hour Start','Morning Rush Hour End',"
+          "'Evening Rush Hour Start','Evening Rush Hour End']){"
           "let f=d.getElementsByName('%s:'+n);"
           "if(f[1]){f[1].type='time';f[1].style.width='120px';}}"), _name);
       settingsScript.printf_P(PSTR("addInfo('%s:System Close Time',1,'earlier than open = service past midnight; equal = 24h');"), _name);
       settingsScript.printf_P(PSTR("addInfo('%s:Train Headway',1,'minutes between departures (decimals ok)');"), _name);
+      settingsScript.printf_P(PSTR("addInfo('%s:Morning Rush Hour End',1,'rush windows are same-day; start at/after end disables one');"), _name);
+      settingsScript.printf_P(PSTR("addInfo('%s:Rush Hour Train Headway',1,'minutes between departures in rush windows (0 = no rush service)');"), _name);
       settingsScript.printf_P(PSTR("addInfo('%s:API Key',1,'WMATA key, only used in live mode');"), _name);
       settingsScript.printf_P(PSTR("addInfo('%s:Fade Milliseconds',1,'train appear/vanish fade (0 = instant, max 5000)');"), _name);
       settingsScript.printf_P(PSTR("addInfo('%s:Gamma',1,'motion anti-alias brightness curve, 1 = linear');"), _name);
