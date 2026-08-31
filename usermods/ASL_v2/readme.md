@@ -31,13 +31,9 @@ refresh, resolving actual colors from the segment's color slots at draw time:
 | Bg (2nd) | train |
 | Cs (3rd) | station |
 
-Each effect also exposes two per-segment sliders that scale those colors at
-draw time (both default to full, and global brightness applies on top):
-
-| Slider | Controls |
-|---|---|
-| Train brightness (intensity) | train pixels |
-| Station brightness (custom1) | station pixels |
+Element brightness is set through the color itself (the picker's value
+slider); segment opacity dims a whole line, and global brightness applies on
+top of everything.
 
 Trains render with two-LED anti-aliasing: a sprite at LED 47.4 lights LED 47
 at 60% and LED 48 at 40% coverage, with weights boosted through a perceptual
