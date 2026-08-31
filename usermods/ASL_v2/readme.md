@@ -68,7 +68,7 @@ plot cycle.
 | Enable Train Sim Mode | on | off = fetch live WMATA data |
 | Server Address | WMATA TrainPositions URL | `api_key` is appended automatically |
 | API Key | *(empty)* | live mode does nothing without it |
-| System Open/Close Time | 05:00 / 22:00 | HH:MM time pickers; first/last train departure (sim). Same-day only — close must be after open or both reset to defaults |
+| System Open/Close Time | 05:00 / 22:00 | HH:MM time pickers; first/last train departure (sim). Close earlier than open wraps past midnight (e.g. 22:00–02:00); equal times = 24-hour service |
 | Train Headway | 6 | minutes between departures, decimals ok (sim); stored as seconds internally |
 | Station Dwell Time (seconds) | 10 | time at each station (sim) |
 | Plot Refresh Interval (ms) | 5000 | data refresh + glide duration; keep ≥ 3500 in live mode or WMATA will get angry |

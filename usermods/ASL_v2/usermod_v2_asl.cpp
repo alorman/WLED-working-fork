@@ -306,20 +306,24 @@ class UsermodASL : public Usermod {
 
     // simulate all trains currently en route on one track of one line:
     // a train departs every headway between open and close; its position is the
-    // segment whose cumulative arrival time brackets "now - departure".
+    // segment whose cumulative arrival time brackets "now - departure". All
+    // schedule math is modulo 24h, so service may span midnight (close before
+    // open) and late runs keep going past the date line.
     void offlineSimTrains(const char* lineCode, uint8_t dir,
                           const uint16_t trackSegs[], uint16_t segCount,
                           const uint16_t addDelay[], uint16_t delayCount) {
       if (delayCount == 0 || headwayTimeSeconds == 0) return;
-      uint32_t opDuration  = systemLastTrainTime - systemFirstTrainTime;
+      uint32_t opDuration = (systemLastTrainTime > systemFirstTrainTime)
+                          ? systemLastTrainTime - systemFirstTrainTime
+                          : 86400UL - systemFirstTrainTime + systemLastTrainTime; // wraps past midnight; open == close = 24h
       uint32_t numSimTrains = opDuration / headwayTimeSeconds + 1;
       uint32_t runDuration = addDelay[delayCount - 1]; // total end-to-end run time
       uint16_t lastSeg = (segCount < delayCount) ? segCount : delayCount;
 
       for (uint32_t i = 0; i < numSimTrains; i++) {
-        uint32_t departure = systemFirstTrainTime + i * headwayTimeSeconds;
-        if (secondOfDay <= departure || secondOfDay >= departure + runDuration) continue;
-        uint32_t t = secondOfDay - departure; // seconds into this train's run
+        uint32_t departure = (systemFirstTrainTime + i * headwayTimeSeconds) % 86400UL;
+        uint32_t t = (secondOfDay + 86400UL - departure) % 86400UL; // seconds into this train's run, wrap-safe
+        if (t == 0 || t >= runDuration) continue;
         for (uint16_t y = 0; y < lastSeg; y++) {
           if (t <= addDelay[y] && (y == 0 || t > addDelay[y - 1])) {
             // fractional progress through this segment's time window, applied
@@ -557,6 +561,9 @@ class UsermodASL : public Usermod {
       headwayTimeSeconds = (headwayMin > 0.0f) ? (uint32_t)(headwayMin * 60.0f + 0.5f) : 0;
       if (headwayTimeSeconds == 0) headwayTimeSeconds = DEF_HEADWAY_S; // missing, non-positive, or rounds to zero
 
+      // any open/close combination is valid: close before open wraps past
+      // midnight, open == close means 24-hour service
+
       configComplete &= getJsonValue(top[F("Station Dwell Time (seconds)")], stationDwellTimeS, DEF_DWELL_S);
       configComplete &= getJsonValue(top[F("Plot Refresh Interval (ms)")], plotRefreshIntervalMs, DEF_REFRESH_MS);
       if (plotRefreshIntervalMs < 1000) plotRefreshIntervalMs = 1000;
@@ -567,12 +574,6 @@ class UsermodASL : public Usermod {
       if (aslGamma < 1.0f) aslGamma = 1.0f;
       if (aslGamma > 4.0f) aslGamma = 4.0f;
       aslBuildPerceptLUT(); // gamma may have changed
-
-      // same-day service only: close must be after open
-      if (systemLastTrainTime <= systemFirstTrainTime) {
-        systemFirstTrainTime = DEF_OPEN_S;
-        systemLastTrainTime  = DEF_CLOSE_S;
-      }
 
       delaysRacked = false; // timing settings may have changed; re-rack on next loop
       return configComplete;
@@ -585,6 +586,7 @@ class UsermodASL : public Usermod {
         "for(let n of['System Open Time','System Close Time']){"
           "let f=d.getElementsByName('%s:'+n);"
           "if(f[1]){f[1].type='time';f[1].style.width='120px';}}"), _name);
+      settingsScript.printf_P(PSTR("addInfo('%s:System Close Time',1,'earlier than open = service past midnight; equal = 24h');"), _name);
       settingsScript.printf_P(PSTR("addInfo('%s:Train Headway',1,'minutes between departures (decimals ok)');"), _name);
       settingsScript.printf_P(PSTR("addInfo('%s:API Key',1,'WMATA key, only used in live mode');"), _name);
       settingsScript.printf_P(PSTR("addInfo('%s:Fade Milliseconds',1,'train appear/vanish fade (0 = instant, max 5000)');"), _name);
