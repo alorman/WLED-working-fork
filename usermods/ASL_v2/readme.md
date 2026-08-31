@@ -5,8 +5,8 @@ Green, Orange, Yellow) are rendered with stations as fixed dots and trains as
 moving pixels. Train positions come from either:
 
 - **Live mode**: the [WMATA TrainPositions API](https://developer.wmata.com/) (requires an API key), or
-- **Sim mode**: an offline schedule simulator (trains depart every *headway*
-  seconds between the open and close times and move along a per-segment
+- **Sim mode**: an offline schedule simulator (a train departs every *headway*
+  interval between the open and close times and moves along a per-segment
   cumulative timetable).
 
 This is the modern self-contained port of the original `ASL_v2` usermod
@@ -49,10 +49,14 @@ next plot cycle.
 | Enable Train Sim Mode | on | off = fetch live WMATA data |
 | Server Address | WMATA TrainPositions URL | `api_key` is appended automatically |
 | API Key | *(empty)* | live mode does nothing without it |
-| System Open/Close Time (s) | 0 / 79200 | second-of-day first/last train departs (sim) |
-| Headway Between Trains (s) | 360 | departure spacing (sim) |
+| System Open/Close Time | 00:00 / 22:00 | HH:MM time pickers; first/last train departure (sim). Same-day only — close must be after open or both reset to defaults |
+| Train Headway | 6 | minutes between departures, decimals ok (sim); stored as seconds internally |
 | Station Dwell Time (s) | 10 | time at each station (sim) |
 | Plot Refresh Interval (ms) | 5000 | keep ≥ 3500 or WMATA will get angry |
+
+Open/close times are stored in `cfg.json` as `"HH:MM"` strings and headway as
+minutes. Missing or invalid entries fall back to the defaults above (defined
+once as `DEF_*` constants in the usermod).
 
 Changing timing settings re-racks the computed delay tables automatically.
 

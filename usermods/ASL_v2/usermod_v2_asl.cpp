@@ -61,19 +61,30 @@ class UsermodASL : public Usermod {
   private:
     static const uint16_t MAX_TRAINS = 100;
 
+    // factory defaults — single source of truth: they initialize the members
+    // below, back every readFromConfig fallback, and thus pre-populate the
+    // settings boxes on a device with no saved config
+    static const uint32_t DEF_OPEN_S     = 0;      // 00:00
+    static const uint32_t DEF_CLOSE_S    = 79200;  // 22:00
+    static const uint32_t DEF_HEADWAY_S  = 360;    // 6 min
+    static const uint32_t DEF_DWELL_S    = 10;
+    static const uint32_t DEF_REFRESH_MS = 5000;
+
     bool enabled = true;
     bool initDone = false;
     unsigned long lastTime = 0;
 
     // ---- config (usermod settings page) ----
+    // times are stored internally as seconds; in cfg.json open/close are "HH:MM"
+    // strings and headway is minutes (decimals ok), converted in read/addToConfig
     bool     simModeEnable = true;
     String   serverAddress = "http://api.wmata.com/TrainPositions/TrainPositions?contentType=json";
     String   apiKey = "";
-    uint32_t systemFirstTrainTime = 0;      // second of day the first train departs
-    uint32_t systemLastTrainTime  = 79200;  // second of day the last train departs
-    uint32_t headwayTimeSeconds   = 360;    // time between train departures
-    uint32_t stationDwellTimeS    = 10;     // sim: time each train sits at a station
-    uint32_t plotRefreshIntervalMs = 5000;  // data refresh; below ~3.5s angers WMATA servers
+    uint32_t systemFirstTrainTime = DEF_OPEN_S;    // second of day the first train departs
+    uint32_t systemLastTrainTime  = DEF_CLOSE_S;   // second of day the last train departs
+    uint32_t headwayTimeSeconds   = DEF_HEADWAY_S; // seconds between train departures
+    uint32_t stationDwellTimeS    = DEF_DWELL_S;   // sim: time each train sits at a station
+    uint32_t plotRefreshIntervalMs = DEF_REFRESH_MS; // data refresh; below ~3.5s angers WMATA servers
 
     // ---- runtime state ----
     uint32_t secondOfDay = 0;
@@ -95,6 +106,18 @@ class UsermodASL : public Usermod {
     // rounded linear map of a circuit ID within its domain onto an LED range
     static int mapRound(int x, int in_min, int in_max, int out_min, int out_max) {
       return (x - in_min) * (out_max - out_min + 1) / (in_max - in_min + 1) + out_min;
+    }
+
+    // "HH:MM" -> second of day; returns fallback on malformed/out-of-range input
+    static uint32_t parseHHMM(const char* s, uint32_t fallback) {
+      int h = -1, m = -1;
+      if (!s || sscanf(s, "%d:%d", &h, &m) != 2) return fallback;
+      if (h < 0 || h > 23 || m < 0 || m > 59) return fallback;
+      return h * 3600UL + m * 60UL;
+    }
+
+    static void formatHHMM(uint32_t secOfDay, char* buf, size_t len) {
+      snprintf(buf, len, "%02u:%02u", (unsigned)(secOfDay / 3600UL) % 24, (unsigned)((secOfDay / 60UL) % 60));
     }
 
     void clearTrains() { numTrains = 0; }
@@ -325,9 +348,12 @@ class UsermodASL : public Usermod {
       top[F("Enable Train Sim Mode")]     = simModeEnable;
       top[F("Server Address")]            = serverAddress;
       top[F("API Key")]                   = apiKey;
-      top[F("System Open Time (s)")]      = systemFirstTrainTime;
-      top[F("System Close Time (s)")]     = systemLastTrainTime;
-      top[F("Headway Between Trains (s)")] = headwayTimeSeconds;
+      char hhmm[6];
+      formatHHMM(systemFirstTrainTime, hhmm, sizeof(hhmm));
+      top[F("System Open Time")]          = hhmm;
+      formatHHMM(systemLastTrainTime, hhmm, sizeof(hhmm));
+      top[F("System Close Time")]         = hhmm;
+      top[F("Train Headway")]             = headwayTimeSeconds / 60.0f;
       top[F("Station Dwell Time (s)")]    = stationDwellTimeS;
       top[F("Plot Refresh Interval (ms)")] = plotRefreshIntervalMs;
     }
@@ -340,15 +366,41 @@ class UsermodASL : public Usermod {
       configComplete &= getJsonValue(top[F("Enable Train Sim Mode")], simModeEnable, true);
       configComplete &= getJsonValue(top[F("Server Address")], serverAddress);
       configComplete &= getJsonValue(top[F("API Key")], apiKey);
-      configComplete &= getJsonValue(top[F("System Open Time (s)")], systemFirstTrainTime, 0);
-      configComplete &= getJsonValue(top[F("System Close Time (s)")], systemLastTrainTime, 79200);
-      configComplete &= getJsonValue(top[F("Headway Between Trains (s)")], headwayTimeSeconds, 360);
-      configComplete &= getJsonValue(top[F("Station Dwell Time (s)")], stationDwellTimeS, 10);
-      configComplete &= getJsonValue(top[F("Plot Refresh Interval (ms)")], plotRefreshIntervalMs, 5000);
+
+      String hhmm;
+      configComplete &= getJsonValue(top[F("System Open Time")], hhmm, "");
+      systemFirstTrainTime = parseHHMM(hhmm.c_str(), DEF_OPEN_S);
+      configComplete &= getJsonValue(top[F("System Close Time")], hhmm, "");
+      systemLastTrainTime  = parseHHMM(hhmm.c_str(), DEF_CLOSE_S);
+
+      float headwayMin = 0.0f;
+      configComplete &= getJsonValue(top[F("Train Headway")], headwayMin, 0.0f);
+      headwayTimeSeconds = (headwayMin > 0.0f) ? (uint32_t)(headwayMin * 60.0f + 0.5f) : 0;
+      if (headwayTimeSeconds == 0) headwayTimeSeconds = DEF_HEADWAY_S; // missing, non-positive, or rounds to zero
+
+      configComplete &= getJsonValue(top[F("Station Dwell Time (s)")], stationDwellTimeS, DEF_DWELL_S);
+      configComplete &= getJsonValue(top[F("Plot Refresh Interval (ms)")], plotRefreshIntervalMs, DEF_REFRESH_MS);
       if (plotRefreshIntervalMs < 1000) plotRefreshIntervalMs = 1000;
+
+      // same-day service only: close must be after open
+      if (systemLastTrainTime <= systemFirstTrainTime) {
+        systemFirstTrainTime = DEF_OPEN_S;
+        systemLastTrainTime  = DEF_CLOSE_S;
+      }
 
       delaysRacked = false; // timing settings may have changed; re-rack on next loop
       return configComplete;
+    }
+
+    void appendConfigData(Print& settingsScript) override {
+      // upgrade the open/close text fields to native HH:MM time pickers;
+      // [0] of each named pair is the hidden type field, [1] the visible input
+      settingsScript.printf_P(PSTR(
+        "for(let n of['System Open Time','System Close Time']){"
+          "let f=d.getElementsByName('%s:'+n);"
+          "if(f[1]){f[1].type='time';f[1].style.width='120px';}}"), _name);
+      settingsScript.printf_P(PSTR("addInfo('%s:Train Headway',1,'minutes between departures (decimals ok)');"), _name);
+      settingsScript.printf_P(PSTR("addInfo('%s:API Key',1,'WMATA key, only used in live mode');"), _name);
     }
 
     uint16_t getId() override { return USERMOD_ID_UNSPECIFIED; }
