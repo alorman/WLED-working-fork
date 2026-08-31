@@ -26,15 +26,15 @@
  *
  * Setup: create one segment per line sized to that line's LED count, assign
  * the matching ASL effect, and set the three segment colors:
- *   Fx (1st) = track, Bg (2nd) = train, Cs (3rd) = station.
+ *   Fx (1st) = train, Bg (2nd) = station, Cs (3rd) = track.
  * Element brightness is part of the picked color (the picker's value slider);
  * segment opacity dims a whole line and global brightness applies on top.
  */
 
 // pixel meaning codes; value doubles as the SEGCOLOR() slot index
-#define ASL_PX_TRACK   0
-#define ASL_PX_TRAIN   1   // color slot only — trains render as moving sprites, not frame pixels
-#define ASL_PX_STATION 2
+#define ASL_PX_TRAIN   0   // color slot only — trains render as moving sprites, not frame pixels
+#define ASL_PX_STATION 1
+#define ASL_PX_TRACK   2
 
 // line indices into aslLines[]; order matches the effect registration order
 #define ASL_LINE_RED    0
@@ -207,11 +207,11 @@ static void mode_asl_green(void)  { aslDrawFrame(GreenFrame,  sizeof(GreenFrame)
 static void mode_asl_orange(void) { aslDrawFrame(OrangeFrame, sizeof(OrangeFrame), ASL_LINE_ORANGE); }
 static void mode_asl_yellow(void) { aslDrawFrame(YellowFrame, sizeof(YellowFrame), ASL_LINE_YELLOW); }
 
-static const char _data_FX_ASL_RED[]    PROGMEM = "ASL Red Line@;Track,Train,Station;;1";
-static const char _data_FX_ASL_BLUE[]   PROGMEM = "ASL Blue Line@;Track,Train,Station;;1";
-static const char _data_FX_ASL_GREEN[]  PROGMEM = "ASL Green Line@;Track,Train,Station;;1";
-static const char _data_FX_ASL_ORANGE[] PROGMEM = "ASL Orange Line@;Track,Train,Station;;1";
-static const char _data_FX_ASL_YELLOW[] PROGMEM = "ASL Yellow Line@;Track,Train,Station;;1";
+static const char _data_FX_ASL_RED[]    PROGMEM = "ASL Red Line@;Train,Station,Track;;1";
+static const char _data_FX_ASL_BLUE[]   PROGMEM = "ASL Blue Line@;Train,Station,Track;;1";
+static const char _data_FX_ASL_GREEN[]  PROGMEM = "ASL Green Line@;Train,Station,Track;;1";
+static const char _data_FX_ASL_ORANGE[] PROGMEM = "ASL Orange Line@;Train,Station,Track;;1";
+static const char _data_FX_ASL_YELLOW[] PROGMEM = "ASL Yellow Line@;Train,Station,Track;;1";
 
 
 class UsermodASL : public Usermod {

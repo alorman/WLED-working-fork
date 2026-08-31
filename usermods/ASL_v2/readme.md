@@ -27,9 +27,9 @@ refresh, resolving actual colors from the segment's color slots at draw time:
 
 | Segment color slot | Meaning |
 |---|---|
-| Fx (1st) | track (background) |
-| Bg (2nd) | train |
-| Cs (3rd) | station |
+| Fx (1st) | train |
+| Bg (2nd) | station |
+| Cs (3rd) | track (background) |
 
 Element brightness is set through the color itself (the picker's value
 slider); segment opacity dims a whole line, and global brightness applies on
