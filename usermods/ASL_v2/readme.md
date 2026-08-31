@@ -37,14 +37,15 @@ top of everything.
 
 Trains render with two-LED anti-aliasing: a sprite at LED 47.4 lights LED 47
 at 60% and LED 48 at 40% coverage, with weights boosted through a perceptual
-(inverse-gamma, exponent `ASL_AA_GAMMA` = 2.2) curve so apparent brightness
-stays constant mid-glide. New trains fade in (`ASL_FADE_MS` = 400 ms),
-vanished trains get one plot cycle of grace (live data routinely drops a
-train for one fetch) then fade out, and moves larger than `ASL_TELEPORT_LEDS`
-(8) dissolve out+in instead of gliding — junk or reacquired API data, or a
-turnback at a terminal (direction is part of the sprite identity). UI
-transitions are left to the WLED core, and color changes apply instantly
-without waiting for the next plot cycle.
+inverse-gamma curve (the **Gamma** setting, default 2.2) so apparent
+brightness stays constant mid-glide. New trains fade in over the **Fade
+Milliseconds** setting (default 400 ms), vanished trains get one plot cycle
+of grace (live data routinely drops a train for one fetch) then fade out, and
+moves larger than `ASL_TELEPORT_LEDS` (8, compile-time) dissolve out+in
+instead of gliding — junk or reacquired API data, or a turnback at a terminal
+(direction is part of the sprite identity). UI transitions are left to the
+WLED core, and color changes apply instantly without waiting for the next
+plot cycle.
 
 ## Setup
 
@@ -66,7 +67,9 @@ without waiting for the next plot cycle.
 | System Open/Close Time | 05:00 / 22:00 | HH:MM time pickers; first/last train departure (sim). Same-day only — close must be after open or both reset to defaults |
 | Train Headway | 6 | minutes between departures, decimals ok (sim); stored as seconds internally |
 | Station Dwell Time (seconds) | 10 | time at each station (sim) |
-| Plot Refresh Interval (ms) | 5000 | keep ≥ 3500 or WMATA will get angry |
+| Plot Refresh Interval (ms) | 5000 | data refresh + glide duration; keep ≥ 3500 in live mode or WMATA will get angry |
+| Fade Milliseconds | 400 | train appear/vanish fade (0 = instant, clamped to 5000) |
+| Gamma | 2.2 | motion anti-alias brightness curve (1 = linear, clamped 1–4) |
 
 Open/close times are stored in `cfg.json` as `"HH:MM"` strings and headway as
 minutes. Missing or invalid entries fall back to the defaults above (defined

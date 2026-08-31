@@ -74,10 +74,14 @@ static const AslLineDef aslLines[5] = {
 // Trains are not baked into the frames; each is a sprite gliding toward the
 // fractional LED position of its latest data point, re-targeted every plot
 // cycle and rendered with two-LED anti-aliasing at the strip frame rate.
-#define ASL_MAX_SPRITES   128   // active trains (<= MAX_TRAINS) + fading ghosts
-#define ASL_FADE_MS       400   // spawn/despawn fade; also each half of a dissolve
-#define ASL_TELEPORT_LEDS 8.0f  // moves larger than this dissolve instead of gliding
-#define ASL_AA_GAMMA      2.2f  // perceptual boost exponent for coverage weights
+#define ASL_MAX_SPRITES    128   // active trains (<= MAX_TRAINS) + fading ghosts
+#define ASL_DEF_FADE_MS    400   // default spawn/despawn fade ("Fade Milliseconds" setting)
+#define ASL_TELEPORT_LEDS  8.0f  // moves larger than this dissolve instead of gliding
+#define ASL_DEF_AA_GAMMA   2.2f  // default perceptual boost exponent ("Gamma" setting)
+
+// runtime-tunable sprite settings (usermod settings page)
+static uint16_t aslFadeMs = ASL_DEF_FADE_MS;  // spawn/despawn fade; also each half of a dissolve
+static float    aslGamma  = ASL_DEF_AA_GAMMA; // anti-alias brightness curve, 1.0 = linear
 
 enum : uint8_t { ASL_SPR_FREE = 0, ASL_SPR_LIVE = 1, ASL_SPR_GHOST = 2 };
 
@@ -96,7 +100,15 @@ struct AslSprite {
 };
 
 static AslSprite aslSprites[ASL_MAX_SPRITES];
-static uint8_t aslPerceptLUT[256]; // coverage -> blend amount, filled in setup()
+static uint8_t aslPerceptLUT[256]; // coverage -> blend amount
+
+// perceptual anti-alias curve: boost fractional coverage by 1/gamma so a train
+// split across two LEDs reads as bright as one fully lit LED; rebuilt whenever
+// the Gamma setting changes
+static void aslBuildPerceptLUT() {
+  for (int i = 0; i < 256; i++)
+    aslPerceptLUT[i] = (uint8_t)(powf((float)i / 255.0f, 1.0f / aslGamma) * 255.0f + 0.5f);
+}
 
 // eased (smoothstep) sprite position: accelerates away from a stop, brakes
 // into the next one
@@ -112,7 +124,7 @@ static float aslSpritePos(const AslSprite& s, uint32_t nowMs) {
 // current fade alpha (0-255): rises after spawn, falls after ghosting
 static uint8_t aslSpriteAlpha(const AslSprite& s, uint32_t nowMs) {
   uint32_t el = nowMs - s.fadeStartMs;
-  uint32_t a  = (el >= ASL_FADE_MS) ? 255 : (el * 255) / ASL_FADE_MS;
+  uint32_t a  = (aslFadeMs == 0 || el >= aslFadeMs) ? 255 : (el * 255) / aslFadeMs;
   return (s.mode == ASL_SPR_GHOST) ? (uint8_t)(255 - a) : (uint8_t)a;
 }
 
@@ -401,7 +413,7 @@ class UsermodASL : public Usermod {
     // dissolve out+in instead of gliding (junk/reacquired API data)
     void updateTrainSprites(uint32_t nowMs) {
       for (auto &s : aslSprites) {
-        if (s.mode == ASL_SPR_GHOST && nowMs - s.fadeStartMs >= ASL_FADE_MS) s.mode = ASL_SPR_FREE;
+        if (s.mode == ASL_SPR_GHOST && nowMs - s.fadeStartMs >= aslFadeMs) s.mode = ASL_SPR_FREE;
         s.seen = false;
       }
       for (uint16_t i = 0; i < numTrains; i++) {
@@ -448,10 +460,7 @@ class UsermodASL : public Usermod {
 
   public:
     void setup() override {
-      // perceptual anti-alias curve: boost fractional coverage by 1/gamma so a
-      // train split across two LEDs reads as bright as one fully lit LED
-      for (int i = 0; i < 256; i++)
-        aslPerceptLUT[i] = (uint8_t)(powf((float)i / 255.0f, 1.0f / ASL_AA_GAMMA) * 255.0f + 0.5f);
+      aslBuildPerceptLUT(); // usually already built by readFromConfig; harmless to redo
       strip.addEffect(255, &mode_asl_red,    _data_FX_ASL_RED);
       strip.addEffect(255, &mode_asl_blue,   _data_FX_ASL_BLUE);
       strip.addEffect(255, &mode_asl_green,  _data_FX_ASL_GREEN);
@@ -509,6 +518,8 @@ class UsermodASL : public Usermod {
       top[F("Train Headway")]             = headwayTimeSeconds / 60.0f;
       top[F("Station Dwell Time (seconds)")] = stationDwellTimeS;
       top[F("Plot Refresh Interval (ms)")] = plotRefreshIntervalMs;
+      top[F("Fade Milliseconds")]         = aslFadeMs;
+      top[F("Gamma")]                     = aslGamma;
     }
 
     bool readFromConfig(JsonObject& root) override {
@@ -535,6 +546,13 @@ class UsermodASL : public Usermod {
       configComplete &= getJsonValue(top[F("Plot Refresh Interval (ms)")], plotRefreshIntervalMs, DEF_REFRESH_MS);
       if (plotRefreshIntervalMs < 1000) plotRefreshIntervalMs = 1000;
 
+      configComplete &= getJsonValue(top[F("Fade Milliseconds")], aslFadeMs, (uint16_t)ASL_DEF_FADE_MS);
+      if (aslFadeMs > 5000) aslFadeMs = 5000;
+      configComplete &= getJsonValue(top[F("Gamma")], aslGamma, ASL_DEF_AA_GAMMA);
+      if (aslGamma < 1.0f) aslGamma = 1.0f;
+      if (aslGamma > 4.0f) aslGamma = 4.0f;
+      aslBuildPerceptLUT(); // gamma may have changed
+
       // same-day service only: close must be after open
       if (systemLastTrainTime <= systemFirstTrainTime) {
         systemFirstTrainTime = DEF_OPEN_S;
@@ -554,6 +572,8 @@ class UsermodASL : public Usermod {
           "if(f[1]){f[1].type='time';f[1].style.width='120px';}}"), _name);
       settingsScript.printf_P(PSTR("addInfo('%s:Train Headway',1,'minutes between departures (decimals ok)');"), _name);
       settingsScript.printf_P(PSTR("addInfo('%s:API Key',1,'WMATA key, only used in live mode');"), _name);
+      settingsScript.printf_P(PSTR("addInfo('%s:Fade Milliseconds',1,'train appear/vanish fade (0 = instant, max 5000)');"), _name);
+      settingsScript.printf_P(PSTR("addInfo('%s:Gamma',1,'motion anti-alias brightness curve, 1 = linear');"), _name);
     }
 
     uint16_t getId() override { return USERMOD_ID_UNSPECIFIED; }
