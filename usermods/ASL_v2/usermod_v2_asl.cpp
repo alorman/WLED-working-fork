@@ -15,6 +15,9 @@
  *    LED: track or station) and reconciles the train table into a sprite
  *    list: each train glides from where it is rendered to the fractional LED
  *    of its latest data point over one plot interval, easing in/out of stops.
+ *    Circuits flow through the pipeline as floats: the sim interpolates exact
+ *    positions from its timetable (continuous motion at any refresh rate),
+ *    while live data stays quantized to WMATA's integer circuits.
  *  - Five registered effects ("ASL Red Line" etc.) draw scenery + sprites on
  *    every strip refresh, resolving colors live from the segment's color
  *    slots. Sprites render with two-LED anti-aliasing through a perceptual
@@ -129,12 +132,15 @@ static uint8_t aslSpriteAlpha(const AslSprite& s, uint32_t nowMs) {
 }
 
 // fractional LED for one track's data point: station snap (+/-1 circuit)
-// first, then linear interpolation within the containing domain — the float
-// analogue of the old integer mapRound() plot
-static bool aslTargetForTrack(const AslLineDef& L, uint8_t track, uint32_t circuit, float& out) {
+// first, then linear interpolation within the containing domain. Circuits are
+// float: live data is integer-valued, the sim interpolates between circuits.
+// The snap must stay at +/-1 — station circuits sit in the gaps between
+// domains, so it is what catches positions there (and it renders a dwelling
+// train parked on the station LED while its simulated position creeps).
+static bool aslTargetForTrack(const AslLineDef& L, uint8_t track, float circuit, float& out) {
   const uint16_t* segs = L.stationSegs[track];
   for (uint16_t x = 0; x < L.numStations; x++) {
-    if (circuit + 1 >= segs[x] && circuit <= (uint32_t)segs[x] + 1) {
+    if (fabsf(circuit - (float)segs[x]) <= 1.0f) {
       out = (float)L.stationLEDPos[x];
       return true;
     }
@@ -144,7 +150,7 @@ static bool aslTargetForTrack(const AslLineDef& L, uint8_t track, uint32_t circu
     if (circuit >= dom[y][0] && circuit <= dom[y][1]) {
       uint16_t c0 = dom[y][0], c1 = dom[y][1];
       uint16_t l0 = L.ledArray[y][0], l1 = L.ledArray[y][1];
-      out = (c1 > c0) ? (float)l0 + (float)(circuit - c0) * (float)(l1 - l0) / (float)(c1 - c0)
+      out = (c1 > c0) ? (float)l0 + (circuit - (float)c0) * (float)(l1 - l0) / (float)(c1 - c0)
                       : 0.5f * (float)(l0 + l1);
       return true;
     }
@@ -152,7 +158,7 @@ static bool aslTargetForTrack(const AslLineDef& L, uint8_t track, uint32_t circu
   return false;
 }
 
-static bool aslTargetLED(uint8_t lineIdx, uint32_t circuit, float& out) {
+static bool aslTargetLED(uint8_t lineIdx, float circuit, float& out) {
   const AslLineDef& L = aslLines[lineIdx];
   return aslTargetForTrack(L, 0, circuit, out) || aslTargetForTrack(L, 1, circuit, out);
 }
@@ -262,7 +268,7 @@ class UsermodASL : public Usermod {
     // train table (compact; one entry per active train this cycle)
     uint16_t numTrains = 0;
     uint32_t trainId[MAX_TRAINS];
-    uint32_t trainCircuit[MAX_TRAINS];
+    float    trainCircuit[MAX_TRAINS]; // fractional: sim interpolates between circuits, live is integer-valued
     uint8_t  trainDirection[MAX_TRAINS];
     uint8_t  trainCars[MAX_TRAINS];
     uint8_t  trainSecondsAtLoc[MAX_TRAINS];
@@ -286,7 +292,7 @@ class UsermodASL : public Usermod {
 
     void clearTrains() { numTrains = 0; }
 
-    void injectSimTrain(uint16_t simIdx, uint8_t dir, uint16_t circuit, const char* lineCode) {
+    void injectSimTrain(uint16_t simIdx, uint8_t dir, float circuit, const char* lineCode) {
       if (numTrains >= MAX_TRAINS) return;
       uint16_t i = numTrains++;
       trainId[i]           = simIdx + 1;
@@ -316,7 +322,16 @@ class UsermodASL : public Usermod {
         uint32_t t = secondOfDay - departure; // seconds into this train's run
         for (uint16_t y = 0; y < lastSeg; y++) {
           if (t <= addDelay[y] && (y == 0 || t > addDelay[y - 1])) {
-            injectSimTrain(i, dir, trackSegs[y], lineCode);
+            // fractional progress through this segment's time window, applied
+            // toward the next circuit — exact position, not just "in segment y"
+            float fc = (float)trackSegs[y];
+            uint32_t t0 = (y == 0) ? 0 : addDelay[y - 1];
+            if (y + 1 < lastSeg && addDelay[y] > t0) {
+              int32_t delta = (int32_t)trackSegs[y + 1] - (int32_t)trackSegs[y];
+              if (delta >= -2 && delta <= 2) // consecutive circuits only; hold across numbering discontinuities
+                fc += ((float)(t - t0) / (float)(addDelay[y] - t0)) * (float)delta;
+            }
+            injectSimTrain(i, dir, fc, lineCode);
             break;
           }
         }
@@ -385,7 +400,7 @@ class UsermodASL : public Usermod {
       for (uint16_t i = 0; i < n; i++) {
         JsonObject t = positions[i];
         trainId[i]           = t["TrainId"] | 0UL;
-        trainCircuit[i]      = t["CircuitId"] | 0UL;
+        trainCircuit[i]      = (float)(t["CircuitId"] | 0UL);
         trainDirection[i]    = t["DirectionNum"] | 0;
         trainCars[i]         = t["CarCount"] | 0;
         trainSecondsAtLoc[i] = t["SecondsAtLocation"] | 0;

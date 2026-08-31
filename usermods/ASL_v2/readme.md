@@ -21,9 +21,13 @@ Every *Plot Refresh Interval* the usermod computes a per-line scenery frame
 (one byte per LED: track / station) and reconciles the train data into a
 sprite list: each train glides from where it is currently rendered to the
 fractional LED position of its latest data point over one plot interval,
-easing out of and into stops (smoothstep). The five registered effects
-("ASL Red Line" … "ASL Yellow Line") paint scenery + sprites on every strip
-refresh, resolving actual colors from the segment's color slots at draw time:
+easing out of and into stops (smoothstep). Circuits flow through the pipeline
+as floats: the sim interpolates exact fractional positions from its timetable
+(continuous motion, no inchworming between circuit boundaries), while live
+data is naturally quantized to WMATA's integer circuits. The five registered
+effects ("ASL Red Line" … "ASL Yellow Line") paint scenery + sprites on every
+strip refresh, resolving actual colors from the segment's color slots at draw
+time:
 
 | Segment color slot | Meaning |
 |---|---|
