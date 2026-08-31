@@ -28,6 +28,14 @@ resolving actual colors from the segment's color slots at draw time:
 | Bg (2nd) | train |
 | Cs (3rd) | station |
 
+Each effect also exposes two per-segment sliders that scale those colors at
+draw time (both default to full, and global brightness applies on top):
+
+| Slider | Controls |
+|---|---|
+| Train brightness (intensity) | train pixels |
+| Station brightness (custom1) | station pixels |
+
 The old hand-rolled per-pixel crossfade is gone — transitions are left to the
 WLED core, and color changes in the UI apply instantly without waiting for the
 next plot cycle.
@@ -49,9 +57,9 @@ next plot cycle.
 | Enable Train Sim Mode | on | off = fetch live WMATA data |
 | Server Address | WMATA TrainPositions URL | `api_key` is appended automatically |
 | API Key | *(empty)* | live mode does nothing without it |
-| System Open/Close Time | 00:00 / 22:00 | HH:MM time pickers; first/last train departure (sim). Same-day only — close must be after open or both reset to defaults |
+| System Open/Close Time | 05:00 / 22:00 | HH:MM time pickers; first/last train departure (sim). Same-day only — close must be after open or both reset to defaults |
 | Train Headway | 6 | minutes between departures, decimals ok (sim); stored as seconds internally |
-| Station Dwell Time (s) | 10 | time at each station (sim) |
+| Station Dwell Time (seconds) | 10 | time at each station (sim) |
 | Plot Refresh Interval (ms) | 5000 | keep ≥ 3500 or WMATA will get angry |
 
 Open/close times are stored in `cfg.json` as `"HH:MM"` strings and headway as
