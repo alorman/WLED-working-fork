@@ -71,12 +71,36 @@ plot cycle.
 ## Setup
 
 1. Build with this usermod (see below) and flash.
-2. Create one segment per line, sized/mapped to that line's LEDs
-   (see `presets-example.json` for the original segment layout; Red=267 LEDs,
-   Blue=298, Green=181, Orange=208, Yellow=184 in the reference build).
+2. Create one segment per line, sized/mapped to that line's LEDs, or simply
+   upload the tracked `presets.json` (see *Presets* below). Reference build
+   strip order: Status LED (1), Blue (298), Green (181), Red (267),
+   Orange (209), Yellow (185) = 1141 LEDs.
 3. Assign each segment its "ASL … Line" effect and set the three colors.
+   The effects always register at the same IDs, so presets keep working
+   across builds and build flags: Red **142**, Blue **169**, Green **170**,
+   Orange **171**, Yellow **220**, Status **221** (`"fx"` in presets). 142 and
+   169–171 are the only slots no stock effect uses; 220/221 are appended
+   after WLED's effect table. If another usermod that appends effects is
+   added, check the IDs (a debug build logs any mismatch).
+   Optionally add a 1-LED segment for a status LED with the "ASL - Status LED"
+   effect (see *Status LED* below).
 4. In Config → Usermods, set either **Enable Train Sim Mode**, or your WMATA
    **API Key** for live data. Live mode also needs NTP time and Wi-Fi.
+
+### Presets
+
+`presets.json` in this folder is the source of truth for the device's
+presets (1 = *Trains and Dim Stations*, 2 = *Only Trains*; both include the
+status LED). Firmware updates (OTA) never touch presets, which live in the
+device's filesystem, so push them separately:
+
+```bash
+curl -F "data=@presets.json;filename=presets.json" http://<wled-ip>/upload
+```
+
+The upload **replaces all presets on the device**: save presets changed on
+the device back into this file (download `http://<wled-ip>/presets.json`)
+before uploading. Uploads are refused while a settings PIN is locked.
 
 ### Usermod settings
 
@@ -121,6 +145,26 @@ The sim runs on WLED's clock, so it is only as right as that clock. Under
   Info panel as *ASL sim time* while active. Also available over the JSON API:
   `{"ASL":{"simAt":"14:30"}}` and `{"ASL":{"simReset":true}}` to `/json/state`.
 
+### Status LED
+
+A sixth effect, **ASL - Status LED** (listed first among the ASL effects), shows the map's health on a status LED (on
+the reference build: the ESP32-S3 board's onboard RGB LED on GPIO48, added in
+LED Preferences as its own 1-LED strip). Put a segment over that LED and
+assign the effect. It uses fixed colors and lets WLED do the dimming, so
+global brightness and segment opacity apply as for the train lines.
+
+| Status LED | Meaning |
+|---|---|
+| red, slow blink | no Wi-Fi **and** no working RTC (missing, or never set): the clock cannot be trusted |
+| amber, fast blink | clock not set yet, or live mode without working data (no API key, no Wi-Fi, last fetch failed) |
+| purple | sim running on a **test time** (see above), not real time |
+| green | live mode, WMATA data arriving |
+| cyan | sim on real time kept by the RTC (offline, as intended) |
+| blue | sim on real time from NTP / network / browser |
+
+"Working RTC" means the RTC set the clock during this boot; it stays counted
+after a later NTP or browser sync.
+
 For offline use (no internet, so no NTP), add the stock RTC usermod
 (DS1307/DS3231 on I2C) next to this one — `custom_usermods = ASL_v2 RTC` —
 and set the global I2C SDA/SCL pins at the top of Config → Usermods. The RTC
@@ -145,15 +189,14 @@ hardware revision.
 
 ## Files
 
-- `usermod_v2_asl.cpp` — usermod class + the five line effects
+- `usermod_v2_asl.cpp` — usermod class, the five line effects and the status LED effect
 - `asl_map_data.h` — static circuit→LED mapping tables (flash-resident)
 - `asl_timing_data.h` — sim timing tables, **generated** from `timing/`
 - `timing/` — measured ride times (`segment_times.csv`), the original
   workbook, `gen_timing.py`, which regenerates `asl_timing_data.h`, and
   `check_map.py`, which checks the map and timing tables (both run by hand;
   not part of the build)
-- `presets-example.json` — the original 5-segment preset; upload to the device
-  filesystem (`/edit`) as `presets.json` or recreate segments manually
+- `presets.json` — the device's presets (source of truth; see *Presets*)
 
 ## Building
 
