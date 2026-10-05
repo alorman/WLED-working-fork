@@ -108,7 +108,7 @@ before uploading. Uploads are refused while a settings PIN is locked.
 |---|---|---|
 | Enable Train Sim Mode | on | off = fetch live WMATA data |
 | Server Address | WMATA TrainPositions URL | `api_key` is appended automatically |
-| API Key | *(empty)* | live mode does nothing without it |
+| API Key | *(empty)* | live mode does nothing without it; spaces and line breaks are removed automatically on save |
 | Plot Refresh Interval (ms) | 5000 | data refresh + glide duration; keep ≥ 3500 in live mode or WMATA will get angry |
 | System Open/Close Time | 05:00 / 00:00 | HH:MM time pickers; first/last train departure (sim), defaults match WMATA weekday hours (5am–midnight). Close earlier than open wraps past midnight (e.g. 22:00–02:00); equal times = 24-hour service |
 | Train Headway | 6 | minutes between departures, decimals ok (sim); stored as seconds internally |

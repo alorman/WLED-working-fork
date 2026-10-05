@@ -830,7 +830,16 @@ class UsermodASL : public Usermod {
       configComplete &= getJsonValue(top[FPSTR(_enabled)], enabled, true);
       configComplete &= getJsonValue(top[F("Enable Train Sim Mode")], simModeEnable, true);
       configComplete &= getJsonValue(top[F("Server Address")], serverAddress);
+      serverAddress.trim(); // stray spaces around a pasted URL
       configComplete &= getJsonValue(top[F("API Key")], apiKey);
+      // WMATA keys are 32 hex characters and never contain whitespace, so drop
+      // all of it (pasted keys often pick up spaces or a line break); runs on
+      // every settings save, and WLED re-saves the cleaned value right after
+      String key;
+      key.reserve(apiKey.length());
+      for (size_t i = 0; i < apiKey.length(); i++)
+        if (!isspace((unsigned char)apiKey[i])) key += apiKey[i];
+      apiKey = key;
 
       String hhmm;
       configComplete &= getJsonValue(top[F("System Open Time")], hhmm, "");
