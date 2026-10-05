@@ -87,6 +87,30 @@ once as `DEF_*` constants in the usermod).
 Saving the settings page rebuilds the sim timetables immediately; no reboot
 is needed.
 
+### Clock and sim test time
+
+The sim runs on WLED's clock, so it is only as right as that clock. Under
+**Enable Train Sim Mode** the settings page shows:
+
+- **Clock** — current local time and where it came from (NTP, RTC,
+  browser / API, or *not set*). The same line appears in the Info panel as
+  *ASL clock*. *Not set* means the sim is drawing the wrong schedule.
+- **Set clock from this device** — sets WLED's clock from the browser's (the
+  same mechanism the main UI uses on every command). With the RTC usermod
+  built, the new time is written to the RTC chip within a second.
+- **Sim test time** + **Apply** / **Real time** — runs the *sim only* as if it
+  were the chosen time, then keeps ticking from there (e.g. view rush hour at
+  2 pm). It is stored as an offset in RAM: never saved to `cfg.json`, cleared
+  by a reboot, and the real clock and RTC chip are never changed. Shown in the
+  Info panel as *ASL sim time* while active. Also available over the JSON API:
+  `{"ASL":{"simAt":"14:30"}}` and `{"ASL":{"simReset":true}}` to `/json/state`.
+
+For offline use (no internet, so no NTP), add the stock RTC usermod
+(DS1307/DS3231 on I2C) next to this one — `custom_usermods = ASL_v2 RTC` —
+and set the global I2C SDA/SCL pins at the top of Config → Usermods. The RTC
+stores UTC, so WLED's timezone/DST rules (Config → Time & Macros) still apply
+offline.
+
 ## How the sim times a run
 
 Each line's run alternates *dwell at station 0, travel to station 1, dwell at
