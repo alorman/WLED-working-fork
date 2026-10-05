@@ -21,10 +21,11 @@
  *    while live data stays quantized to WMATA's integer circuits.
  *  - Five registered effects ("ASL Red Line" etc.) draw scenery + sprites on
  *    every strip refresh, resolving colors live from the segment's color
- *    slots. Sprites render with two-LED anti-aliasing through a perceptual
- *    (inverse-gamma) weight curve so apparent brightness stays constant
- *    mid-glide. New trains fade in, vanished trains fade out after one cycle
- *    of grace, and implausible jumps (junk/reacquired API data) dissolve
+ *    slots. A sprite sits on one LED and crossfades to the next only inside a
+ *    short window around the midpoint ("Train Crossfade"), weighted through a
+ *    perceptual (inverse-gamma) curve so apparent brightness holds during the
+ *    handover. New trains fade in, vanished trains fade out (live data after
+ *    one cycle of grace), and implausible jumps (junk/reacquired API data) dissolve
  *    out+in instead of gliding across the map. UI transitions are left to
  *    the WLED core.
  *
@@ -95,15 +96,22 @@ static constexpr uint32_t ASL_PLACEHOLDER_S_PER_CIRCUIT = 3;
 // ---- moving-train sprites ----
 // Trains are not baked into the frames; each is a sprite gliding toward the
 // fractional LED position of its latest data point, re-targeted every plot
-// cycle and rendered with two-LED anti-aliasing at the strip frame rate.
+// cycle and rendered at the strip frame rate (one LED, crossfading to the next
+// inside the "Train Crossfade" window).
 #define ASL_MAX_SPRITES    256   // active trains (<= MAX_TRAINS) + fading ghosts
-#define ASL_DEF_FADE_MS    400   // default spawn/despawn fade ("Fade Milliseconds" setting)
 #define ASL_TELEPORT_LEDS  8.0f  // moves larger than this dissolve instead of gliding
 #define ASL_DEF_AA_GAMMA   2.2f  // default perceptual boost exponent ("Gamma" setting)
+#define ASL_DEF_CROSSFADE  0.25f // default "Train Crossfade" window, fraction of one LED
+#define ASL_DEF_HOP_BELOW  12    // default "Hop Below Brightness" (0 = never hop)
+#define ASL_GLIDE_SLACK_MS 300   // glides last this much longer than the refresh interval, so a
+                                 // late update (loop deferred while the strip draws) never leaves
+                                 // a train parked; it just lags its data point very slightly
 
 // runtime-tunable sprite settings (usermod settings page)
-static uint16_t aslFadeMs = ASL_DEF_FADE_MS;  // spawn/despawn fade; also each half of a dissolve
-static float    aslGamma  = ASL_DEF_AA_GAMMA; // anti-alias brightness curve, 1.0 = linear
+static float    aslGamma     = ASL_DEF_AA_GAMMA;  // anti-alias brightness curve, 1.0 = linear
+static float    aslCrossfade = ASL_DEF_CROSSFADE; // LED-to-LED handover window: 0 = hop, 1 = full blend
+static uint8_t  aslHopBelowBri = ASL_DEF_HOP_BELOW; // below this shown brightness the handover is a hop
+static bool     aslLinearGlide = false;           // sim mode: constant-speed glides (sim positions are exact)
 
 enum : uint8_t { ASL_SPR_FREE = 0, ASL_SPR_LIVE = 1, ASL_SPR_GHOST = 2 };
 
@@ -132,21 +140,34 @@ static void aslBuildPerceptLUT() {
     aslPerceptLUT[i] = (uint8_t)(powf((float)i / 255.0f, 1.0f / aslGamma) * 255.0f + 0.5f);
 }
 
-// eased (smoothstep) sprite position: accelerates away from a stop, brakes
-// into the next one
+// sprite position along its current glide. Live data: eased (smoothstep),
+// accelerating away from one data point and braking into the next. Sim:
+// linear, because the sim's positions already follow the real constant-speed
+// motion and easing would make every train stop at each refresh.
 static float aslSpritePos(const AslSprite& s, uint32_t nowMs) {
   if (s.moveDurMs == 0) return s.targetPos;
   uint32_t el = nowMs - s.moveStartMs;
   if (el >= s.moveDurMs) return s.targetPos;
   float t = (float)el / (float)s.moveDurMs;
-  t = t * t * (3.0f - 2.0f * t);
+  if (!aslLinearGlide) t = t * t * (3.0f - 2.0f * t);
   return s.startPos + (s.targetPos - s.startPos) * t;
+}
+
+// Train appear/vanish fade time (also each half of a dissolve). Follows WLED's
+// own Transition Time (Config -> LED Preferences) so there is one place to tune
+// how soft changes are on this device. Uses the stored default, not the live
+// transitionDelay, which a single request ("tt", the main UI's transition box)
+// can change temporarily. Clamped so a very long transition cannot keep
+// vanished trains on the map.
+static uint32_t aslFadeMs() {
+  return (transitionDelayDefault > 5000) ? 5000 : transitionDelayDefault;
 }
 
 // current fade alpha (0-255): rises after spawn, falls after ghosting
 static uint8_t aslSpriteAlpha(const AslSprite& s, uint32_t nowMs) {
+  const uint32_t fade = aslFadeMs();
   uint32_t el = nowMs - s.fadeStartMs;
-  uint32_t a  = (aslFadeMs == 0 || el >= aslFadeMs) ? 255 : (el * 255) / aslFadeMs;
+  uint32_t a  = (fade == 0 || el >= fade) ? 255 : (el * 255) / fade;
   return (s.mode == ASL_SPR_GHOST) ? (uint8_t)(255 - a) : (uint8_t)a;
 }
 
@@ -219,6 +240,14 @@ static void aslDrawFrame(const uint8_t* frame, uint16_t frameLen, uint8_t lineId
 
   const uint32_t trainC = SEGCOLOR(ASL_PX_TRAIN);
   const uint32_t nowMs  = millis();
+  // Hop Below Brightness: LEDs take 8-bit values and brightness is applied
+  // after this effect, so at brightness 10 a train LED has only ~10 output
+  // levels and each low step (1 -> 2 -> 3) is a large visible jump; a crossfade
+  // then reads as a stutter. Below the threshold, compared against the
+  // brightness this line actually shows (global brightness x segment
+  // opacity), the handover becomes a clean hop instead.
+  const uint8_t shownBri  = (uint8_t)(((uint16_t)strip.getBrightness() * SEGMENT.opacity) / 255);
+  const float   crossfade = (shownBri < aslHopBelowBri) ? 0.0f : aslCrossfade;
   for (unsigned n = 0; n < ASL_MAX_SPRITES; n++) {
     const AslSprite& s = aslSprites[n];
     if (s.mode == ASL_SPR_FREE || s.lineIdx != lineIdx) continue;
@@ -227,6 +256,17 @@ static void aslDrawFrame(const uint8_t* frame, uint16_t frameLen, uint8_t lineId
     float pos  = aslSpritePos(s, nowMs);
     int   i0   = (int)floorf(pos);
     float frac = pos - (float)i0;
+    // Train Crossfade: trains move slowly (often several seconds per LED), so
+    // a full two-LED blend would show most trains as a two-LED smear. Only a
+    // window of this width around the midpoint between LEDs is blended; outside
+    // it the train sits on one LED. 0 = hard hop at the midpoint (nearest LED),
+    // 1 = full linear blend across the whole gap.
+    if (crossfade <= 0.0f) {
+      frac = (frac < 0.5f) ? 0.0f : 1.0f;
+    } else if (crossfade < 1.0f) {
+      frac = (frac - 0.5f) / crossfade + 0.5f;
+      frac = (frac < 0.0f) ? 0.0f : (frac > 1.0f ? 1.0f : frac);
+    }
     // split coverage * fade alpha across the two straddled LEDs, boosted
     // through the perceptual LUT so apparent brightness holds mid-glide
     unsigned w0 = (unsigned)((1.0f - frac) * alpha + 0.5f);
@@ -517,11 +557,11 @@ class UsermodASL : public Usermod {
 
     // reconcile the train table into the sprite list: matched trains re-target
     // (gliding there over one plot interval), new trains fade in, vanished
-    // trains get one cycle of grace then fade out, and implausible jumps
+    // trains fade out (live data after one cycle of grace), and implausible jumps
     // dissolve out+in instead of gliding (junk/reacquired API data)
     void updateTrainSprites(uint32_t nowMs) {
       for (auto &s : aslSprites) {
-        if (s.mode == ASL_SPR_GHOST && nowMs - s.fadeStartMs >= aslFadeMs) s.mode = ASL_SPR_FREE;
+        if (s.mode == ASL_SPR_GHOST && nowMs - s.fadeStartMs >= aslFadeMs()) s.mode = ASL_SPR_FREE;
         s.seen = false;
       }
       for (uint16_t i = 0; i < numTrains; i++) {
@@ -542,14 +582,18 @@ class UsermodASL : public Usermod {
           s->startPos    = cur;
           s->targetPos   = target;
           s->moveStartMs = nowMs;
-          s->moveDurMs   = plotRefreshIntervalMs;
+          s->moveDurMs   = plotRefreshIntervalMs + ASL_GLIDE_SLACK_MS;
         } else {
           aslGhostSprite(*s, nowMs);
           aslSpawnSprite(li, trainDirection[i], trainId[i], target, nowMs);
         }
       }
+      // a train missing from this cycle's data: live WMATA data often drops a
+      // train for one fetch, so it gets one cycle of grace; sim data is exact,
+      // so a missing sim train has finished its run and goes immediately
+      const uint8_t grace = simModeEnable ? 0 : 1;
       for (auto &s : aslSprites) {
-        if (s.mode == ASL_SPR_LIVE && !s.seen && ++s.missed > 1) aslGhostSprite(s, nowMs);
+        if (s.mode == ASL_SPR_LIVE && !s.seen && ++s.missed > grace) aslGhostSprite(s, nowMs);
       }
     }
 
@@ -585,6 +629,7 @@ class UsermodASL : public Usermod {
       secondOfDay = (realSecondOfDay() + simOffsetS) % 86400UL; // sim clock; offset is 0 unless a test time is set
 
       if (!delaysRacked) rackTimetables();
+      aslLinearGlide = simModeEnable; // constant-speed glides for the sim, eased for live data
       clearTrains();
       if (simModeEnable) {
         for (uint8_t li = 0; li < ASL_NUM_LINES; li++) {
@@ -659,12 +704,14 @@ class UsermodASL : public Usermod {
       top[F("Enable Train Sim Mode")]     = simModeEnable;
       top[F("Server Address")]            = serverAddress;
       top[F("API Key")]                   = apiKey;
+      top[F("Plot Refresh Interval (ms)")] = plotRefreshIntervalMs;
       char hhmm[6];
       formatHHMM(systemFirstTrainTime, hhmm, sizeof(hhmm));
       top[F("System Open Time")]          = hhmm;
       formatHHMM(systemLastTrainTime, hhmm, sizeof(hhmm));
       top[F("System Close Time")]         = hhmm;
       top[F("Train Headway")]             = headwayTimeSeconds / 60.0f;
+      top[F("Rush Hour Train Headway")]   = rushHeadwayTimeSeconds / 60.0f;
       formatHHMM(amRushStartTime, hhmm, sizeof(hhmm));
       top[F("Morning Rush Hour Start")]   = hhmm;
       formatHHMM(amRushEndTime, hhmm, sizeof(hhmm));
@@ -673,10 +720,9 @@ class UsermodASL : public Usermod {
       top[F("Evening Rush Hour Start")]   = hhmm;
       formatHHMM(pmRushEndTime, hhmm, sizeof(hhmm));
       top[F("Evening Rush Hour End")]     = hhmm;
-      top[F("Rush Hour Train Headway")]   = rushHeadwayTimeSeconds / 60.0f;
       top[F("Fallback Station Dwell (s)")] = stationDwellTimeS;
-      top[F("Plot Refresh Interval (ms)")] = plotRefreshIntervalMs;
-      top[F("Fade Milliseconds")]         = aslFadeMs;
+      top[F("Train Crossfade")]           = aslCrossfade;
+      top[F("Hop Below Brightness")]      = aslHopBelowBri;
       top[F("Gamma")]                     = aslGamma;
     }
 
@@ -725,8 +771,12 @@ class UsermodASL : public Usermod {
       configComplete &= getJsonValue(top[F("Plot Refresh Interval (ms)")], plotRefreshIntervalMs, DEF_REFRESH_MS);
       if (plotRefreshIntervalMs < 1000) plotRefreshIntervalMs = 1000;
 
-      configComplete &= getJsonValue(top[F("Fade Milliseconds")], aslFadeMs, (uint16_t)ASL_DEF_FADE_MS);
-      if (aslFadeMs > 5000) aslFadeMs = 5000;
+      configComplete &= getJsonValue(top[F("Train Crossfade")], aslCrossfade, ASL_DEF_CROSSFADE);
+      if (!(aslCrossfade >= 0.0f)) aslCrossfade = 0.0f; // also catches NaN
+      if (aslCrossfade > 1.0f) aslCrossfade = 1.0f;
+      int hopBelow = ASL_DEF_HOP_BELOW; // read as int so out-of-range input clamps instead of wrapping
+      configComplete &= getJsonValue(top[F("Hop Below Brightness")], hopBelow, ASL_DEF_HOP_BELOW);
+      aslHopBelowBri = (uint8_t)constrain(hopBelow, 0, 255);
       configComplete &= getJsonValue(top[F("Gamma")], aslGamma, ASL_DEF_AA_GAMMA);
       if (aslGamma < 1.0f) aslGamma = 1.0f;
       if (aslGamma > 4.0f) aslGamma = 4.0f;
@@ -745,43 +795,68 @@ class UsermodASL : public Usermod {
           "'Evening Rush Hour Start','Evening Rush Hour End']){"
           "let f=d.getElementsByName('%s:'+n);"
           "if(f[1]){f[1].type='time';f[1].style.width='120px';}}"), _name);
-      settingsScript.printf_P(PSTR("addInfo('%s:System Close Time',1,'earlier than open = service past midnight; equal = 24h');"), _name);
-      settingsScript.printf_P(PSTR("addInfo('%s:Train Headway',1,'minutes between departures (decimals ok)');"), _name);
-      settingsScript.printf_P(PSTR("addInfo('%s:Morning Rush Hour End',1,'rush windows are same-day; start at/after end disables one');"), _name);
-      settingsScript.printf_P(PSTR("addInfo('%s:Rush Hour Train Headway',1,'minutes between departures in rush windows (0 = no rush service)');"), _name);
-      settingsScript.printf_P(PSTR("addInfo('%s:Fallback Station Dwell (s)',1,'whole seconds; sim dwell at terminals and stations with no measured time (blank = 25)');"), _name);
-      settingsScript.printf_P(PSTR("addInfo('%s:API Key',1,'WMATA key, only used in live mode');"), _name);
-      settingsScript.printf_P(PSTR("addInfo('%s:Fade Milliseconds',1,'train appear/vanish fade (0 = instant, max 5000)');"), _name);
-      settingsScript.printf_P(PSTR("addInfo('%s:Gamma',1,'motion anti-alias brightness curve, 1 = linear');"), _name);
-
       // AI: below section was generated by an AI
-      // Clock block under "Enable Train Sim Mode": live clock status (read
-      // from this usermod's /json/info rows), a button that sets WLED's clock
-      // from the browser (same {"time":...} the main UI sends; the RTC usermod
-      // then writes it to the chip), and the temporary sim test time
-      // (readFromJsonState). This script runs inside the page's GetV()
-      // function, so the button handlers are attached to window.
+      // Page layout. WLED renders the settings as one flat list in
+      // addToConfig() order, so the visual hierarchy is added here:
+      //   section heading  - WLED's own group divider (hr.sml) + <h4>
+      //   field            - label + input, as rendered by WLED
+      //   description      - own line under the input, smaller and dimmed
+      // Sections: Data source / Clock / Sim timetable / Train display.
+      // Headings are DOM-only, so cfg.json keeps its flat structure. This
+      // script runs inside the page's GetV() function: helpers are block-scoped
+      // and the button handlers are attached to window.
+      //   ai(field, text)  description under a field (wraps WLED's addInfo)
+      //   hd(field, html)  insert html above a field's label
+      //   sec(title)       section heading html
       settingsScript.printf_P(PSTR(
-        "{"
+        "{let p='%s:',"
+        "ds='<span style=\"display:inline-block;font-size:80%%;line-height:1.4;opacity:.75\">',"
+        "ai=(n,t)=>addInfo(p+n,1,'<br>'+ds+t+'</span>'),"
+        "hd=(n,h)=>{let e=d.getElementsByName(p+n)[0];if(e&&e.previousSibling){let v=cE('div');v.innerHTML=h;e.parentNode.insertBefore(v,e.previousSibling);}},"
+        "sec=t=>'<hr class=\"sml\"><h4>'+t+'</h4>';"), _name);
+      settingsScript.print(F(
+        // clock status and actions: status comes from this usermod's
+        // /json/info rows; "Set clock" sends the same {"time":...} the main UI
+        // sends (the RTC usermod then writes it to the chip); the sim test
+        // time goes to readFromJsonState and never touches the real clock
         "window.aslU=()=>fetch(getURL('/json/info')).then(r=>r.json()).then(j=>{"
           "let u=j.u||{},c=u['ASL clock'],s=u['ASL sim time'];"
-          "gId('aslS').innerHTML='<b>Clock:</b> '+esc(c?c.join(''):'?')+(s?'<br><b>Sim time:</b> '+esc(s.join('')):'');"
+          "gId('aslS').innerHTML='Device time: <b>'+esc(c?c.join(''):'?')+'</b>'+(s?'<br>Sim time: <b>'+esc(s.join(''))+'</b>':'');"
         "}).catch(()=>{});"
         "window.aslP=o=>fetch(getURL('/json/state'),{method:'POST',headers:{'Content-Type':'application/json'},"
           "body:JSON.stringify(o)}).then(()=>setTimeout(aslU,500)).catch(()=>{});"
         "window.aslClock=()=>aslP({time:Math.floor(Date.now()/1000)});"
         "window.aslApply=()=>{let v=gId('aslTm').value;if(v)aslP({ASL:{simAt:v}});};"
         "window.aslReal=()=>aslP({ASL:{simReset:true}});"
-        "let f=d.getElementsByName('%s:Enable Train Sim Mode');"
-        "if(f.length)f[f.length-1].insertAdjacentHTML('afterend',"
-          "'<div style=\"margin:6px 0 10px\"><div id=\"aslS\">Clock: ...</div>"
-          "<button type=\"button\" onclick=\"aslClock()\">Set clock from this device</button><br>"
-          "Sim test time <input type=\"time\" id=\"aslTm\" style=\"width:120px\"> "
-          "<button type=\"button\" onclick=\"aslApply()\">Apply</button> "
-          "<button type=\"button\" onclick=\"aslReal()\">Real time</button><br>"
-          "<i>Test time changes the sim only: not saved, cleared on reboot, real clock and RTC untouched.</i></div>');"
+
+        // section headings (the Clock section sits between Data source and
+        // Sim timetable, so it is inserted together with the next heading)
+        "hd('Enable Train Sim Mode',sec('Data source'));"
+        "hd('System Open Time',sec('Clock')+"
+          "'<div id=\"aslS\">Device time: ...</div>"
+          "<button type=\"button\" class=\"sml\" onclick=\"aslClock()\">Set clock from this device</button><br>"
+          "Sim test time <input type=\"time\" id=\"aslTm\" style=\"width:120px\">"
+          "<button type=\"button\" class=\"sml\" onclick=\"aslApply()\">Apply</button>"
+          "<button type=\"button\" class=\"sml\" onclick=\"aslReal()\">Real time</button><br>'"
+          "+ds+'Test time changes the sim only: not saved, cleared on reboot, real clock and RTC untouched.</span>'"
+          "+sec('Sim timetable'));"
+        "hd('Train Crossfade',sec('Train display')+ds+'Trains fade in and out over WLED\\'s Transition Time (Config &gt; LED Preferences).</span>');"
+
+        // field descriptions
+        "ai('Enable Train Sim Mode','on = offline timetable, off = live WMATA positions');"
+        "ai('Server Address','live mode only; the API key is appended automatically');"
+        "ai('API Key','WMATA key, only used in live mode');"
+        "ai('Plot Refresh Interval (ms)','data refresh and glide time; keep at 3500 or more in live mode');"
+        "ai('System Close Time','earlier than open = service past midnight; equal = 24h');"
+        "ai('Train Headway','minutes between departures (decimals ok)');"
+        "ai('Rush Hour Train Headway','minutes between departures in rush windows (0 = no rush service)');"
+        "ai('Morning Rush Hour End','rush windows are same-day; start at/after end disables one');"
+        "ai('Fallback Station Dwell (s)','whole seconds; dwell at terminals and stations with no measured time (blank = 25)');"
+        "ai('Train Crossfade','LED-to-LED handover, fraction of an LED: 0 = hop, 1 = full blend');"
+        "ai('Hop Below Brightness','below this brightness (0-255, incl. segment opacity) trains hop instead of crossfading; 0 = never');"
+        "ai('Gamma','brightness curve of the crossfade, 1 = linear');"
         "aslU();"
-        "}"), _name);
+        "}"));
       // AI: end
     }
 

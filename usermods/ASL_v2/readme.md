@@ -22,8 +22,11 @@ the five line effects are registered at runtime from `setup()` via
 Every *Plot Refresh Interval* the usermod computes a per-line scenery frame
 (one byte per LED: track / station) and reconciles the train data into a
 sprite list: each train glides from where it is currently rendered to the
-fractional LED position of its latest data point over one plot interval,
-easing out of and into stops (smoothstep). Circuits flow through the pipeline
+fractional LED position of its latest data point over one plot interval
+(plus 300 ms of slack so a late update never leaves it parked). Sim trains
+glide at constant speed, because the sim's positions already follow the real
+motion; live trains ease out of and into each data point (smoothstep).
+Circuits flow through the pipeline
 as floats: the sim interpolates exact fractional positions from its timetable
 (continuous motion, no inchworming between circuit boundaries), while live
 data is naturally quantized to WMATA's integer circuits. The five registered
@@ -41,13 +44,25 @@ Element brightness is set through the color itself (the picker's value
 slider); segment opacity dims a whole line, and global brightness applies on
 top of everything.
 
-Trains render with two-LED anti-aliasing: a sprite at LED 47.4 lights LED 47
-at 60% and LED 48 at 40% coverage, with weights boosted through a perceptual
-inverse-gamma curve (the **Gamma** setting, default 2.2) so apparent
-brightness stays constant mid-glide. New trains fade in over the **Fade
-Milliseconds** setting (default 400 ms), vanished trains get one plot cycle
-of grace (live data routinely drops a train for one fetch) then fade out, and
-moves larger than `ASL_TELEPORT_LEDS` (8, compile-time) dissolve out+in
+A train normally occupies one LED. Trains move slowly on this map (often
+several seconds per LED), so blending across the whole gap between two LEDs
+would show most trains as a two-LED smear. Instead the **Train Crossfade**
+setting (default 0.25) sets a handover window, as a fraction of one LED,
+centred on the midpoint between LEDs: outside it the train sits on a single
+LED; inside it the train crossfades to the next LED. 0 = the train hops to
+the nearest LED with no blending; 1 = full two-LED blending all the way (a
+train at LED 47.4 lights LED 47 at 60% and LED 48 at 40%). Blend weights go
+through a perceptual inverse-gamma curve (the **Gamma** setting, default 2.2)
+so apparent brightness holds during the handover. Because the window is a
+distance, a handover takes longer on slow stretches than on fast ones.
+
+New trains fade in over WLED's own **Transition Time** (Config → LED
+Preferences, default 750 ms, capped at 5 s for trains), so there is one
+place to tune how soft changes are on the device; 0 makes trains pop in and
+out.
+A train missing from the data fades out: immediately in sim mode (it has
+finished its run), after one plot cycle of grace in live mode (live data
+routinely drops a train for one fetch). Moves larger than `ASL_TELEPORT_LEDS` (8, compile-time) dissolve out+in
 instead of gliding — junk or reacquired API data, or a turnback at a terminal
 (direction is part of the sprite identity). UI transitions are left to the
 WLED core, and color changes apply instantly without waiting for the next
@@ -70,15 +85,16 @@ plot cycle.
 | Enable Train Sim Mode | on | off = fetch live WMATA data |
 | Server Address | WMATA TrainPositions URL | `api_key` is appended automatically |
 | API Key | *(empty)* | live mode does nothing without it |
+| Plot Refresh Interval (ms) | 5000 | data refresh + glide duration; keep ≥ 3500 in live mode or WMATA will get angry |
 | System Open/Close Time | 05:00 / 00:00 | HH:MM time pickers; first/last train departure (sim), defaults match WMATA weekday hours (5am–midnight). Close earlier than open wraps past midnight (e.g. 22:00–02:00); equal times = 24-hour service |
 | Train Headway | 6 | minutes between departures, decimals ok (sim); stored as seconds internally |
+| Rush Hour Train Headway | 4 | minutes between departures inside rush windows (0 = no rush service). Applies at the terminals, so the density wave sweeps down each line at travel speed. Defaults match WMATA's published FY2026 peak service |
 | Morning Rush Hour Start/End | 07:00 / 09:00 | rush window (sim); same-day only, start at/after end disables it |
 | Evening Rush Hour Start/End | 16:00 / 18:00 | rush window (sim); same-day only, start at/after end disables it |
-| Rush Hour Train Headway | 4 | minutes between departures inside rush windows (0 = no rush service). Applies at the terminals, so the density wave sweeps down each line at travel speed. Defaults match WMATA's published FY2026 peak service |
 | Fallback Station Dwell (s) | 25 | whole seconds; sim dwell at the terminals and at stations with no measured dwell (blank or 0 = 25, max 600). Measured stations use their own times. Replaces the old "Station Dwell Time (seconds)" setting |
-| Plot Refresh Interval (ms) | 5000 | data refresh + glide duration; keep ≥ 3500 in live mode or WMATA will get angry |
-| Fade Milliseconds | 400 | train appear/vanish fade (0 = instant, clamped to 5000) |
-| Gamma | 2.2 | motion anti-alias brightness curve (1 = linear, clamped 1–4) |
+| Train Crossfade | 0.25 | LED-to-LED handover window as a fraction of one LED: 0 = hop to the nearest LED, 1 = full two-LED blend (clamped 0–1) |
+| Hop Below Brightness | 12 | below this shown brightness (0–255: global brightness × segment opacity) trains hop instead of crossfading, because at very low brightness the LEDs have too few output levels for a smooth crossfade; 0 = never |
+| Gamma | 2.2 | brightness curve of the crossfade (1 = linear, clamped 1–4) |
 
 Open/close times are stored in `cfg.json` as `"HH:MM"` strings and headway as
 minutes. Missing or invalid entries fall back to the defaults above (defined
