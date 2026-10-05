@@ -7,8 +7,9 @@ moving pixels. Train positions come from either:
 - **Live mode**: the [WMATA TrainPositions API](https://developer.wmata.com/) (requires an API key), or
 - **Sim mode**: an offline schedule simulator (a train departs every *headway*
   interval between the open and close times — every *rush hour headway* inside
-  the morning/evening rush windows — and moves along a per-segment cumulative
-  timetable).
+  the morning/evening rush windows — and runs the line on a timetable built
+  from stopwatch-measured station dwell and station-to-station travel times;
+  see `timing/README.md`).
 
 This is the modern self-contained port of the original `ASL_v2` usermod
 (branch `asl-variable-station-sim-delays`), which required edits to `wled.h`,
@@ -74,7 +75,7 @@ plot cycle.
 | Morning Rush Hour Start/End | 07:00 / 09:00 | rush window (sim); same-day only, start at/after end disables it |
 | Evening Rush Hour Start/End | 16:00 / 18:00 | rush window (sim); same-day only, start at/after end disables it |
 | Rush Hour Train Headway | 4 | minutes between departures inside rush windows (0 = no rush service). Applies at the terminals, so the density wave sweeps down each line at travel speed. Defaults match WMATA's published FY2026 peak service |
-| Station Dwell Time (seconds) | 10 | time at each station (sim) |
+| Fallback Station Dwell (s) | 25 | whole seconds; sim dwell at the terminals and at stations with no measured dwell (blank or 0 = 25, max 600). Measured stations use their own times. Replaces the old "Station Dwell Time (seconds)" setting |
 | Plot Refresh Interval (ms) | 5000 | data refresh + glide duration; keep ≥ 3500 in live mode or WMATA will get angry |
 | Fade Milliseconds | 400 | train appear/vanish fade (0 = instant, clamped to 5000) |
 | Gamma | 2.2 | motion anti-alias brightness curve (1 = linear, clamped 1–4) |
@@ -83,12 +84,33 @@ Open/close times are stored in `cfg.json` as `"HH:MM"` strings and headway as
 minutes. Missing or invalid entries fall back to the defaults above (defined
 once as `DEF_*` constants in the usermod).
 
-Changing timing settings re-racks the computed delay tables automatically.
+Saving the settings page rebuilds the sim timetables immediately; no reboot
+is needed.
+
+## How the sim times a run
+
+Each line's run alternates *dwell at station 0, travel to station 1, dwell at
+station 1, …* using the per-station and per-domain seconds in
+`asl_timing_data.h`. A dwelling train sits on its station dot; a moving train
+is interpolated evenly across that domain's LEDs. Track2 runs the same
+timeline in reverse. Values that were never measured fall back to the
+**Fallback Station Dwell** setting (dwell) or to the old placeholder speed of
+3 s per track circuit (travel).
+
+Track1 direction per line (derived from the circuit numbering; details in
+`asl_map_data.h`): Red Shady Grove→Glenmont, Blue Franconia→Downtown Largo,
+Green Branch Ave→Greenbelt, Orange Vienna→New Carrollton, Yellow
+Huntington→Fort Totten. Potomac Yard and the Silver line are not on this
+hardware revision.
 
 ## Files
 
 - `usermod_v2_asl.cpp` — usermod class + the five line effects
 - `asl_map_data.h` — static circuit→LED mapping tables (flash-resident)
+- `asl_timing_data.h` — sim timing tables, **generated** from `timing/`
+- `timing/` — measured ride times (`segment_times.csv`), the original
+  workbook, and `gen_timing.py`, which regenerates `asl_timing_data.h`
+  (run by hand; not part of the build)
 - `presets-example.json` — the original 5-segment preset; upload to the device
   filesystem (`/edit`) as `presets.json` or recreate segments manually
 
@@ -105,7 +127,14 @@ ESP32 only (live mode uses `HTTPClient`).
 ## Notes / current limitations
 
 - The live HTTP fetch is synchronous; effects pause briefly during each poll.
-- `calculateAdditiveDelays()` (runtime-generated "re-rackable" timetable) is
-  computed for Red line track 1 only and not yet consumed by the simulator,
-  which still runs on the static `*AdditiveDelaySegments` tables.
 - Trains with `ServiceType != "Normal"` are ignored, matching the original.
+- Unmeasured stretches still use placeholders: Red Metro Center→Gallery Place,
+  Yellow Huntington→Eisenhower Ave→King St (travel at 3 s/circuit, which is
+  faster than reality), and the dwell at Judiciary Sq, Brookland, Eisenhower
+  Ave and every terminal (fallback setting).
+- Map data still to verify (see comments in `asl_map_data.h`): station
+  circuits that sit inside a domain (Orange Vienna, Yellow King St / Pentagon /
+  L'Enfant), Orange station LEDs that overlap their neighbouring LED ranges
+  (Metro Center, L'Enfant, Stadium-Armory), Orange vs Blue station circuits at
+  Rosslyn and Stadium-Armory, and swapped Track1/Track2 labels between Yellow
+  and Green north of L'Enfant Plaza.

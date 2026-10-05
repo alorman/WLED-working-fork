@@ -1,0 +1,293 @@
+line,seq,kind,name,pass1,pass2,pass3,exclude,note
+Red,0,station,Shady Grove,,,,,
+Red,1,segment,Rockville,307,317,,,
+Red,2,station,Rockville,24,48,,2,dwell outlier
+Red,3,segment,Twinbrook,222,230,,,
+Red,4,station,Twinbrook,27,24,,,
+Red,5,segment,North Bethesda,139,148,,,
+Red,6,station,North Bethesda,30,34,,,
+Red,7,segment,Grosvenor-Strathmore,150,205,,,
+Red,8,station,Grosvenor-Strathmore,24,38,,,
+Red,9,segment,Medical Center,240,250,,,
+Red,10,station,Medical Center,32,20,,,
+Red,11,segment,Bethesda,134,138,,,
+Red,12,station,Bethesda,20,22,,,
+Red,13,segment,Friendship Heights,212,208,,,
+Red,14,station,Friendship Heights,22,26,,,
+Red,15,segment,Tenleytown-AU,115,124,,,
+Red,16,station,Tenleytown-AU,24,23,,,
+Red,17,segment,Van Ness-UDC,157,200,,,
+Red,18,station,Van Ness-UDC,26,19,,,
+Red,19,segment,Cleveland Park,108,118,,,
+Red,20,station,Cleveland Park,31,22,,,
+Red,21,segment,Woodley Park-Zoo,125,114,,,
+Red,22,station,Woodley Park-Zoo,26,25,,,
+Red,23,segment,Dupont Circle,145,144,,,
+Red,24,station,Dupont Circle,26,28,,,
+Red,25,segment,Farragut North,103,105,,,
+Red,26,station,Farragut North,50,25,,1,dwell outlier
+Red,27,segment,Metro Center,152,125,,,
+Red,28,station,Metro Center,,,,,
+Red,29,segment,Gallery Place-Chinatown,,,,,
+Red,30,station,Gallery Place-Chinatown,,,,,
+Red,31,segment,Judiciary Square,57,,,,
+Red,32,station,Judiciary Square,,,,,
+Red,33,segment,Union Station,126,,,,
+Red,34,station,Union Station,40,,,,
+Red,35,segment,NoMa-Gallaudet U,128,,,,
+Red,36,station,NoMa-Gallaudet U,31,,,,
+Red,37,segment,Rhode Island Ave-Brentwood,240,,,,
+Red,38,station,Rhode Island Ave-Brentwood,26,,,,
+Red,39,segment,Brookland-CUA,123,,,,
+Red,40,station,Brookland-CUA,,,,,
+Red,41,segment,Fort Totten,150,,,,
+Red,42,station,Fort Totten,29,,,,
+Red,43,segment,Takoma,226,207,,,
+Red,44,station,Takoma,26,36,,,
+Red,45,segment,Silver Spring,159,150,,,
+Red,46,station,Silver Spring,34,22,,,
+Red,47,segment,Forest Glen,238,230,,,
+Red,48,station,Forest Glen,31,26,,,
+Red,49,segment,Wheaton,228,214,,,
+Red,50,station,Wheaton,42,29,,,
+Red,51,segment,Glenmont,337,230,,1,travel outlier
+Red,52,station,Glenmont,,,,,
+Orange,0,station,Vienna/Fairfax-GMU,,,,,
+Orange,1,segment,Dunn Loring-Merrifield,356,355,,,
+Orange,2,station,Dunn Loring-Merrifield,31,43,,,
+Orange,3,segment,West Falls Church,413,317,,,
+Orange,4,station,West Falls Church,45,25,,,
+Orange,5,segment,East Falls Church,405,326,,,
+Orange,6,station,East Falls Church,27,30,,,
+Orange,7,segment,Ballston-MU,411,338,,,
+Orange,8,station,Ballston-MU,27,20,,,
+Orange,9,segment,Virginia Square-GMU,116,118,,,
+Orange,10,station,Virginia Square-GMU,26,25,,,
+Orange,11,segment,Clarendon,102,103,,,
+Orange,12,station,Clarendon,21,22,,,
+Orange,13,segment,Court House,104,106,,,
+Orange,14,station,Court House,21,36,,,
+Orange,15,segment,Rosslyn,156,229,,,
+Orange,16,station,Rosslyn,31,32,,,
+Orange,17,segment,Foggy Bottom-GWU,232,202,,,
+Orange,18,station,Foggy Bottom-GWU,29,27,,,
+Orange,19,segment,Farragut West,115,109,,,
+Orange,20,station,Farragut West,32,18,,,
+Orange,21,segment,McPherson Square,55,59,,,
+Orange,22,station,McPherson Square,35,23,,,
+Orange,23,segment,Metro Center,104,116,,,
+Orange,24,station,Metro Center,33,,,,
+Orange,25,segment,Federal Triangle,50,,,,
+Orange,26,station,Federal Triangle,38,,,,
+Orange,27,segment,Smithsonian,106,,,,
+Orange,28,station,Smithsonian,33,,,,
+Orange,29,segment,L'Enfant Plaza,103,,,,
+Orange,30,station,L'Enfant Plaza,30,,,,
+Orange,31,segment,Federal Center SW,50,,,,
+Orange,32,station,Federal Center SW,52,,,1,dwell outlier
+Orange,33,segment,Capitol South,110,,,,
+Orange,34,station,Capitol South,45,,,,
+Orange,35,segment,Eastern Market,200,,,1,travel outlier
+Orange,36,station,Eastern Market,110,,,1,dwell outlier
+Orange,37,segment,Potomac Ave,114,,,,
+Orange,38,station,Potomac Ave,28,,,,
+Orange,39,segment,Stadium-Armory,225,217,,,
+Orange,40,station,Stadium-Armory,32,24,,,
+Orange,41,segment,Minnesota Ave,630,423,,1,travel outlier; use 4:23
+Orange,42,station,Minnesota Ave,121,23,,1,dwell outlier; use 0:23
+Orange,43,segment,Deanwood,151,127,,,
+Orange,44,station,Deanwood,30,26,,,
+Orange,45,segment,Cheverly,214,149,,,
+Orange,46,station,Cheverly,27,20,,,
+Orange,47,segment,Landover,233,225,,,
+Orange,48,station,Landover,30,19,,,
+Orange,49,segment,New Carrollton,230,158,,,
+Orange,50,station,New Carrollton,,,,,
+Blue,0,station,Franconia-Springfield,,,,,
+Blue,1,segment,Van Dorn Street,448,437,,,
+Blue,2,station,Van Dorn Street,39,28,,,
+Blue,3,segment,King St-Old Town,616,541,,,
+Blue,4,station,King St-Old Town,28,28,,,
+Blue,5,segment,Braddock Road,120,114,,,
+Blue,6,station,Braddock Road,20,28,,,
+Blue,7,segment,Potomac Yard,212,210,,,
+Blue,8,station,Potomac Yard,33,23,,,
+Blue,9,segment,Reagan National Airport,256,415,,2,pass 2 lap pressed in wrong row / train held (Reagan-Crystal City sequence)
+Blue,10,station,Reagan National Airport,44,117,,2,pass 2 lap pressed in wrong row / train held (Reagan-Crystal City sequence)
+Blue,11,segment,Crystal City,111,25,,2,pass 2 lap pressed in wrong row / train held (Reagan-Crystal City sequence)
+Blue,12,station,Crystal City,17,130,,2,pass 2 lap pressed in wrong row / train held (Reagan-Crystal City sequence)
+Blue,13,segment,Pentagon City,122,,,,
+Blue,14,station,Pentagon City,22,,,,
+Blue,15,segment,Pentagon,205,,,,
+Blue,16,station,Pentagon,15,,,,
+Blue,17,segment,Arlington Cemetery,234,257,,,
+Blue,18,station,Arlington Cemetery,21,56,,2,dwell outlier
+Blue,19,segment,Rosslyn,141,138,,,
+Blue,20,station,Rosslyn,14,,,,
+Blue,21,segment,Foggy Bottom-GWU,232,202,,,same track as Orange
+Blue,22,station,Foggy Bottom-GWU,29,27,,,
+Blue,23,segment,Farragut West,115,109,,,same track as Orange
+Blue,24,station,Farragut West,32,18,,,
+Blue,25,segment,McPherson Square,55,59,,,same track as Orange
+Blue,26,station,McPherson Square,35,23,,,
+Blue,27,segment,Metro Center,104,116,,,same track as Orange
+Blue,28,station,Metro Center,33,,,,
+Blue,29,segment,Federal Triangle,,55,,,same track as Orange
+Blue,30,station,Federal Triangle,,32,,,
+Blue,31,segment,Smithsonian,,120,,,same track as Orange
+Blue,32,station,Smithsonian,,22,,,
+Blue,33,segment,L'Enfant Plaza,,105,,,same track as Orange
+Blue,34,station,L'Enfant Plaza,,25,,,
+Blue,35,segment,Federal Center SW,,52,,,same track as Orange
+Blue,36,station,Federal Center SW,,20,,,
+Blue,37,segment,Capitol South,,106,,,same track as Orange
+Blue,38,station,Capitol South,,25,,,
+Blue,39,segment,Eastern Market,,106,,,same track as Orange
+Blue,40,station,Eastern Market,,30,,,
+Blue,41,segment,Potomac Ave,,120,,,same track as Orange
+Blue,42,station,Potomac Ave,,32,,,
+Blue,43,segment,Stadium-Armory,227,213,,,same track as Orange
+Blue,44,station,Stadium-Armory,25,26,,,
+Blue,45,segment,Benning Road,329,513,,2,travel outlier
+Blue,46,station,Benning Road,26,27,,,
+Blue,47,segment,Capitol Heights,208,212,,,
+Blue,48,station,Capitol Heights,21,32,,,
+Blue,49,segment,Addison Road-Seat Pleasant,139,133,,,
+Blue,50,station,Addison Road-Seat Pleasant,25,32,,,
+Blue,51,segment,Morgan Boulevard,205,205,,,
+Blue,52,station,Morgan Boulevard,33,36,,,
+Blue,53,segment,Downtown Largo,222,236,,,
+Blue,54,station,Downtown Largo,,,,,
+Green,0,station,Greenbelt,,,,,
+Green,1,segment,College Park-U of Md,349,355,,,
+Green,2,station,College Park-U of Md,37,36,,,
+Green,3,segment,Hyattsville Crossing,304,256,,,
+Green,4,station,Hyattsville Crossing,25,31,,,
+Green,5,segment,West Hyattsville,210,206,,,
+Green,6,station,West Hyattsville,27,29,,,
+Green,7,segment,Fort Totten,345,248,,,
+Green,8,station,Fort Totten,,38,,,
+Green,9,segment,Georgia Ave-Petworth,,220,,,
+Green,10,station,Georgia Ave-Petworth,,39,,,
+Green,11,segment,Columbia Heights,,157,,,
+Green,12,station,Columbia Heights,,42,,,
+Green,13,segment,U Street/Cardozo,,138,,,
+Green,14,station,U Street/Cardozo,,38,,,
+Green,15,segment,Shaw-Howard U,,102,,,
+Green,16,station,Shaw-Howard U,,29,,,
+Green,17,segment,Mt Vernon Sq-7th St,,59,,,
+Green,18,station,Mt Vernon Sq-7th St,,26,,,
+Green,19,segment,Gallery Place-Chinatown,,103,,,
+Green,20,station,Gallery Place-Chinatown,,34,,,
+Green,21,segment,Archives-Navy Memorial,,48,,,
+Green,22,station,Archives-Navy Memorial,,27,,,
+Green,23,segment,L'Enfant Plaza,,105,,,
+Green,24,station,L'Enfant Plaza,,30,,,
+Green,25,segment,Waterfront,133,131,,,
+Green,26,station,Waterfront,31,26,,,
+Green,27,segment,Navy Yard-Ballpark,108,109,,,
+Green,28,station,Navy Yard-Ballpark,40,24,,,
+Green,29,segment,Anacostia,155,151,,,
+Green,30,station,Anacostia,35,28,,,
+Green,31,segment,Congress Heights,207,154,,,
+Green,32,station,Congress Heights,30,24,,,
+Green,33,segment,Southern Avenue,158,151,,,
+Green,34,station,Southern Avenue,35,34,,,
+Green,35,segment,Naylor Road,212,201,,,
+Green,36,station,Naylor Road,44,36,,,
+Green,37,segment,Suitland,232,225,,,
+Green,38,station,Suitland,45,33,,,
+Green,39,segment,Branch Avenue,324,312,,,
+Green,40,station,Branch Avenue,,,,,
+Yellow,0,station,Huntington,,,,,
+Yellow,1,segment,Eisenhower Avenue,,,,,
+Yellow,2,station,Eisenhower Avenue,,,,,
+Yellow,3,segment,King St-Old Town,,,,,
+Yellow,4,station,King St-Old Town,28,28,,,
+Yellow,5,segment,Braddock Road,120,114,,,same track as Blue
+Yellow,6,station,Braddock Road,20,28,,,
+Yellow,7,segment,Potomac Yard,212,210,,,same track as Blue
+Yellow,8,station,Potomac Yard,33,23,,,
+Yellow,9,segment,Reagan National Airport,256,415,,2,same track as Blue; pass 2 lap pressed in wrong row / train held (Reagan-Crystal City sequence)
+Yellow,10,station,Reagan National Airport,44,117,,2,pass 2 lap pressed in wrong row / train held (Reagan-Crystal City sequence)
+Yellow,11,segment,Crystal City,111,25,,2,same track as Blue; pass 2 lap pressed in wrong row / train held (Reagan-Crystal City sequence)
+Yellow,12,station,Crystal City,17,130,,2,pass 2 lap pressed in wrong row / train held (Reagan-Crystal City sequence)
+Yellow,13,segment,Pentagon City,122,,,,same track as Blue
+Yellow,14,station,Pentagon City,,24,,,
+Yellow,15,segment,Pentagon,,131,,,same track as Blue
+Yellow,16,station,Pentagon,,19,,,
+Yellow,17,segment,L'Enfant Plaza,410,505,,,
+Yellow,18,station,L'Enfant Plaza,24,,,,
+Yellow,19,segment,Archives-Navy Memorial,109,,,,same track as Green
+Yellow,20,station,Archives-Navy Memorial,27,,,,
+Yellow,21,segment,Gallery Place-Chinatown,57,,,,same track as Green
+Yellow,22,station,Gallery Place-Chinatown,,34,,,
+Yellow,23,segment,Mt Vernon Sq-7th St,,103,,,same track as Green
+Yellow,24,station,Mt Vernon Sq-7th St,,26,,,
+Silver,0,station,Ashburn,,,,,
+Silver,1,segment,Loudoun Gateway,,,,,
+Silver,2,station,Loudoun Gateway,,,,,
+Silver,3,segment,Washington Dulles Intl,,,,,
+Silver,4,station,Washington Dulles Intl,,,,,
+Silver,5,segment,Innovation Center,,,,,
+Silver,6,station,Innovation Center,,,,,
+Silver,7,segment,Herndon,,,,,
+Silver,8,station,Herndon,,,,,
+Silver,9,segment,Reston Town Center,,,,,
+Silver,10,station,Reston Town Center,,,,,
+Silver,11,segment,Wiehle-Reston East,,,,,
+Silver,12,station,Wiehle-Reston East,,,,,
+Silver,13,segment,Spring Hill,,,,,
+Silver,14,station,Spring Hill,,,,,
+Silver,15,segment,Greensboro,,,,,
+Silver,16,station,Greensboro,,,,,
+Silver,17,segment,Tysons,,,,,
+Silver,18,station,Tysons,,,,,
+Silver,19,segment,McLean,,,,,
+Silver,20,station,McLean,,,,,
+Silver,21,segment,East Falls Church,,,,,
+Silver,22,station,East Falls Church,27,30,,,
+Silver,23,segment,Ballston-MU,411,338,,,same track as Orange
+Silver,24,station,Ballston-MU,27,20,,,
+Silver,25,segment,Virginia Square-GMU,116,118,,,same track as Orange
+Silver,26,station,Virginia Square-GMU,26,25,,,
+Silver,27,segment,Clarendon,102,103,,,same track as Orange
+Silver,28,station,Clarendon,21,22,,,
+Silver,29,segment,Court House,104,106,,,same track as Orange
+Silver,30,station,Court House,21,36,,,
+Silver,31,segment,Rosslyn,156,229,,,same track as Orange
+Silver,32,station,Rosslyn,31,32,,,
+Silver,33,segment,Foggy Bottom-GWU,232,202,,,same track as Orange
+Silver,34,station,Foggy Bottom-GWU,29,27,,,
+Silver,35,segment,Farragut West,115,109,,,same track as Orange
+Silver,36,station,Farragut West,32,18,,,
+Silver,37,segment,McPherson Square,55,59,,,same track as Orange
+Silver,38,station,McPherson Square,35,23,,,
+Silver,39,segment,Metro Center,104,116,,,same track as Orange
+Silver,40,station,Metro Center,33,,,,
+Silver,41,segment,Federal Triangle,50,,,,same track as Orange
+Silver,42,station,Federal Triangle,38,,,,
+Silver,43,segment,Smithsonian,106,,,,same track as Orange
+Silver,44,station,Smithsonian,33,,,,
+Silver,45,segment,L'Enfant Plaza,103,,,,same track as Orange
+Silver,46,station,L'Enfant Plaza,30,,,,
+Silver,47,segment,Federal Center SW,50,,,,same track as Orange
+Silver,48,station,Federal Center SW,52,,,1,copy of Orange; dwell outlier
+Silver,49,segment,Capitol South,110,,,,same track as Orange
+Silver,50,station,Capitol South,45,,,,
+Silver,51,segment,Eastern Market,200,,,1,same track as Orange; copy of Orange; travel outlier
+Silver,52,station,Eastern Market,110,,,1,copy of Orange; dwell outlier
+Silver,53,segment,Potomac Ave,114,,,,same track as Orange
+Silver,54,station,Potomac Ave,28,,,,
+Silver,55,segment,Stadium-Armory,225,217,,,same track as Orange
+Silver,56,station,Stadium-Armory,32,24,,,
+Silver,57,segment,Benning Road,329,513,,2,same track as Blue; copy of Blue; travel outlier
+Silver,58,station,Benning Road,26,27,,,
+Silver,59,segment,Capitol Heights,208,212,,,same track as Blue
+Silver,60,station,Capitol Heights,21,32,,,
+Silver,61,segment,Addison Road-Seat Pleasant,139,133,,,same track as Blue
+Silver,62,station,Addison Road-Seat Pleasant,25,32,,,
+Silver,63,segment,Morgan Boulevard,205,205,,,same track as Blue
+Silver,64,station,Morgan Boulevard,33,36,,,
+Silver,65,segment,Downtown Largo,222,236,,,same track as Blue
+Silver,66,station,Downtown Largo,,,,,
