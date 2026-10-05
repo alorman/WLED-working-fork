@@ -109,8 +109,9 @@ hardware revision.
 - `asl_map_data.h` — static circuit→LED mapping tables (flash-resident)
 - `asl_timing_data.h` — sim timing tables, **generated** from `timing/`
 - `timing/` — measured ride times (`segment_times.csv`), the original
-  workbook, and `gen_timing.py`, which regenerates `asl_timing_data.h`
-  (run by hand; not part of the build)
+  workbook, `gen_timing.py`, which regenerates `asl_timing_data.h`, and
+  `check_map.py`, which checks the map and timing tables (both run by hand;
+  not part of the build)
 - `presets-example.json` — the original 5-segment preset; upload to the device
   filesystem (`/edit`) as `presets.json` or recreate segments manually
 
@@ -132,9 +133,7 @@ ESP32 only (live mode uses `HTTPClient`).
   Yellow Huntington→Eisenhower Ave→King St (travel at 3 s/circuit, which is
   faster than reality), and the dwell at Judiciary Sq, Brookland, Eisenhower
   Ave and every terminal (fallback setting).
-- Map data still to verify (see comments in `asl_map_data.h`): station
-  circuits that sit inside a domain (Orange Vienna, Yellow King St / Pentagon /
-  L'Enfant), Orange station LEDs that overlap their neighbouring LED ranges
-  (Metro Center, L'Enfant, Stadium-Armory), Orange vs Blue station circuits at
-  Rosslyn and Stadium-Armory, and swapped Track1/Track2 labels between Yellow
-  and Green north of L'Enfant Plaza.
+- Map data still unresolved: the Stadium-Armory platform circuit (Orange says
+  1443, Blue 1461; measured times suggest neither). Only affects where live
+  trains dwelling there are drawn. Details and the fixes already made are in
+  the comments in `asl_map_data.h`; `timing/check_map.py` re-checks the tables.

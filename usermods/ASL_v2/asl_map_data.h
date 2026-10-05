@@ -26,10 +26,16 @@
  *      Green  Branch Avenue -> Greenbelt               (opposite of the timing sheet)
  *      Orange Vienna -> New Carrollton
  *      Yellow Huntington -> Fort Totten                (old route; no Potomac Yard)
- *  - The Track1/Track2 labels on shared track are not fully consistent:
- *    north of L'Enfant Plaza, Yellow Track1 (northbound) uses the circuits of
- *    Green Track2 (southbound). Harmless for rendering, because a circuit is
- *    looked up on both tracks, but one of the two lines has its labels swapped.
+ *  - Shared track uses the same Track1/Track2 circuits on every line that
+ *    rides it (Blue/Orange, Blue/Yellow, Green/Yellow). Green's two tracks were
+ *    originally labelled the other way round from Yellow's; they were swapped
+ *    so Yellow Track1 and Green Track1 now share circuits north of L'Enfant.
+ *    Labels only: a circuit is looked up on both tracks, so rendering and live
+ *    data were never affected.
+ *  - Where a line joins or leaves shared track, the station circuit can be a
+ *    junction circuit rather than the other line's platform circuit (Yellow at
+ *    Pentagon and L'Enfant, Orange at Rosslyn). Circuit numbering is not always
+ *    sequential along a route, so this is kept as recorded.
  */
 
 //Track Domains
@@ -55,36 +61,49 @@ static constexpr uint16_t BlueLineTrack2StationSegments[] = {2679,2709,1159,1170
 //Green Line
 // Track1 = Branch Avenue -> Greenbelt (index 0 = Branch Ave). This is the opposite
 // of the direction the timing sheet was ridden; timing/gen_timing.py reverses it.
-// Evidence: Yellow's station circuits 11-16 equal Green Track2's 11-16, which only
-// lines up station-by-station (Mt Vernon Sq ... Fort Totten) with Branch Ave at 0,
-// and domain 9 (4 circuits) is then Archives -> Gallery Place, the shortest hop.
-static constexpr uint16_t GreenLineTrack1Domains [][2] = { {2119,2135},{2137,2153},{2155,2169},{2171,2182},{2184,2198},{2200,2207},{2209,2218},{2220,2230},{2232,2240},{2242,2245},{1744,1752},{1754,1763},{1765,1772},{1774,1781},{1783,1795},{1797,1808},{1810,1832},{1834,1849},{1851,1870},{1872,1893} };
-static constexpr uint16_t GreenLineTrack2Domains [][2] = { {2256,2271},{2273,2290},{2292,2302},{2304,2316},{2318,2332},{2334,2341},{2343,2351},{2353,2363},{2365,2375},{2377,2380},{1900,1910},{1912,1922},{1924,1931},{1933,1941},{1943,1955},{1957,1970},{1972,1991},{1993,2008},{2010,2029},{2031,2054} };
+// Evidence: Yellow's station circuits 11-16 equal Green's 11-16, which only lines
+// up station-by-station (Mt Vernon Sq ... Fort Totten) with Branch Ave at 0, and
+// domain 9 (4 circuits) is then Archives -> Gallery Place, the shortest hop.
+// Track1/Track2 tables swapped relative to the original source so they match
+// Yellow's labels on the shared track (labels only, no behaviour change).
+static constexpr uint16_t GreenLineTrack1Domains [][2] = { {2256,2271},{2273,2290},{2292,2302},{2304,2316},{2318,2332},{2334,2341},{2343,2351},{2353,2363},{2365,2375},{2377,2380},{1900,1910},{1912,1922},{1924,1931},{1933,1941},{1943,1955},{1957,1970},{1972,1991},{1993,2008},{2010,2029},{2031,2054} };
+static constexpr uint16_t GreenLineTrack2Domains [][2] = { {2119,2135},{2137,2153},{2155,2169},{2171,2182},{2184,2198},{2200,2207},{2209,2218},{2220,2230},{2232,2240},{2242,2245},{1744,1752},{1754,1763},{1765,1772},{1774,1781},{1783,1795},{1797,1808},{1810,1832},{1834,1849},{1851,1870},{1872,1893} };
 
-static constexpr uint16_t GreenLineTrack1StationSegments[] = {2118,2136,2154,2170,2183,2199,2208,2219,2231,2241,2246,1753,1764,1773,1782,1796,1809,1833,1850,1871,1894};  
-static constexpr uint16_t GreenLineTrack2StationSegments[] = {2255,2272,2291,2303,2317,2333,2342,2352,2364,2376,1899,1911,1923,1932,1942,1956,1971,1992,2009,2030,2055};
+static constexpr uint16_t GreenLineTrack1StationSegments[] = {2255,2272,2291,2303,2317,2333,2342,2352,2364,2376,1899,1911,1923,1932,1942,1956,1971,1992,2009,2030,2055};
+static constexpr uint16_t GreenLineTrack2StationSegments[] = {2118,2136,2154,2170,2183,2199,2208,2219,2231,2241,2246,1753,1764,1773,1782,1796,1809,1833,1850,1871,1894};  
 
 //Orange Line
 // Track1 = Vienna -> New Carrollton. The first 8 domains (27xx-29xx) are Vienna -> Rosslyn.
-// Station list fixes (checked against the domain gaps and the Blue line's shared stations):
+// Fixes vs the original source (checked against the domain gaps, the Blue line's shared
+// stations and the original per-circuit ride order):
 //  - Track1 was missing Federal Triangle (1384) and Smithsonian (1393); Track2 was
 //    missing the same two stations (1549, 1559). Without them those two stations had
 //    no station circuit, every Orange station from L'Enfant Plaza on was off by two
 //    in the station -> LED lookup, and the last two station dots were never drawn.
 //  - Track1 domain {1383,1378} was written backwards (Blue has {1378,1383}); the
 //    range test could never match, so live trains there had no LED position.
-// Still unverified (left as-is):
-//  - Rosslyn: Orange Track1 uses station circuit 1089, Blue uses 1092.
+//  - Track1 domain 0 was {2755,2795}, which contained the Vienna station circuit 2774
+//    (trains passing 2773-2775 snapped back onto the Vienna dot). The original ride
+//    order starts at 2774, and Track2's matching domain has 20 circuits, so it is now
+//    {2775,2795}.
+//  - OrangeLineLEDArray overlapped three station dots (every other line leaves a
+//    one-LED gap per station). OrangeLineStationLEDPosition is the authority for dot
+//    positions, so the ranges were trimmed around it: {100,112} -> {100,111} (Metro
+//    Center 112), {123,132},{134,138} -> {123,131},{133,138} (L'Enfant 132), and
+//    {158,164},{166,176} -> {158,162},{164,176} (Stadium-Armory 163).
+// Kept as recorded:
+//  - Rosslyn: Orange uses station circuit 1089 / 1282, Blue uses 1092 / 1285. Treated
+//    as real (numbering is not always sequential where Orange joins the Blue track),
+//    although the original Orange ride order runs 2927 -> 1090 without passing 1089.
+// Unresolved:
 //  - Stadium-Armory: Orange Track1 uses 1443 after domain {1437,1442}; Blue uses 1461
-//    after domain {1437,1460}, which runs through 1443.
-//  - Vienna: Track1 station circuit 2774 lies inside domain {2755,2795}; a train
-//    passing circuits 2773-2775 snaps back onto the Vienna dot for a moment.
-//  - OrangeLineStationLEDPosition overlaps OrangeLineLEDArray at three stations
-//    (every other line leaves a one-LED gap for each station): Metro Center 112 is
-//    the last LED of {100,112}, L'Enfant Plaza 132 the last of {123,132}, and
-//    Stadium-Armory 163 sits inside {158,164} while LED 165 is unused. Trains step
-//    back about one LED arriving at Stadium-Armory.
-static constexpr uint16_t OrangeLineTrack1Domains [][2] = { {2755,2795},{2797,2816},{2818,2843},{2845,2869},{2871,2885},{2887,2897},{2899,2910},{2912,2927},{1090,1104},{1106,1116},{1118,1125},{1127,1134},{1378,1383},{1385,1392},{1394,1399},{1401,1405},{1407,1417},{1419,1423},{1425,1435},{1437,1442},{1444,1474},{1476,1486},{1488,1499},{1501,1521},{1523,1541} };
+//    after domain {1437,1460}. Both lines ride 1437..1461 (Blue then turns onto 2409,
+//    Orange continues at 1462), so the shared platform is a single circuit in that
+//    range. Measured travel times fit neither number (23 or 19-20 s per circuit vs
+//    7-10 everywhere else) but fit a platform around 1450. Sim is unaffected (dwell
+//    always lands on the dot); in live mode a train dwelling there is drawn mid-domain
+//    on whichever line is wrong. Settle with WMATA StandardRoutes or a live CircuitId.
+static constexpr uint16_t OrangeLineTrack1Domains [][2] = { {2775,2795},{2797,2816},{2818,2843},{2845,2869},{2871,2885},{2887,2897},{2899,2910},{2912,2927},{1090,1104},{1106,1116},{1118,1125},{1127,1134},{1378,1383},{1385,1392},{1394,1399},{1401,1405},{1407,1417},{1419,1423},{1425,1435},{1437,1442},{1444,1474},{1476,1486},{1488,1499},{1501,1521},{1523,1541} };
 static constexpr uint16_t OrangeLineTrack2Domains [][2] = { {2934,2953},{2955,2975},{2977,3000},{3002,3022},{3024,3036},{3038,3047},{3049,3060},{3062,3075},{1283,1297},{1299,1309},{1311,1322},{1324,1329},{1544,1548},{1550,1558},{1560,1567},{1569,1574},{1576,1589},{1591,1597},{1599,1609},{1611,1617},{1619,1642},{1644,1656},{1658,1669},{1671,1691},{1693,1710} };
 
 static constexpr uint16_t OrangeLineTrack1StationSegments[] = {2774,2796,2817,2844,2870,2886,2898,2911,1089,1105,1117,1126,1135,1384,1393,1400,1406,1418,1424,1436,1443,1475,1487,1500,1522,1542};  
@@ -93,17 +112,19 @@ static constexpr uint16_t OrangeLineTrack2StationSegments[] = {2933,2954,2976,30
 //Yellow Line
 // Track1 = Huntington -> Fort Totten (the old route north of Mt Vernon Sq; the north
 // end shares Green's circuits). Potomac Yard is not on this hardware.
-// Unverified (left as-is) - station circuits that lie inside a domain, so passing
-// trains briefly snap onto the station dot:
-//  - Track1 King St-Old Town = 969, inside {967,975}; the domain gap and Blue's
-//    King St both say 966.
-//  - Track2 Pentagon = 1246, inside {1231,1247}; Blue Track2 has {1231,1245}.
-//  - Track2 L'Enfant Plaza = 2231, inside {2230,2240}; Green Track1 has {2232,2240}.
+// Station circuit fixes (each previously sat inside a domain, so passing trains
+// snapped onto the station dot; checked against the original ride order):
+//  - Track1 King St-Old Town 969 -> 966: the ride order runs 965, 966, 967 and Blue
+//    joins at 2673 -> 966. Live trains dwelling at King St used to match nothing.
+//  - Track2 Pentagon 1246 -> 1248 and Track2 L'Enfant Plaza 2231 -> 2229: Yellow's
+//    Track1 already uses the circuit where it meets the bridge (Pentagon 1054,
+//    L'Enfant 2362) rather than the Blue/Green platform circuit, and Track2 now does
+//    the same (the ride order off the bridge is 3105 -> 1248 and 2229 -> 3123).
 static constexpr uint16_t YellowLineTrack1Domains [][2] = { { 945, 954},{ 956, 965},{ 967, 975},{ 977,1009},{1011,1023},{1025,1035},{1037,1053},{3124,3145},{2363,2375},{2377,2380},{1900,1910},{1912,1922},{1924,1931},{1933,1941},{1943,1955},{1957,1970} };
 static constexpr uint16_t YellowLineTrack2Domains [][2] = { {1138,1147},{1149,1161},{1163,1169},{1171,1203},{1205,1216},{1218,1229},{1231,1247},{3105,3123},{2230,2240},{2242,2245},{1744,1752},{1754,1763},{1765,1772},{1774,1781},{1783,1795},{1797,1808} };
 
-static constexpr uint16_t YellowLineTrack1StationSegments[] = { 944, 955, 969, 976,1010,1024,1036,1054,2362,2376,1899,1911,1923,1932,1942,1956,1971};  
-static constexpr uint16_t YellowLineTrack2StationSegments[] = {1137,1148,1162,1170,1204,1217,1230,1246,2231,2241,2246,1753,1764,1773,1782,1796,1809};
+static constexpr uint16_t YellowLineTrack1StationSegments[] = { 944, 955, 966, 976,1010,1024,1036,1054,2362,2376,1899,1911,1923,1932,1942,1956,1971};  
+static constexpr uint16_t YellowLineTrack2StationSegments[] = {1137,1148,1162,1170,1204,1217,1230,1248,2229,2241,2246,1753,1764,1773,1782,1796,1809};
 
 //LED ARRAYS (in real-world space)
 //Red LED Arrays
@@ -120,7 +141,7 @@ static constexpr uint16_t GreenLineLEDArray [][2] = { {1,7},{9,14},{16,21},{23,3
 
 //Orange LED Arrays
 static constexpr uint16_t OrangeLineStationLEDPosition[] = {0,6,12,18,24,30,36,42,52,78,88,99,112,117,122,132,139,145,150,157,163,177,184,192,200,208}; //hard coded position of each station within sequential numbering of LEDS (this can be less than the total number of stations if you want (for some odd reason))
-static constexpr uint16_t OrangeLineLEDArray [][2] = { {1,5},{7,11},{13,17},{19,23},{25,29},{31,35},{37,41},{43,51},{53,77},{79,87},{89,98},{100,112},{113,116},{118,121},{123,132},{134,138},{140,144},{146,149},{151,156},{158,164},{166,176},{178,183},{185,191},{193,199},{201,207} };
+static constexpr uint16_t OrangeLineLEDArray [][2] = { {1,5},{7,11},{13,17},{19,23},{25,29},{31,35},{37,41},{43,51},{53,77},{79,87},{89,98},{100,111},{113,116},{118,121},{123,131},{133,138},{140,144},{146,149},{151,156},{158,162},{164,176},{178,183},{185,191},{193,199},{201,207} };
 
 //Yellow LED Arrays
 static constexpr uint16_t YellowLineStationLEDPosition[] = {0,8,13,18,29,42,47,56,100,107,113,120,129,135,152,170,184}; //hard coded position of each station within sequential numbering of LEDS (this can be less than the total number of stations if you want (for some odd reason))

@@ -9,14 +9,17 @@ Measured WMATA Metrorail ride times that drive the offline train simulator.
 | `metrorail-timing-workbook-merged.xlsx` | Original stopwatch workbook (template generated with Claude; times are hand-measured on real rides). Kept as the raw record. |
 | `segment_times.csv` | **Source of truth.** Same data as the workbook, one row per station or segment, plus the exclusion decisions. Edit this when you add rides. |
 | `gen_timing.py` | Helper that turns the CSV into `../asl_timing_data.h`. Standard library only, run by hand, **not** part of the firmware build. |
+| `check_map.py` | Consistency checker for `../asl_map_data.h` and `../asl_timing_data.h`: table structure, LED layout, shared track between lines, speed sanity, and a mirror of the sim that verifies every train runs end to end without gaps or backward steps. Exit status 1 on errors. Not part of the build. |
 
 After editing the CSV:
 
 ```
 python usermods/ASL_v2/timing/gen_timing.py
+python usermods/ASL_v2/timing/check_map.py
 ```
 
 then build as usual and commit both the CSV and the regenerated header.
+Run `check_map.py` after any edit to the map tables too.
 
 ## Source and accuracy
 
