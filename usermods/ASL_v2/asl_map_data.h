@@ -141,6 +141,24 @@ static constexpr uint16_t YellowLineLEDArray [][2] = { {1,7},{9,12},{14,17},{19,
 #define YellowLineTrack1AdditiveDelaySegmentsCount (sizeof(YellowLineTrack1AdditiveDelaySegments)/sizeof(YellowLineTrack1AdditiveDelaySegments[0]))
 #define YellowLineTrack2AdditiveDelaySegmentsCount (sizeof(YellowLineTrack2AdditiveDelaySegments)/sizeof(YellowLineTrack2AdditiveDelaySegments[0]))
 
+// ---- table consistency checks ----
+// each AdditiveDelaySegments entry is the timing for the Segments entry at the
+// same index, so a length mismatch would silently drop or misplace sim trains
+static_assert(RedLineTrack1SegmentCount    == RedLineTrack1AdditiveDelaySegmentsCount,    "Red track 1: Segments / AdditiveDelaySegments length mismatch");
+static_assert(RedLineTrack2SegmentCount    == RedLineTrack2AdditiveDelaySegmentsCount,    "Red track 2: Segments / AdditiveDelaySegments length mismatch");
+static_assert(BlueLineTrack1SegmentCount   == BlueLineTrack1AdditiveDelaySegmentsCount,   "Blue track 1: Segments / AdditiveDelaySegments length mismatch");
+static_assert(BlueLineTrack2SegmentCount   == BlueLineTrack2AdditiveDelaySegmentsCount,   "Blue track 2: Segments / AdditiveDelaySegments length mismatch");
+static_assert(GreenLineTrack1SegmentCount  == GreenLineTrack1AdditiveDelaySegmentsCount,  "Green track 1: Segments / AdditiveDelaySegments length mismatch");
+static_assert(GreenLineTrack2SegmentCount  == GreenLineTrack2AdditiveDelaySegmentsCount,  "Green track 2: Segments / AdditiveDelaySegments length mismatch");
+static_assert(OrangeLineTrack1SegmentCount == OrangeLineTrack1AdditiveDelaySegmentsCount, "Orange track 1: Segments / AdditiveDelaySegments length mismatch");
+static_assert(OrangeLineTrack2SegmentCount == OrangeLineTrack2AdditiveDelaySegmentsCount, "Orange track 2: Segments / AdditiveDelaySegments length mismatch");
+static_assert(YellowLineTrack1SegmentCount == YellowLineTrack1AdditiveDelaySegmentsCount, "Yellow track 1: Segments / AdditiveDelaySegments length mismatch");
+static_assert(YellowLineTrack2SegmentCount == YellowLineTrack2AdditiveDelaySegmentsCount, "Yellow track 2: Segments / AdditiveDelaySegments length mismatch");
+// WIP re-rack inputs are indexed per domain in parallel
+static_assert(sizeof(RedLineTrack1DelayDomainsS) / sizeof(RedLineTrack1DelayDomainsS[0]) ==
+              sizeof(RedLineTrack1DelaySegTotal) / sizeof(RedLineTrack1DelaySegTotal[0]),
+              "Red track 1: DelayDomainsS / DelaySegTotal length mismatch");
+
 // Output buffer for the runtime-computed ("re-rackable") delay table.
 // WIP: currently generated for Red line track 1 only; sim mode still runs on
 // the constexpr AdditiveDelaySegments tables above until this is validated.

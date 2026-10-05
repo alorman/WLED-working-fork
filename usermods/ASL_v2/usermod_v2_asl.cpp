@@ -346,8 +346,12 @@ class UsermodASL : public Usermod {
       uint32_t runDuration = addDelay[delayCount - 1]; // total end-to-end run time
       uint16_t lastSeg = (segCount < delayCount) ? segCount : delayCount;
 
+      // a departure exactly at close is the last train, except in 24h service
+      // where elapsed == 86400 is the first departure again (duplicate train)
+      uint32_t lastElapsed = (opDuration >= 86400UL) ? opDuration - 1 : opDuration;
+
       uint32_t elapsed = 0; // seconds from open to this departure
-      for (uint32_t i = 0; elapsed <= opDuration && i < 4096; i++) {
+      for (uint32_t i = 0; elapsed <= lastElapsed && i < 4096; i++) {
         uint32_t departure = (systemFirstTrainTime + elapsed) % 86400UL;
         elapsed += headwayAt(departure);
         uint32_t t = (secondOfDay + 86400UL - departure) % 86400UL; // seconds into this train's run, wrap-safe
@@ -379,6 +383,7 @@ class UsermodASL : public Usermod {
       const uint16_t numStations = RedLineNumStationsInLine;
       const uint16_t numDomains  = sizeof(RedLineTrack1DelayDomainsS) / sizeof(RedLineTrack1DelayDomainsS[0]);
       uint16_t stationsPassed = 0;
+      uint16_t segInDomain = 0; // index of this segment within the current domain
       for (uint16_t i = 0; i < segCount; i++) {
         bool isStation = false;
         for (uint16_t x = 0; x < numStations; x++) {
@@ -387,10 +392,16 @@ class UsermodASL : public Usermod {
         if (isStation) {
           RedLineTrack1NewAdditiveDelaySegs[i] = stationDwellTimeS;
           stationsPassed++;
+          segInDomain = 0;
         } else if (stationsPassed > 0 && stationsPassed <= numDomains) {
-          // spread the domain's travel time evenly across its non-station segments
-          RedLineTrack1NewAdditiveDelaySegs[i] =
-            (RedLineTrack1DelayDomainsS[stationsPassed - 1] - stationDwellTimeS) / RedLineTrack1DelaySegTotal[stationsPassed - 1];
+          // spread the domain's travel time across its non-station segments;
+          // each gets the difference of rounded-down cumulative shares, so the
+          // remainder is distributed and the domain sums to its exact total
+          uint32_t domainS = RedLineTrack1DelayDomainsS[stationsPassed - 1];
+          uint32_t span = (domainS > stationDwellTimeS) ? domainS - stationDwellTimeS : 0;
+          uint32_t n = RedLineTrack1DelaySegTotal[stationsPassed - 1];
+          uint32_t k = segInDomain++;
+          RedLineTrack1NewAdditiveDelaySegs[i] = (k < n) ? (k + 1) * span / n - k * span / n : 0;
         } else {
           RedLineTrack1NewAdditiveDelaySegs[i] = 0;
         }
@@ -607,7 +618,7 @@ class UsermodASL : public Usermod {
       configComplete &= getJsonValue(top[F("Evening Rush Hour End")], hhmm, "");
       pmRushEndTime   = parseHHMM(hhmm.c_str(), DEF_PM_RUSH_END_S);
 
-      // 0 (or negative) rush headway = rush disabled; missing = default 3 min
+      // 0 (or negative) rush headway = rush disabled; missing = default 4 min
       float rushMin = 0.0f;
       configComplete &= getJsonValue(top[F("Rush Hour Train Headway")], rushMin, DEF_RUSH_HEADWAY_S / 60.0f);
       rushHeadwayTimeSeconds = (rushMin > 0.0f) ? (uint32_t)(rushMin * 60.0f + 0.5f) : 0;
