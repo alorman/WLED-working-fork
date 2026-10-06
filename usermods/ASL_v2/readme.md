@@ -21,11 +21,21 @@ the five line effects are registered at runtime from `setup()` via
 
 Every *Plot Refresh Interval* the usermod computes a per-line scenery frame
 (one byte per LED: track / station) and reconciles the train data into a
-sprite list: each train glides from where it is currently rendered to the
-fractional LED position of its latest data point over one plot interval
-(plus 300 ms of slack so a late update never leaves it parked). Sim trains
-glide at constant speed, because the sim's positions already follow the real
-motion; live trains ease out of and into each data point (smoothstep).
+sprite list: each train glides at constant speed from where it is currently
+rendered to the fractional LED position of its latest data point, timed to
+arrive when the next data point is due (plus 300 ms of slack), so it is
+normally still moving when that point arrives:
+
+- **Sim:** a new position every plot interval, so glides last one interval.
+- **Live:** WMATA refreshes positions less often than the usermod polls, and
+  only in whole circuits. A poll that returns the same snapshot as the last
+  one is ignored (trains keep gliding); the time between real feed changes is
+  measured and smoothed, and each train that moved glides to its new position
+  over that measured interval (default 10 s until measured, capped at 30 s).
+  The display therefore runs about one WMATA update behind, in exchange for
+  continuous motion. Failed fetches leave trains in place; after 60 s without
+  good data, live trains are cleared from the map.
+
 Circuits flow through the pipeline
 as floats: the sim interpolates exact fractional positions from its timetable
 (continuous motion, no inchworming between circuit boundaries), while live
@@ -109,7 +119,7 @@ before uploading. Uploads are refused while a settings PIN is locked.
 | Enable Train Sim Mode | on | off = fetch live WMATA data |
 | Server Address | WMATA TrainPositions URL | `api_key` is appended automatically |
 | API Key | *(empty)* | live mode does nothing without it; spaces and line breaks are removed automatically on save |
-| Plot Refresh Interval (ms) | 5000 | data refresh + glide duration; keep ≥ 3500 in live mode or WMATA will get angry |
+| Plot Refresh Interval (s) | 15 | data refresh + glide duration, in seconds (decimals ok, minimum 1). **Live mode: 15 or more recommended** — WMATA refreshes each train's position only about every 15 s, so polling faster makes trains glide and then wait for the next update. Sim mode works well at any value. Replaces the old "Plot Refresh Interval (ms)" setting |
 | System Open/Close Time | 05:00 / 00:00 | HH:MM time pickers; first/last train departure (sim), defaults match WMATA weekday hours (5am–midnight). Close earlier than open wraps past midnight (e.g. 22:00–02:00); equal times = 24-hour service |
 | Train Headway | 6 | minutes between departures, decimals ok (sim); stored as seconds internally |
 | Rush Hour Train Headway | 4 | minutes between departures inside rush windows (0 = no rush service). Applies at the terminals, so the density wave sweeps down each line at travel speed. Defaults match WMATA's published FY2026 peak service |
