@@ -155,6 +155,29 @@ The sim runs on WLED's clock, so it is only as right as that clock. Under
   Info panel as *ASL sim time* while active. Also available over the JSON API:
   `{"ASL":{"simAt":"14:30"}}` and `{"ASL":{"simReset":true}}` to `/json/state`.
 
+### Info panel
+
+The WLED Info page shows these rows (mode-specific rows only in that mode):
+
+| Row | Shows |
+|---|---|
+| ASL trains | trains in the current data (sim or live) |
+| ASL clock | local time and where it came from (NTP, RTC, browser / API, not set) |
+| ASL UTC offset | offset actually applied (timezone + DST + manual offset) |
+| ASL NTP sync | when NTP last succeeded, or disabled / not yet |
+| ASL RTC | not built in / off (no I2C pins) / set the clock at boot / no time from RTC |
+| ASL status LED | what the status LED currently means, in words |
+| ASL effect IDs | OK, or a warning if an effect missed its fixed ID (presets would need updating) |
+| ASL service *(sim)* | in service (AM/PM rush, current headway) or next departure time |
+| ASL run times *(sim)* | end-to-end run time per line from the timing tables |
+| ASL sim time *(sim)* | the test time, while one is active |
+| ASL feed refresh *(live)* | measured WMATA refresh interval |
+| ASL last fetch *(live)* | OK (and how long it blocked), HTTP error, no connection, bad data, no API key, no Wi-Fi |
+| ASL feed trains *(live)* | trains in the feed vs drawn, off-map, other lines (e.g. Silver), non-revenue |
+| ASL trains per line *(live)* | trains drawn per line |
+| ASL data age *(live)* | how long ago positions last changed |
+| ASL API calls *(live)* | WMATA requests since boot |
+
 ### Status LED
 
 A sixth effect, **ASL - Status LED** (listed first among the ASL effects), shows the map's health on a status LED (on
