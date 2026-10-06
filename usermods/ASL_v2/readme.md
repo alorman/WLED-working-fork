@@ -165,7 +165,7 @@ The WLED Info page shows these rows (mode-specific rows only in that mode):
 | ASL clock | local time and where it came from (NTP, RTC, browser / API, not set) |
 | ASL UTC offset | offset actually applied (timezone + DST + manual offset) |
 | ASL NTP sync | when NTP last succeeded, or disabled / not yet |
-| ASL RTC | not built in / off (no I2C pins) / set the clock at boot / no time from RTC |
+| ASL RTC | not built in / off (no I2C pins) / OK, set the clock at boot / chip found but its time was not set / chip not responding on I2C (pins, wiring or unsupported chip — DS3231/DS1307 only) |
 | ASL status LED | what the status LED currently means, in words |
 | ASL effect IDs | OK, or a warning if an effect missed its fixed ID (presets would need updating) |
 | ASL service *(sim)* | in service (AM/PM rush, current headway) or next departure time |
