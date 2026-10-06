@@ -154,6 +154,72 @@ The sim runs on WLED's clock, so it is only as right as that clock. Under
   by a reboot, and the real clock and RTC chip are never changed. Shown in the
   Info panel as *ASL sim time* while active. Also available over the JSON API:
   `{"ASL":{"simAt":"14:30"}}` and `{"ASL":{"simReset":true}}` to `/json/state`.
+- **Sim / live switch** over the JSON API: `{"ASL":{"sim":true}}` or
+  `{"ASL":{"sim":false}}` to `/json/state` (the Metro Map page's *Trains*
+  toggle). Saved like the *Enable Train Sim Mode* setting; trains of the old
+  mode fade out and the map refills from the new source at once.
+- **Sim timetable** over the JSON API (the Metro Map page's *Sim timetable*
+  section): `GET /asl/sim` returns the timetable settings (without the rest of
+  `cfg.json`, which holds the API key), and
+  `{"ASL":{"simCfg":{"open":"05:00","close":"00:30","headway":6,"rushHeadway":4,"amStart":"06:00","amEnd":"09:00","pmStart":"15:00","pmEnd":"18:30","dwell":25}}}`
+  to `/json/state` changes any subset of them. Validated like the settings
+  page (malformed times keep the current value, headway must be above 0, rush
+  headway 0 = no rush service, dwell 1-600 s) and saved to `cfg.json`.
+- **Live feed settings** over the JSON API (the Metro Map page's *Live feed*
+  section): `GET /asl/feed` returns the server address, whether an API key is
+  set, the key itself only while WLED's settings are unlocked (no settings PIN,
+  or the PIN has been entered - the same rule as WLED's own settings pages),
+  and whether the PIN lock is on. `{"ASL":{"feed":{"server":"http://...","key":"..."}}}`
+  to `/json/state` changes either one (server must start with `http://` or
+  `https://`; whitespace is stripped from the key) and saves to `cfg.json`.
+  Because the key is sent to whatever server is set, this command follows
+  WLED's settings protection: if a settings PIN is set, it is ignored until the
+  PIN has been entered (WLED Settings).
+
+### Metro Map web page
+
+`web/metro.htm` is a custom landing page: a live map (trains and stations,
+WMATA line colours), power, brightness, preset buttons, per-line on/off and
+brightness, sim test time / set clock, the Info panel, and links to the WLED
+controls and settings.
+
+```bash
+curl -F "data=@web/metro.htm;filename=metro.htm" http://<wled-ip>/upload
+# then open http://<wled-ip>/metro.htm
+```
+
+For development, open the file straight from disk with `?ip=<wled-ip>`
+(remembered afterwards); WLED's API allows cross-origin requests. Like
+`presets.json`, the page lives in the device filesystem, so a full flash
+erase removes it.
+
+The live map reads `GET /asl/live` from this usermod: per line the LED
+count and station LEDs, plus every visible train as
+`[line, pos, alpha, id, cars, "dest", nonRev]`, where `pos` is the fractional
+LED exactly as drawn. Hovering or tapping a train shows its line, destination,
+train ID and car count (live mode; the sim has none of these). Trains not in
+passenger service are never shown on the LEDs, but the page draws them as
+hollow grey rings. The endpoint is only called by the page, so this costs
+nothing while the page is closed. Destinations show as WMATA station codes
+unless `web/wmata_stations.json` (the response of WMATA's
+`Rail.svc/json/jStations`, saved as a file) is present when
+`gen_map_coords.py` runs; then they show as names. The map is geographic:
+every LED's position comes from the board's LED numbering PDF
+(`web/LED-Numbering.pdf`, one label per LED, e.g. `RD0`..`RD266`).
+`web/gen_map_coords.py` (standard library, run by hand) reads the labels'
+positions out of the PDF, checks every line is complete, and writes them
+into the page's `COORDS` line. It also copies the board's grey artwork
+(outline, rivers, county lines, track corridors) into the `BACKDROP` line,
+which the map draws in translucent white behind the LEDs (strength set by
+`BACKDROP_OPACITY` in the page), and the station bullseyes from that artwork
+into the `BULLSEYES` line. Stations are not drawn on top of the artwork; each
+bullseye is an invisible hover target showing the station's name, plus its
+lines at transfer stations. Rerun it if the board layout changes. Without
+coordinates the page falls back to a schematic one-bar-per-line diagram.
+
+The artwork makes the page about 180 KB. To save flash and load time, gzip it
+and upload `metro.htm.gz` in place of `metro.htm`; WLED serves the compressed
+file automatically.
 
 ### Info panel
 

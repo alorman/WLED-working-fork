@@ -134,6 +134,10 @@ struct AslSprite {
   uint32_t moveStartMs;
   uint32_t moveDurMs;    // 0 = parked at targetPos
   uint32_t fadeStartMs;  // spawn (fade-in) or ghost (fade-out) start
+  // details for the web page's train tooltips (/asl/live); not used for the LEDs
+  bool     nonRev;       // not in passenger service: shown on the web map only, never on the LEDs
+  uint8_t  cars;         // car count, 0 = unknown (sim)
+  char     dest[4];      // WMATA destination station code, "" = unknown
 };
 
 static AslSprite aslSprites[ASL_MAX_SPRITES];
@@ -244,12 +248,13 @@ static AslSprite* aslFindSprite(uint8_t lineIdx, uint8_t dir, uint32_t id) {
   return nullptr;
 }
 
-static void aslSpawnSprite(uint8_t lineIdx, uint8_t dir, uint32_t id, float pos, uint32_t nowMs) {
+static AslSprite* aslSpawnSprite(uint8_t lineIdx, uint8_t dir, uint32_t id, float pos, uint32_t nowMs) {
   for (auto &s : aslSprites) {
     if (s.mode != ASL_SPR_FREE) continue;
     s = { ASL_SPR_LIVE, lineIdx, dir, 0, true, id, pos, pos, nowMs, 0, nowMs };
-    return;
+    return &s;
   } // table full: the train simply appears on a later cycle
+  return nullptr;
 }
 
 static void aslGhostSprite(AslSprite& s, uint32_t nowMs) {
@@ -280,7 +285,7 @@ static void aslDrawFrame(const uint8_t* frame, uint16_t frameLen, uint8_t lineId
   const float   crossfade = (shownBri < aslHopBelowBri) ? 0.0f : aslCrossfade;
   for (unsigned n = 0; n < ASL_MAX_SPRITES; n++) {
     const AslSprite& s = aslSprites[n];
-    if (s.mode == ASL_SPR_FREE || s.lineIdx != lineIdx) continue;
+    if (s.mode == ASL_SPR_FREE || s.lineIdx != lineIdx || s.nonRev) continue;
     uint8_t alpha = aslSpriteAlpha(s, nowMs);
     if (alpha == 0) continue;
     float pos  = aslSpritePos(s, nowMs);
@@ -421,6 +426,12 @@ class UsermodASL : public Usermod {
     // times are stored internally as seconds; in cfg.json open/close are "HH:MM"
     // strings and headway is minutes (decimals ok), converted in read/addToConfig
     bool     simModeEnable = true;
+    volatile int8_t simModeRequest = -1; // -1 none, 0 live, 1 sim: set by JSON, applied in loop()
+    // feed settings from the Metro Map page, applied in loop() (which uses the
+    // live strings for the WMATA request); written only while feedPending is clear
+    volatile bool feedPending = false;
+    bool     feedNewServer = false, feedNewKey = false;
+    String   feedServer, feedKey;
     String   serverAddress = "http://api.wmata.com/TrainPositions/TrainPositions?contentType=json";
     String   apiKey = "";
     uint32_t systemFirstTrainTime = DEF_OPEN_S;    // second of day the first train departs
@@ -472,6 +483,7 @@ class UsermodASL : public Usermod {
     uint8_t  trainCars[MAX_TRAINS];
     uint8_t  trainSecondsAtLoc[MAX_TRAINS];
     char     trainLine[MAX_TRAINS][3];
+    char     trainDest[MAX_TRAINS][4];  // destination station code (web page tooltips only)
     bool     trainNormal[MAX_TRAINS];
 
     static const char _name[];
@@ -517,9 +529,10 @@ class UsermodASL : public Usermod {
       trainId[i]           = simIdx + 1;
       trainCircuit[i]      = circuit;
       trainDirection[i]    = dir;
-      trainCars[i]         = 8;
+      trainCars[i]         = 0;   // unknown: the sim has no consists
       trainSecondsAtLoc[i] = 2;
       strlcpy(trainLine[i], lineCode, sizeof(trainLine[i]));
+      trainDest[i][0]      = '\0';
       trainNormal[i]       = true;
     }
 
@@ -688,11 +701,14 @@ class UsermodASL : public Usermod {
       // ~120 positions off-peak, more at rush) overflowed the old fixed 24 KB
       // document; filtered, one train costs ~140 bytes (7 member slots plus a
       // few short strings, keys deduplicated), so this size covers MAX_TRAINS.
+      // DestinationStationCode (one more slot + a 3-letter string) is only for
+      // the web page's train tooltips.
       StaticJsonDocument<256> filter;
       JsonObject f = filter["TrainPositions"].createNestedObject();
       f["TrainId"] = true;  f["CircuitId"] = true;  f["DirectionNum"] = true; f["CarCount"] = true;
       f["SecondsAtLocation"] = true; f["LineCode"] = true; f["ServiceType"] = true;
-      DynamicJsonDocument doc(MAX_TRAINS * 160);
+      f["DestinationStationCode"] = true;
+      DynamicJsonDocument doc(MAX_TRAINS * 176);
       DeserializationError err = deserializeJson(doc, payload, DeserializationOption::Filter(filter));
       if (err) {
         DEBUG_PRINTF_P(PSTR("ASL: JSON parse failed: %s (payload %u bytes)\n"), err.c_str(), payload.length());
@@ -712,6 +728,7 @@ class UsermodASL : public Usermod {
         uint32_t atLoc       = t["SecondsAtLocation"] | 0UL; // feed can report e.g. 9990
         trainSecondsAtLoc[i] = (atLoc > 255) ? 255 : (uint8_t)atLoc;
         strlcpy(trainLine[i], t["LineCode"] | "", sizeof(trainLine[i]));
+        strlcpy(trainDest[i], t["DestinationStationCode"] | "", sizeof(trainDest[i])); // may be null in the feed
         trainNormal[i]       = (strcmp(t["ServiceType"] | "", "Normal") == 0);
       }
       numTrains = n;
@@ -774,19 +791,42 @@ class UsermodASL : public Usermod {
       // Info panel breakdown of this update's trains
       statFeed = numTrains; statDrawn = statOffMap = statOtherLine = statNonRevenue = 0;
       for (auto &c : statPerLine) c = 0;
+      // AI: below section was generated by an AI
+      // copy one feed entry's tooltip details (web page only) onto its sprite
+      auto setDetails = [this](AslSprite* s, uint16_t i) {
+        if (!s) return;
+        s->nonRev = !trainNormal[i];
+        s->cars   = trainCars[i];
+        strlcpy(s->dest, trainDest[i], sizeof(s->dest));
+      };
+      // AI: end
       for (uint16_t i = 0; i < numTrains; i++) {
-        if (!trainNormal[i]) { statNonRevenue++; continue; }
         int8_t li = aslLineIndex(trainLine[i]);
-        if (li < 0) { statOtherLine++; continue; }                 // e.g. Silver, not on this hardware
         float target;
-        if (!aslTargetLED(li, trainCircuit[i], target)) { statOffMap++; continue; } // circuit outside the mapped domains
-        statDrawn++;
-        statPerLine[li]++;
+        if (!trainNormal[i]) {
+          // AI: below section was generated by an AI
+          // Not in passenger service: never drawn on the LEDs (the effects skip
+          // nonRev sprites), only on the web page's map. These trains often
+          // have no line code, so place them on the first line whose map
+          // contains their circuit.
+          statNonRevenue++;
+          bool placed = (li >= 0) && aslTargetLED(li, trainCircuit[i], target);
+          for (uint8_t l = 0; !placed && l < ASL_NUM_LINES; l++)
+            if (aslTargetLED(l, trainCircuit[i], target)) { li = (int8_t)l; placed = true; }
+          if (!placed) continue;
+          // AI: end
+        } else {
+          if (li < 0) { statOtherLine++; continue; }                 // e.g. Silver, not on this hardware
+          if (!aslTargetLED(li, trainCircuit[i], target)) { statOffMap++; continue; } // circuit outside the mapped domains
+          statDrawn++;
+          statPerLine[li]++;
+        }
         AslSprite* s = aslFindSprite(li, trainDirection[i], trainId[i]);
         if (!s) {
-          aslSpawnSprite(li, trainDirection[i], trainId[i], target, nowMs);
+          setDetails(aslSpawnSprite(li, trainDirection[i], trainId[i], target, nowMs), i);
           continue;
         }
+        setDetails(s, i);
         s->seen = true;
         s->missed = 0;
         // live: this train has not moved since its last report (the feed
@@ -800,7 +840,7 @@ class UsermodASL : public Usermod {
           s->moveDurMs   = glideMs;
         } else {
           aslGhostSprite(*s, nowMs);
-          aslSpawnSprite(li, trainDirection[i], trainId[i], target, nowMs);
+          setDetails(aslSpawnSprite(li, trainDirection[i], trainId[i], target, nowMs), i);
         }
       }
       // a train missing from this cycle's data: live WMATA data often drops a
@@ -835,6 +875,11 @@ class UsermodASL : public Usermod {
       aslAddEffect(ASL_FX_ORANGE, &mode_asl_orange, _data_FX_ASL_ORANGE);
       aslAddEffect(ASL_FX_YELLOW, &mode_asl_yellow, _data_FX_ASL_YELLOW);
       aslAddEffect(ASL_FX_STATUS, &mode_asl_status, _data_FX_ASL_STATUS);
+      // live map data for the custom web page (web/metro.htm). Not under /json/:
+      // WLED's /json handler also matches every /json/... sub-path.
+      server.on(F("/asl/live"), HTTP_GET, [this](AsyncWebServerRequest* request) { serveLiveMap(request); });
+      server.on(F("/asl/sim"), HTTP_GET, [this](AsyncWebServerRequest* request) { serveSimConfig(request); });
+      server.on(F("/asl/feed"), HTTP_GET, [this](AsyncWebServerRequest* request) { serveFeedConfig(request); });
       // Draw the scenery before any frame is shown. The frames start zeroed,
       // and pixel code 0 is the TRAIN color slot, so until the first plot
       // every LED of every line lit up in its train color at full preset
@@ -848,6 +893,32 @@ class UsermodASL : public Usermod {
     }
 
     void loop() override {
+      // AI: below section was generated by an AI
+      // sim/live switch requested over JSON (see readFromJsonState): fade out
+      // every train of the old mode so the map refills cleanly from the new
+      // source, refresh at once, and save the setting
+      if (simModeRequest >= 0) {
+        const bool on = (simModeRequest == 1);
+        simModeRequest = -1;
+        if (on != simModeEnable) {
+          simModeEnable = on;
+          const uint32_t nowMs = millis();
+          for (auto &s : aslSprites) if (s.mode == ASL_SPR_LIVE) aslGhostSprite(s, nowMs);
+          lastTime = nowMs - plotRefreshIntervalMs;
+          configNeedsWrite = true;
+        }
+      }
+      // feed settings requested over JSON (see readFromJsonState): swap them in
+      // between WMATA requests, refresh at once, and save
+      if (feedPending) {
+        if (feedNewServer) serverAddress = feedServer;
+        if (feedNewKey)    apiKey = feedKey;
+        feedServer = String(); feedKey = String();   // don't keep a second copy of the key around
+        feedPending = false;
+        lastTime = millis() - plotRefreshIntervalMs;
+        configNeedsWrite = true;
+      }
+      // AI: end
       if (enabled) updateStatus(); // every pass, so the status LED reacts immediately
       if (!enabled || (strip.isUpdating() && (millis() - lastTime < plotRefreshIntervalMs + 200))) return;
       if (millis() - lastTime < plotRefreshIntervalMs) return;
@@ -1006,6 +1077,95 @@ class UsermodASL : public Usermod {
       // AI: end
     }
 
+    // AI: below section was generated by an AI
+    // GET /asl/live - snapshot of what the map is drawing, for web/metro.htm:
+    //   {"v":1,"sim":1,"ms":<millis>,"st":<sim clock, second of day>,"test":<1 = test time set>,
+    //    "lines":[{"c":"RD","n":267,"s":[0,11,...]}, ...],   // per line: code, LED count, station LEDs
+    //    "tr":[[line,pos,alpha,id,cars,"dest",nonRev], ...]}  // every visible train sprite
+    // line = index into "lines" (ASL_LINE_* order), pos = fractional LED along
+    // that line exactly as rendered (glide included), alpha = fade 0-255,
+    // id = train ID, cars = car count (0 = unknown), dest = WMATA destination
+    // station code ("" = unknown), nonRev = 1 for a train not in passenger
+    // service (on the page only, never on the LEDs).
+    // Positions are line-local LED indices, so the page needs no knowledge of
+    // segment starts. Runs in the web server task while loop() updates the
+    // sprites; a torn read only affects one frame of the drawing.
+    void serveLiveMap(AsyncWebServerRequest* request) {
+      AsyncResponseStream* r = request->beginResponseStream(F("application/json"));
+      r->addHeader(F("Cache-Control"), F("no-store"));
+      const uint32_t now = millis();
+      r->printf_P(PSTR("{\"v\":1,\"sim\":%d,\"ms\":%u,\"st\":%u,\"test\":%d,\"lines\":["), simModeEnable ? 1 : 0, (unsigned)now,
+                  (unsigned)((realSecondOfDay() + simOffsetS) % 86400UL), simOffsetS ? 1 : 0);
+      for (uint8_t li = 0; li < ASL_NUM_LINES; li++) {
+        const AslLineDef& L = aslLines[li];
+        r->printf_P(PSTR("%s{\"c\":\"%s\",\"n\":%u,\"s\":["), li ? "," : "", L.code,
+                    (unsigned)(L.stationLEDPos[L.numStations - 1] + 1));
+        for (uint16_t k = 0; k < L.numStations; k++) r->printf_P(PSTR("%s%u"), k ? "," : "", L.stationLEDPos[k]);
+        r->print(F("]}"));
+      }
+      r->print(F("],\"tr\":["));
+      bool first = true;
+      for (const AslSprite& s : aslSprites) {
+        if (s.mode == ASL_SPR_FREE) continue;
+        const uint8_t a = aslSpriteAlpha(s, now);
+        if (a == 0) continue;
+        // the destination code comes from the network feed: pass letters and digits only
+        char dest[sizeof(s.dest)] = "";
+        for (uint8_t k = 0, o = 0; k < sizeof(s.dest) - 1 && s.dest[k]; k++) if (isalnum((unsigned char)s.dest[k])) { dest[o++] = s.dest[k]; dest[o] = '\0'; }
+        r->printf_P(PSTR("%s[%u,%.2f,%u,%u,%u,\"%s\",%u]"), first ? "" : ",", s.lineIdx, aslSpritePos(s, now), a,
+                    (unsigned)s.id, s.cars, dest, s.nonRev ? 1 : 0);
+        first = false;
+      }
+      r->print(F("]}"));
+      request->send(r);
+    }
+    // AI: end
+
+    // AI: below section was generated by an AI
+    // GET /asl/sim - the sim timetable settings for the Metro Map page, without
+    // the rest of cfg.json (which holds the API key). Same fields and units as
+    // the {"ASL":{"simCfg":{...}}} command: times "HH:MM", headways in minutes
+    // (rushHeadway 0 = no rush service), dwell in seconds.
+    void serveSimConfig(AsyncWebServerRequest* request) {
+      char o[6], c[6], as[6], ae[6], ps[6], pe[6];
+      formatHHMM(systemFirstTrainTime, o, sizeof(o));
+      formatHHMM(systemLastTrainTime, c, sizeof(c));
+      formatHHMM(amRushStartTime, as, sizeof(as));
+      formatHHMM(amRushEndTime, ae, sizeof(ae));
+      formatHHMM(pmRushStartTime, ps, sizeof(ps));
+      formatHHMM(pmRushEndTime, pe, sizeof(pe));
+      char buf[256];
+      snprintf_P(buf, sizeof(buf),
+                 PSTR("{\"open\":\"%s\",\"close\":\"%s\",\"headway\":%.2f,\"rushHeadway\":%.2f,"
+                      "\"amStart\":\"%s\",\"amEnd\":\"%s\",\"pmStart\":\"%s\",\"pmEnd\":\"%s\",\"dwell\":%u}"),
+                 o, c, headwayTimeSeconds / 60.0f, rushHeadwayTimeSeconds / 60.0f, as, ae, ps, pe, (unsigned)stationDwellTimeS);
+      AsyncWebServerResponse* r = request->beginResponse(200, F("application/json"), buf);
+      r->addHeader(F("Cache-Control"), F("no-store"));
+      request->send(r);
+    }
+    // AI: end
+
+    // AI: below section was generated by an AI
+    // GET /asl/feed - live feed settings for the Metro Map page: the server
+    // address, whether an API key is set, and the key itself - the latter only
+    // while WLED's settings are unlocked (no settings PIN, or the PIN has been
+    // entered), the same rule as WLED's own settings pages, which show the key
+    // too. "locked" = PIN set and not entered: no key, and {"ASL":{"feed":...}}
+    // would be ignored.
+    void serveFeedConfig(AsyncWebServerRequest* request) {
+      DynamicJsonDocument doc(512);
+      doc[F("server")] = serverAddress;   // String: copied into the document
+      doc[F("keySet")] = apiKey.length() > 0;
+      if (correctPIN) doc[F("key")] = apiKey;
+      doc[F("locked")] = !correctPIN;
+      String out;
+      serializeJson(doc, out);
+      AsyncWebServerResponse* r = request->beginResponse(200, F("application/json"), out);
+      r->addHeader(F("Cache-Control"), F("no-store"));
+      request->send(r);
+    }
+    // AI: end
+
     // "12 s ago" / "4 min ago" / "3 h ago" for Info panel rows
     static void formatAge(uint32_t ms, char* buf, size_t len) {
       uint32_t s = ms / 1000;
@@ -1022,9 +1182,68 @@ class UsermodASL : public Usermod {
     // Stored as an offset from the real clock so the sim keeps ticking from the
     // chosen time. Runtime only: not written to cfg.json, cleared by a reboot,
     // and the real clock / RTC chip are never changed.
+    //   {"ASL":{"sim":true|false}}  switch sim / live mode (the Metro Map page's
+    //                               toggle); saved to cfg.json like the settings page
     void readFromJsonState(JsonObject& root) override {
       JsonObject um = root[F("ASL")];
       if (um.isNull()) return;
+      // applied in loop(): this runs in the web server task, and the switch clears the sprites
+      if (um[F("sim")].is<bool>()) simModeRequest = um[F("sim")].as<bool>() ? 1 : 0;
+      // AI: below section was generated by an AI
+      // sim timetable from the Metro Map page (any subset of the fields served
+      // by /asl/sim), validated like readFromConfig() and saved to cfg.json:
+      //   {"ASL":{"simCfg":{"open":"05:00","headway":6,"rushHeadway":4,"dwell":25,...}}}
+      JsonObject tt = um[F("simCfg")];
+      if (!tt.isNull()) {
+        auto hhmm = [&](const __FlashStringHelper* key, uint32_t& dst) {
+          const char* s = tt[key] | (const char*)nullptr;
+          if (s) dst = parseHHMM(s, dst);   // malformed input keeps the current value
+        };
+        hhmm(F("open"), systemFirstTrainTime);
+        hhmm(F("close"), systemLastTrainTime);
+        hhmm(F("amStart"), amRushStartTime);
+        hhmm(F("amEnd"), amRushEndTime);
+        hhmm(F("pmStart"), pmRushStartTime);
+        hhmm(F("pmEnd"), pmRushEndTime);
+        if (tt[F("headway")].is<float>()) {   // minutes, must be positive
+          const float m = tt[F("headway")].as<float>();
+          if (m > 0.0f && m * 60.0f >= 0.5f) headwayTimeSeconds = (uint32_t)(m * 60.0f + 0.5f);
+        }
+        if (tt[F("rushHeadway")].is<float>()) {   // minutes, 0 = no rush service
+          const float m = tt[F("rushHeadway")].as<float>();
+          rushHeadwayTimeSeconds = (m > 0.0f) ? (uint32_t)(m * 60.0f + 0.5f) : 0;
+        }
+        if (tt[F("dwell")].is<int>()) {   // seconds, 1..MAX_DWELL_S
+          const int d = tt[F("dwell")].as<int>();
+          if (d > 0) stationDwellTimeS = (d > (int)MAX_DWELL_S) ? MAX_DWELL_S : (uint32_t)d;
+        }
+        delaysRacked = false;     // rebuild the sim timetables on the next loop
+        configNeedsWrite = true;  // save, like the settings page
+      }
+      // Live feed settings from the Metro Map page:
+      //   {"ASL":{"feed":{"server":"http://...","key":"..."}}}  (either field optional)
+      // The key is sent to whatever server is set, so this follows WLED's own
+      // settings protection: ignored unless the settings PIN (if one is set)
+      // has been entered. The key is never served back (see /asl/feed).
+      JsonObject fd = um[F("feed")];
+      if (!fd.isNull() && correctPIN && !feedPending) {
+        const char* srv = fd[F("server")] | (const char*)nullptr;
+        const char* key = fd[F("key")]    | (const char*)nullptr;
+        feedNewServer = false; feedNewKey = false;
+        if (srv) {
+          String s(srv);
+          s.trim();
+          // must be an http(s) URL; the request appends "&api_key=..." to it
+          if (s.length() < 256 && (s.startsWith(F("http://")) || s.startsWith(F("https://")))) { feedServer = s; feedNewServer = true; }
+        }
+        if (key && *key) {
+          String k;   // same cleanup as readFromConfig(): WMATA keys never contain whitespace
+          for (const char* p = key; *p && k.length() < 64; p++) if (!isspace((unsigned char)*p)) k += *p;
+          if (k.length()) { feedKey = k; feedNewKey = true; }
+        }
+        if (feedNewServer || feedNewKey) feedPending = true;
+      }
+      // AI: end
       if (um[F("simReset")] | false) simOffsetS = 0;
       const char* at = um[F("simAt")] | (const char*)nullptr;
       if (at) {
