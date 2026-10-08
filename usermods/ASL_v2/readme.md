@@ -188,6 +188,16 @@ curl -F "data=@web/metro.htm;filename=metro.htm" http://<wled-ip>/upload
 # then open http://<wled-ip>/metro.htm
 ```
 
+**Home page:** with *Metro Page as Home* on (usermod settings, default on)
+and `metro.htm` (or `metro.htm.gz`) uploaded, the device's own address
+(`http://<wled-ip>/`) opens the Metro Map page. WLED's own page is then at
+`http://<wled-ip>/wled` (always available; `/?ui`, or `/` with any query
+string, works too), which is where the page's *WLED controls* button goes. WLED's settings pages' *Back* buttons lead to the
+Metro Map page. Turn the setting off or delete `metro.htm` to get WLED's page
+back at `/`; WLED's first-time setup page is never replaced. Done without core
+changes: the usermod adds a conditional rewrite of `/` to `/metro.htm`, a
+conditional `/` handler as a fallback, and a rewrite of `/wled` to `/?ui`.
+
 For development, open the file straight from disk with `?ip=<wled-ip>`
 (remembered afterwards); WLED's API allows cross-origin requests. Like
 `presets.json`, the page lives in the device filesystem, so a full flash

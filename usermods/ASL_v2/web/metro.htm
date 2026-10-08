@@ -88,7 +88,7 @@
 	<h1>DC Metro Map</h1>
 	<div id="conn" class="conn" title="connection"></div>
 	<nav>
-		<a class="btn" id="lnkWled" href="/">WLED controls</a>
+		<a class="btn" id="lnkWled" href="/wled">WLED controls</a>
 		<a class="btn" id="lnkSet" href="/settings">Settings</a>
 		<a class="btn" id="lnkUm" href="/settings/um">Map settings</a>
 	</nav>
@@ -162,7 +162,7 @@ if (location.protocol === "file:") {
 	const ip = qs.get("ip") || localStorage.getItem("aslIp") || "192.168.1.103";
 	localStorage.setItem("aslIp", ip);
 	host = "http://" + ip;
-	for (const [id, p] of [["lnkWled", "/"], ["lnkSet", "/settings"], ["lnkUm", "/settings/um"]]) document.getElementById(id).href = host + p;
+	for (const [id, p] of [["lnkWled", "/wled"], ["lnkSet", "/settings"], ["lnkUm", "/settings/um"]]) document.getElementById(id).href = host + p;
 }
 const $ = id => document.getElementById(id);
 
