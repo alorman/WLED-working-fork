@@ -175,13 +175,39 @@ The sim runs on WLED's clock, so it is only as right as that clock. Under
   Because the key is sent to whatever server is set, this command follows
   WLED's settings protection: if a settings PIN is set, it is ignored until the
   PIN has been entered (WLED Settings).
+- **Train display, fade and schedule** over the JSON API (the Metro Map page's
+  *Fade* slider, *Train display* and *Schedule* sections): `GET /asl/display`
+  returns `refresh` (s), `crossfade`, `gamma`, `fade` (WLED's Transition Time,
+  s), `sched`, `offAt` and `onAt`; `{"ASL":{"display":{...}}}` to `/json/state`
+  changes any subset, validated like the settings page, and saves to
+  `cfg.json`. *Hop Below Brightness* stays on the settings page only.
+- **Light schedule** (*Light Schedule*, *Lights Off At*, *Lights On At*;
+  default off, 01:00-05:00): every day the lights switch off when the clock
+  enters the off period and back on when it leaves it. Only those two moments
+  act, so switching the lights by hand in between is kept until the next one;
+  after boot (or a schedule change) the current period is applied once, so a
+  board starting at 02:00 inside 01:00-05:00 stays dark. Needs a set clock
+  (NTP, RTC or browser). Shown in the Info panel as *ASL schedule* while on.
 
 ### Metro Map web page
 
 `web/metro.htm` is a custom landing page: a live map (trains and stations,
 WMATA line colours), power, brightness, preset buttons, per-line on/off and
 brightness, sim test time / set clock, the Info panel, and links to the WLED
-controls and settings.
+controls and settings. Also:
+
+- **Header dot:** mirrors the status LED (colour and blink), with its meaning
+  on hover.
+- **Fade** slider (WLED's Transition Time, which the train fades follow) and a
+  **Stations lit** switch for all lines (on = each line's train colour / 4 as
+  the station colour, off = black).
+- **Save as new preset / Update selected:** stores the current look,
+  brightness and segments included, like WLED's own preset saving.
+- **Lines:** trains per line (counted from the map, trains not in passenger
+  service excluded); click a line's name to highlight it on the map (click
+  again to clear); *Colours* opens Train / Station / Track colour pickers and
+  that line's *Stations lit* switch.
+- **Schedule** and **Train display** sections (see the JSON API notes above).
 
 ```bash
 curl -F "data=@web/metro.htm;filename=metro.htm" http://<wled-ip>/upload
@@ -197,6 +223,11 @@ Metro Map page. Turn the setting off or delete `metro.htm` to get WLED's page
 back at `/`; WLED's first-time setup page is never replaced. Done without core
 changes: the usermod adds a conditional rewrite of `/` to `/metro.htm`, a
 conditional `/` handler as a fallback, and a rewrite of `/wled` to `/?ui`.
+
+**Light / dark:** the header button switches the whole page, including the
+live map, between a dark and a light theme. With no choice made it follows
+the system setting; a choice is remembered per browser. All theme colours are
+CSS variables at the top of the page.
 
 For development, open the file straight from disk with `?ip=<wled-ip>`
 (remembered afterwards); WLED's API allows cross-origin requests. Like
@@ -220,8 +251,9 @@ every LED's position comes from the board's LED numbering PDF
 positions out of the PDF, checks every line is complete, and writes them
 into the page's `COORDS` line. It also copies the board's grey artwork
 (outline, rivers, county lines, track corridors) into the `BACKDROP` line,
-which the map draws in translucent white behind the LEDs (strength set by
-`BACKDROP_OPACITY` in the page), and the station bullseyes from that artwork
+which the map draws behind the LEDs - translucent white in the dark theme,
+solid black in the light theme (colour and strength: `--map-art` and
+`--map-art-op` in the page's CSS) - and the station bullseyes from that artwork
 into the `BULLSEYES` line. Stations are not drawn on top of the artwork; each
 bullseye is an invisible hover target showing the station's name, plus its
 lines at transfer stations. Rerun it if the board layout changes. Without
@@ -268,6 +300,7 @@ global brightness and segment opacity apply as for the train lines.
 | amber, fast blink | clock not set yet, or live mode without working data (no API key, no Wi-Fi, last fetch failed) |
 | purple | sim running on a **test time** (see above), not real time |
 | green | live mode, WMATA data arriving |
+| dim white, steady | live mode, WMATA data arriving but no passenger trains to show (overnight, or none on the mapped lines) |
 | cyan | sim on real time kept by the RTC (offline, as intended) |
 | blue | sim on real time from NTP / network / browser |
 
