@@ -178,7 +178,8 @@ The sim runs on WLED's clock, so it is only as right as that clock. Under
 - **Train display, fade and schedule** over the JSON API (the Metro Map page's
   *Fade* slider, *Train display* and *Schedule* sections): `GET /asl/display`
   returns `refresh` (s), `crossfade`, `gamma`, `fade` (WLED's Transition Time,
-  s), `sched`, `offAt` and `onAt`; `{"ASL":{"display":{...}}}` to `/json/state`
+  s; on the page as *Fade time* under Train display), `sched`, `offAt`, `onAt`
+  and, read only, `hopBelow`; `{"ASL":{"display":{...}}}` to `/json/state`
   changes any subset, validated like the settings page, and saves to
   `cfg.json`. *Hop Below Brightness* stays on the settings page only.
 - **Light schedule** (*Light Schedule*, *Lights Off At*, *Lights On At*;
@@ -198,7 +199,8 @@ controls and settings. Also:
 
 - **Header dot:** mirrors the status LED (colour and blink), with its meaning
   on hover.
-- **Fade** slider (WLED's Transition Time, which the train fades follow) and a
+- **Crossfade** slider (LED-to-LED handover; the page notes when it has no
+  effect because the brightness is below *Hop Below Brightness*) and a
   **Stations lit** switch for all lines (on = each line's train colour / 4 as
   the station colour, off = black).
 - **Save as new preset / Update selected:** stores the current look,
@@ -217,12 +219,15 @@ curl -F "data=@web/metro.htm;filename=metro.htm" http://<wled-ip>/upload
 **Home page:** with *Metro Page as Home* on (usermod settings, default on)
 and `metro.htm` (or `metro.htm.gz`) uploaded, the device's own address
 (`http://<wled-ip>/`) opens the Metro Map page. WLED's own page is then at
-`http://<wled-ip>/wled` (always available; `/?ui`, or `/` with any query
-string, works too), which is where the page's *WLED controls* button goes. WLED's settings pages' *Back* buttons lead to the
+`http://<wled-ip>/?ui` (`/` with any query string works; `http://<wled-ip>/wled`
+redirects there, always available), which is where the page's *WLED controls*
+button goes. WLED's settings pages' *Back* buttons lead to the
 Metro Map page. Turn the setting off or delete `metro.htm` to get WLED's page
 back at `/`; WLED's first-time setup page is never replaced. Done without core
 changes: the usermod adds a conditional rewrite of `/` to `/metro.htm`, a
-conditional `/` handler as a fallback, and a rewrite of `/wled` to `/?ui`.
+conditional `/` handler as a fallback, and a redirect from `/wled` to `/?ui`
+(a redirect, because WLED's page treats a sub-path in the address bar as a
+reverse-proxy prefix and would send its requests to `/wled/json/...`).
 
 **Light / dark:** the header button switches the whole page, including the
 live map, between a dark and a light theme. With no choice made it follows
@@ -262,6 +267,44 @@ coordinates the page falls back to a schematic one-bar-per-line diagram.
 The artwork makes the page about 180 KB. To save flash and load time, gzip it
 and upload `metro.htm.gz` in place of `metro.htm`; WLED serves the compressed
 file automatically.
+
+### Welcome / setup page
+
+`web/setup.htm` replaces WLED's first-boot "join a network" page with a
+one-stop setup: Wi-Fi network (from a scan, or typed for hidden networks),
+device name (`<name>.local`), time zone, live or simulated trains with the
+train server and WMATA API key, a *sync time and time zone from this browser*
+button, and optionally the standalone network's (access point mode) password
+and *always on*.
+It is built into the firmware (`web/gen_setup_page.py` writes
+`asl_setup_page.h`; rerun it after editing the page, then rebuild), so it works
+on a freshly flashed board with an empty file system.
+
+- **Where:** always at `http://<wled-ip>/setup`; at `/` while WLED would show
+  its own first-boot page, while the board has fallen back to its own access
+  point because its saved Wi-Fi is unreachable, and - with *Setup preview* on
+  (Metro Map page, Network section; until reboot) - to devices on the access
+  point. WLED's captive portal sends phones on the access point to `/`, so the
+  phone's "sign in to network" pop-up opens this page.
+- **WLED still does the networking:** the page only fills in settings
+  (`{"ASL":{"setup":{...}}}`, applied in the usermod's loop); WLED's own code
+  connects, retries and runs the access point. Opened from disk the page
+  talks to `?ip=<board>`, or shows sample data (design preview).
+- **Joining a network:** while trying, the new network is the only saved one,
+  so WLED tries exactly that. Joined: it is saved first, with the previous
+  networks kept behind it as fallbacks (WLED keeps up to 3). Not joined within
+  90 s: the previous networks are restored (rollback). WLED closes its access
+  point the moment it connects; the usermod holds it open until the page has
+  shown the new address (or 90 s). The ESP32 has one radio, so the access
+  point moves to the router's channel when connecting and a phone may drop off
+  for a moment; the page shows the expected address beforehand for that case.
+- **Protection:** follows WLED's settings PIN; Wi-Fi and access point fields
+  also respect WLED's Wi-Fi lock. `GET /asl/setupinfo` never returns a
+  password or key (it does list saved network names, as WLED's own Wi-Fi page
+  does).
+- **Metro Map page, Network section:** connection status, *Standalone network
+  always on* (WLED's "AP opens: Always" / back to its default), *Setup
+  preview*, and a link to the setup page.
 
 ### Info panel
 

@@ -135,6 +135,7 @@
 	td:first-child { color: var(--dim); white-space: nowrap; }
 	.swatch { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
 	.note { font-size: 12px; color: var(--dim); margin-top: 6px; }
+	#briHint.below { font-weight: 700; color: var(--text); }
 	#tip .k { color: var(--dim); }
 	#tip .full { grid-column: 1 / -1; }
 	#tip { grid-template-columns: auto auto; gap: 2px 10px; text-align: left; position: fixed; pointer-events: none; background: var(--tip-bg); color: var(--tip-fg); border: 1px solid var(--edge); padding: 4px 8px; border-radius: 6px; font-size: 13px; display: none; z-index: 5; }
@@ -148,7 +149,7 @@
 	<div id="stDot" class="stDot" title="connecting..."></div>
 	<nav>
 		<button id="themeBtn" type="button" title="Switch light / dark">Light</button>
-		<a class="btn" id="lnkWled" href="/wled">WLED controls</a>
+		<a class="btn" id="lnkWled" href="/?ui">WLED controls</a>
 		<a class="btn" id="lnkSet" href="/settings">Settings</a>
 		<a class="btn" id="lnkUm" href="/settings/um">Map settings</a>
 	</nav>
@@ -157,11 +158,13 @@
 	<section>
 		<h2>Lights</h2>
 		<div class="row"><button id="power">Power</button><label for="bri">Brightness</label><input id="bri" type="range" min="1" max="255"></div>
+		<div class="note" id="briHint" style="margin:-4px 0 4px"></div>
 		<h2 style="margin-top:14px">Presets</h2>
 		<div class="presets" id="presets"></div>
-		<div class="row"><label for="fade">Fade</label><input id="fade" type="range" min="0" max="5" step="0.1"><span class="note" id="fadeVal" style="min-width:3em;margin:0"></span></div>
+		<div class="row"><label for="xfade">Crossfade</label><input id="xfade" type="range" min="0" max="1" step="0.05"><span class="note" id="xfadeVal" style="min-width:3em;margin:0"></span></div>
 		<div class="row"><span class="modeLbl">Stations lit</span><label class="switch"><input type="checkbox" id="stAll"><span class="knob"></span></label></div>
-		<div class="note">Fade: how softly trains appear and disappear, and how long WLED's own transitions take.</div>
+		<div class="note">Crossfade: how trains hand over from one LED to the next, 0 = hop, 1 = smooth blend.</div>
+		<div class="note" id="xfadeWarn" style="display:none"></div>
 		<div class="row" style="flex-wrap:wrap"><input id="psName" type="text" maxlength="32" placeholder="Preset name"><button id="psNew">Save as new preset</button><button id="psUpd">Update selected</button><span class="note" id="psMsg" style="margin:0"></span></div>
 	</section>
 	<section>
@@ -194,6 +197,15 @@
 		</div>
 		<div class="row"><button id="scSave">Save schedule</button><span class="note" id="scMsg" style="margin:0"></span></div>
 		<div class="note">Every day, by the board's clock. Switching the lights by hand in between is kept until the next scheduled change. On earlier than off = the off period runs past midnight.</div>
+	</section>
+	<section id="netSec">
+		<h2>Network</h2>
+		<div class="note" id="netStatus" style="margin:0 0 6px">...</div>
+		<div class="row"><span class="modeLbl">Standalone network always on</span><label class="switch"><input type="checkbox" id="apAlways"><span class="knob"></span></label></div>
+		<div class="note">Access point mode: the map's own standalone network (<b id="apName">WLED-AP</b>, address 4.3.2.1). Normally it only opens when the map can't reach your Wi-Fi.</div>
+		<div class="row"><span class="modeLbl">Setup preview</span><label class="switch"><input type="checkbox" id="setupPrev"><span class="knob"></span></label></div>
+		<div class="note">For testing: devices on the standalone network see the setup page instead of this one. Until the next reboot.</div>
+		<div class="row"><a class="btn" id="lnkSetup" href="/setup">Open setup page</a><span class="note" id="netMsg" style="margin:0"></span></div>
 	</section>
 	<section>
 		<h2>Info</h2>
@@ -229,11 +241,11 @@
 		<h2>Train display</h2>
 		<div class="tt">
 			<label for="dpRefresh">Refresh interval (s)</label><input id="dpRefresh" type="number" min="1" max="120" step="0.5">
-			<label for="dpCross">Train crossfade</label><input id="dpCross" type="number" min="0" max="1" step="0.05">
+			<label for="dpFade">Fade time (s)</label><input id="dpFade" type="number" min="0" max="5" step="0.1">
 			<label for="dpGamma">Gamma</label><input id="dpGamma" type="number" min="1" max="4" step="0.1">
 		</div>
 		<div class="row"><button id="dpSave">Save display settings</button><button id="dpReload">Revert</button><span class="note" id="dpMsg" style="margin:0"></span></div>
-		<div class="note">Refresh: how often trains update and how long each glide takes; live mode 15 s or more (WMATA updates each train about every 15 s). Crossfade: LED-to-LED handover, 0 = hop, 1 = full blend. Gamma: brightness curve of the crossfade, 1 = linear.</div>
+		<div class="note">Refresh: how often trains update and how long each glide takes; live mode 15 s or more (WMATA updates each train about every 15 s). Fade time: how softly trains appear and disappear (new or vanished trains, sim/live switch), also WLED's own transition time for preset and brightness changes. Gamma: brightness curve of the crossfade, 1 = linear.</div>
 	</section>
 </main>
 <div id="tip"></div>
@@ -247,7 +259,7 @@ if (location.protocol === "file:") {
 	const ip = qs.get("ip") || localStorage.getItem("aslIp") || "192.168.1.103";
 	localStorage.setItem("aslIp", ip);
 	host = "http://" + ip;
-	for (const [id, p] of [["lnkWled", "/wled"], ["lnkSet", "/settings"], ["lnkUm", "/settings/um"]]) document.getElementById(id).href = host + p;
+	for (const [id, p] of [["lnkWled", "/?ui"], ["lnkSet", "/settings"], ["lnkUm", "/settings/um"], ["lnkSetup", "/setup"]]) document.getElementById(id).href = host + p;
 }
 const $ = id => document.getElementById(id);
 
@@ -655,6 +667,7 @@ function renderState(s) {
 	$("power").className = s.on ? "on" : "";
 	$("power").textContent = s.on ? "On" : "Off";
 	if (!quiet($("bri"))) { $("bri").value = s.bri; fillRange($("bri")); }
+	showXfadeWarn();
 	segOf = {};
 	for (const sg of s.seg || []) { const c = FX_LINE[sg.fx]; if (c) segOf[c] = sg; }
 	let lit = 0, have = 0;
@@ -733,13 +746,49 @@ async function refreshState() { const s = await api("/json/state"); if (s) rende
 $("power").onclick = async () => { const r = await api("/json/state", { on: "t", v: true }); if (r) renderState(r); };
 $("bri").oninput = debounce(() => api("/json/state", { bri: +$("bri").value }), 150);
 
-// ---- fade, train display and schedule (GET /asl/display, saved with {"ASL":{"display":{...}}}) ----
-function showFade(v) { $("fadeVal").textContent = (+v).toFixed(1) + " s"; }
+// ---- network: status, "standalone network always on", setup preview (GET /asl/setupinfo) ----
+async function loadNet() {
+	const n = await api("/asl/setupinfo");
+	if (!n) { $("netStatus").textContent = "Network details need the latest firmware."; return; }
+	$("netStatus").innerHTML = n.connected ? `Connected to <b>${esc(n.ssid)}</b> (${esc(n.ip)}${n.mdns ? ", " + esc(n.mdns) + ".local" : ""})` +
+		(n.saved.length > 1 ? `; also saved: ${esc(n.saved.filter(s => s !== n.ssid).join(", "))}` : "") : "Not connected to Wi-Fi";
+	$("apName").textContent = n.apSSID || "WLED-AP";
+	$("apAlways").checked = !!n.apAlways;
+	$("setupPrev").checked = !!n.preview;
+	$("apAlways").disabled = $("setupPrev").disabled = !!(n.locked || n.wifiLock);
+	$("netMsg").textContent = n.locked ? "Locked by the WLED settings PIN" : n.wifiLock ? "Locked by WLED's Wi-Fi lock" : (n.apActive ? "Standalone network is open" : "");
+}
+$("apAlways").onchange = async () => { await api("/json/state", { ASL: { apAlways: $("apAlways").checked } }); setTimeout(loadNet, 1500); };
+$("setupPrev").onchange = async () => { await api("/json/state", { ASL: { setupPreview: $("setupPrev").checked } }); setTimeout(loadNet, 500); };
+
+// ---- crossfade, train display and schedule (GET /asl/display, saved with {"ASL":{"display":{...}}}) ----
+let hopBelow = 12;  // "Hop Below Brightness" (settings page): below this shown brightness trains hop, crossfade has no effect;
+                    // 12 = the firmware default until the board reports its setting (/asl/display "hopBelow")
+function showXfade(v) { $("xfadeVal").textContent = (+v).toFixed(2); }
+// brightness slider: tooltip + hint naming the crossfade threshold, bold while below it (b: brightness being shown or dragged)
+function showBriHint(b) {
+	const h = $("briHint");
+	if (!(hopBelow > 0)) { h.textContent = ""; $("bri").title = ""; return; }
+	$("bri").title = `Crossfades are disabled below brightness ${hopBelow}`;
+	h.textContent = `Crossfades off below brightness ${hopBelow}`;
+	h.classList.toggle("below", b < hopBelow);
+}
+$("bri").addEventListener("input", () => showBriHint(+$("bri").value));
+// tell when the crossfade can't show: at the current brightness the firmware hops instead
+function showXfadeWarn() {
+	const w = $("xfadeWarn"), b = state ? state.bri : 255;
+	showBriHint(quiet($("bri")) ? +$("bri").value : b);
+	const off = hopBelow > 0 && b < hopBelow;
+	w.style.display = off ? "" : "none";
+	if (off) w.textContent = `Not in effect right now: at brightness ${b} (below ${hopBelow}, "Hop Below Brightness" in Map settings) trains hop between LEDs, because a blend shows as a stutter with so few brightness steps.`;
+}
 async function loadDisplay() {
 	const d = await api("/asl/display");
 	if (!d) { for (const id of ["dpMsg", "scMsg"]) $(id).textContent = "not available (needs the latest firmware)"; return; }
-	if (!quiet($("fade"))) { $("fade").value = d.fade; fillRange($("fade")); showFade(d.fade); }
-	$("dpRefresh").value = d.refresh; $("dpCross").value = d.crossfade; $("dpGamma").value = d.gamma;
+	if (!quiet($("xfade"))) { $("xfade").value = d.crossfade; fillRange($("xfade")); showXfade(d.crossfade); }
+	$("dpRefresh").value = d.refresh; $("dpFade").value = d.fade; $("dpGamma").value = d.gamma;
+	if (d.hopBelow !== undefined) hopBelow = d.hopBelow;
+	showXfadeWarn();
 	$("scEn").checked = !!d.sched; $("scOff").value = d.offAt; $("scOn").value = d.onAt;
 	$("dpMsg").textContent = ""; $("scMsg").textContent = "";
 }
@@ -752,11 +801,11 @@ async function saveDisplay(part, msgId) {
 	$(msgId).textContent = "saved";
 	setTimeout(refreshInfo, 800);
 }
-$("fade").oninput = () => showFade($("fade").value);
-$("fade").onchange = () => saveDisplay({ fade: +$("fade").value });
+$("xfade").oninput = () => showXfade($("xfade").value);
+$("xfade").onchange = () => saveDisplay({ crossfade: +$("xfade").value });
 $("dpSave").onclick = () => {
 	const part = {};
-	for (const [id, k] of [["dpRefresh", "refresh"], ["dpCross", "crossfade"], ["dpGamma", "gamma"]]) if ($(id).value !== "") part[k] = +$(id).value;
+	for (const [id, k] of [["dpRefresh", "refresh"], ["dpFade", "fade"], ["dpGamma", "gamma"]]) if ($(id).value !== "") part[k] = +$(id).value;
 	saveDisplay(part, "dpMsg");
 };
 $("dpReload").onclick = loadDisplay;
@@ -889,9 +938,10 @@ async function refreshInfo() {
 
 // ---- start ----
 pollMap();
-refreshState(); loadPresets(); refreshInfo(); loadTimetable(); loadFeed(); loadDisplay();
+refreshState(); loadPresets(); refreshInfo(); loadTimetable(); loadFeed(); loadDisplay(); loadNet();
 setInterval(refreshState, 3000);
 setInterval(refreshInfo, 5000);
+setInterval(loadNet, 10000);
 </script>
 </body>
 </html>
