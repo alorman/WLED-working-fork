@@ -72,9 +72,17 @@ place to tune how soft changes are on the device; 0 makes trains pop in and
 out.
 A train missing from the data fades out: immediately in sim mode (it has
 finished its run), after one plot cycle of grace in live mode (live data
-routinely drops a train for one fetch). Moves larger than `ASL_TELEPORT_LEDS` (8, compile-time) dissolve out+in
-instead of gliding — junk or reacquired API data, or a turnback at a terminal
-(direction is part of the sprite identity). UI transitions are left to the
+routinely drops a train for one fetch). A turnback at a terminal starts a new
+sprite (direction is part of the sprite identity).
+Live data jumps ahead after missed updates and jitters backwards, so a live
+train follows these rules (by track, i.e. its direction of travel):
+forward moves always glide, a big jump at most at the line's *catch-up speed*
+(3× the fastest measured station-to-station average from the timing data,
+at least 0.5 LED/s; one glide at most 45 s), so it becomes a visible run
+instead of a flash; backward moves up to `ASL_TELEPORT_LEDS` (8, compile-time)
+are ignored (the train holds); larger backward moves and big moves after a
+track change dissolve out+in (junk or re-acquired API data). Sim positions are
+exact: they glide, and only moves over 8 LEDs dissolve. UI transitions are left to the
 WLED core, and color changes apply instantly without waiting for the next
 plot cycle.
 
