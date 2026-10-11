@@ -73,16 +73,18 @@ struct AslLineDef {
   uint16_t numDomains;
   const uint16_t *travelS;         // sim: seconds per domain, 0 = not measured (asl_timing_data.h)
   const uint16_t *dwellS;          // sim: seconds per station, 0 = use the fallback dwell setting
+  const AslExtraCircuit *extra[2]; // per-track circuits outside the domains, explicit LED positions (asl_map_data.h)
+  uint8_t numExtra[2];
 };
 
 #define ASL_NUM_LINES 5
 
 static const AslLineDef aslLines[ASL_NUM_LINES] = {
-  { "RD", { RedLineTrack1Domains,    RedLineTrack2Domains    }, { RedLineTrack1StationSegments,    RedLineTrack2StationSegments    }, RedLineLEDArray,    RedLineStationLEDPosition,    RedLineNumStationsInLine,    Red_Num_LED_Domains,    RedLineTravelS,    RedLineDwellS    },
-  { "BL", { BlueLineTrack1Domains,   BlueLineTrack2Domains   }, { BlueLineTrack1StationSegments,   BlueLineTrack2StationSegments   }, BlueLineLEDArray,   BlueLineStationLEDPosition,   BlueLineNumStationsInLine,   Blue_Num_LED_Domains,   BlueLineTravelS,   BlueLineDwellS   },
-  { "GR", { GreenLineTrack1Domains,  GreenLineTrack2Domains  }, { GreenLineTrack1StationSegments,  GreenLineTrack2StationSegments  }, GreenLineLEDArray,  GreenLineStationLEDPosition,  GreenLineNumStationsInLine,  Green_Num_LED_Domains,  GreenLineTravelS,  GreenLineDwellS  },
-  { "OR", { OrangeLineTrack1Domains, OrangeLineTrack2Domains }, { OrangeLineTrack1StationSegments, OrangeLineTrack2StationSegments }, OrangeLineLEDArray, OrangeLineStationLEDPosition, OrangeLineNumStationsInLine, Orange_Num_LED_Domains, OrangeLineTravelS, OrangeLineDwellS },
-  { "YL", { YellowLineTrack1Domains, YellowLineTrack2Domains }, { YellowLineTrack1StationSegments, YellowLineTrack2StationSegments }, YellowLineLEDArray, YellowLineStationLEDPosition, YellowLineNumStationsInLine, Yellow_Num_LED_Domains, YellowLineTravelS, YellowLineDwellS },
+  { "RD", { RedLineTrack1Domains,    RedLineTrack2Domains    }, { RedLineTrack1StationSegments,    RedLineTrack2StationSegments    }, RedLineLEDArray,    RedLineStationLEDPosition,    RedLineNumStationsInLine,    Red_Num_LED_Domains,    RedLineTravelS,    RedLineDwellS    , { nullptr, nullptr }, { 0, 0 } },
+  { "BL", { BlueLineTrack1Domains,   BlueLineTrack2Domains   }, { BlueLineTrack1StationSegments,   BlueLineTrack2StationSegments   }, BlueLineLEDArray,   BlueLineStationLEDPosition,   BlueLineNumStationsInLine,   Blue_Num_LED_Domains,   BlueLineTravelS,   BlueLineDwellS   , { BlueLineTrack1Extra, BlueLineTrack2Extra }, { (uint8_t)ASL_COUNT(BlueLineTrack1Extra), (uint8_t)ASL_COUNT(BlueLineTrack2Extra) } },
+  { "GR", { GreenLineTrack1Domains,  GreenLineTrack2Domains  }, { GreenLineTrack1StationSegments,  GreenLineTrack2StationSegments  }, GreenLineLEDArray,  GreenLineStationLEDPosition,  GreenLineNumStationsInLine,  Green_Num_LED_Domains,  GreenLineTravelS,  GreenLineDwellS  , { nullptr, nullptr }, { 0, 0 } },
+  { "OR", { OrangeLineTrack1Domains, OrangeLineTrack2Domains }, { OrangeLineTrack1StationSegments, OrangeLineTrack2StationSegments }, OrangeLineLEDArray, OrangeLineStationLEDPosition, OrangeLineNumStationsInLine, Orange_Num_LED_Domains, OrangeLineTravelS, OrangeLineDwellS , { nullptr, OrangeLineTrack2Extra }, { 0, (uint8_t)ASL_COUNT(OrangeLineTrack2Extra) } },
+  { "YL", { YellowLineTrack1Domains, YellowLineTrack2Domains }, { YellowLineTrack1StationSegments, YellowLineTrack2StationSegments }, YellowLineLEDArray, YellowLineStationLEDPosition, YellowLineNumStationsInLine, Yellow_Num_LED_Domains, YellowLineTravelS, YellowLineDwellS , { YellowLineTrack1Extra, YellowLineTrack2Extra }, { (uint8_t)ASL_COUNT(YellowLineTrack1Extra), (uint8_t)ASL_COUNT(YellowLineTrack2Extra) } },
 };
 
 // sim timetable sizing: a run has one dwell per station and one travel per
@@ -138,7 +140,9 @@ struct AslSprite {
   uint32_t moveDurMs;    // 0 = parked at targetPos
   uint32_t fadeStartMs;  // spawn (fade-in) or ghost (fade-out) start
   // details for the web page's train tooltips (/asl/live); not used for the LEDs
-  uint8_t  track;        // 0 = Track1, 1 = Track2 (from the last placed report): gives the direction of travel
+  uint8_t  track;        // 0 = Track1, 1 = Track2 (from the last placed report), to notice a track change
+  int8_t   heading;      // live: direction of travel along the strip, learned from the train's own movement
+                         //   (+1 = towards higher LED numbers, -1 = lower, 0 = not known yet)
   bool     nonRev;       // not in passenger service: shown on the web map only, never on the LEDs
   uint8_t  cars;         // car count, 0 = unknown (sim)
   char     dest[4];      // WMATA destination station code, "" = unknown
@@ -208,6 +212,14 @@ static bool aslTargetForTrack(const AslLineDef& L, uint8_t track, float circuit,
       uint16_t l0 = L.ledArray[y][0], l1 = L.ledArray[y][1];
       out = (c1 > c0) ? (float)l0 + (circuit - (float)c0) * (float)(l1 - l0) / (float)(c1 - c0)
                       : 0.5f * (float)(l0 + l1);
+      return true;
+    }
+  }
+  // route circuits outside every domain's numeric range (live data only;
+  // the sim never produces them): explicit positions, see asl_map_data.h
+  for (uint8_t x = 0; x < L.numExtra[track]; x++) {
+    if (fabsf(circuit - (float)L.extra[track][x].circuit) < 0.5f) {
+      out = L.extra[track][x].led100 / 100.0f;
       return true;
     }
   }
@@ -896,18 +908,23 @@ class UsermodASL : public Usermod {
         // AI: below section was generated by an AI
         // How to follow the new position. Sim positions are exact: glide, and
         // dissolve only for an implausible jump, as before. Live WMATA data
-        // jumps ahead after missed updates and jitters backwards, so on the
-        // same track (= same direction of travel):
+        // jumps ahead after missed updates and jitters backwards. A live
+        // train's direction of travel is learned from its own movement (its
+        // first move of at least one LED), not from the track tables: WMATA
+        // lists both tracks in the same geographic order and the tables mix
+        // track labels on shared track (see asl_map_data.h). Once known, on
+        // the same track:
         //  - forward, any distance: glide, at most at the line's catch-up
         //    speed, so a big jump becomes a visible run instead of a flash
         //  - backward up to ASL_TELEPORT_LEDS: hold (keep the current glide)
         //  - backward further, or a big move after a track change: dissolve
         //    (re-acquired or bad data, not real movement)
+        // Direction not known yet: as before (glide up to 8 LEDs, else dissolve).
         const float delta = target - cur;
         bool glide = fabsf(delta) <= ASL_TELEPORT_LEDS;
         uint32_t dur = glideMs;
-        if (!simModeEnable && s->track == trk) {
-          const float ahead = (trk == 0) ? delta : -delta;   // Track1 travels towards higher LED numbers
+        if (!simModeEnable && s->track == trk && s->heading != 0) {
+          const float ahead = s->heading * delta;
           if (ahead < 0.0f && -ahead <= ASL_TELEPORT_LEDS) continue;   // jitter backwards: hold
           if (ahead >= 0.0f) {
             glide = true;
@@ -915,6 +932,7 @@ class UsermodASL : public Usermod {
             dur = constrain(need, glideMs, (uint32_t)ASL_CATCHUP_MAX_MS);
           }
         }
+        if (glide && s->heading == 0 && fabsf(delta) >= 1.0f) s->heading = (delta > 0.0f) ? 1 : -1;
         if (glide) {
           s->startPos    = cur;
           s->targetPos   = target;

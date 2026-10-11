@@ -157,7 +157,7 @@
 <main>
 	<section>
 		<h2>Lights</h2>
-		<div class="row"><button id="power">Power</button><label for="bri">Brightness</label><input id="bri" type="range" min="1" max="255"></div>
+		<div class="row"><button id="power">Power</button><label for="bri">Brightness</label><input id="bri" type="range" min="0" max="1000"><span class="note" id="briVal" style="min-width:2.5em;margin:0"></span></div>
 		<div class="note" id="briHint" style="margin:-4px 0 4px"></div>
 		<h2 style="margin-top:14px">Presets</h2>
 		<div class="presets" id="presets"></div>
@@ -666,7 +666,7 @@ function renderState(s) {
 	state = s;
 	$("power").className = s.on ? "on" : "";
 	$("power").textContent = s.on ? "On" : "Off";
-	if (!quiet($("bri"))) { $("bri").value = s.bri; fillRange($("bri")); }
+	if (!quiet($("bri"))) { $("bri").value = briToPos(s.bri); fillRange($("bri")); $("briVal").textContent = s.bri; }
 	showXfadeWarn();
 	segOf = {};
 	for (const sg of s.seg || []) { const c = FX_LINE[sg.fx]; if (c) segOf[c] = sg; }
@@ -744,7 +744,21 @@ $("psUpd").onclick = () => {
 };
 async function refreshState() { const s = await api("/json/state"); if (s) renderState(s); }
 $("power").onclick = async () => { const r = await api("/json/state", { on: "t", v: true }); if (r) renderState(r); };
-$("bri").oninput = debounce(() => api("/json/state", { bri: +$("bri").value }), 150);
+// main brightness slider: the first 30% of its travel (BRI_KNEE_POS) is a
+// curve covering brightness 1..40 (BRI_KNEE), so low values have fine steps
+// (5 at ~10%, 15 at ~18%); the remaining 70% is linear from 40 to 255. Both
+// parts meet at nearly the same slope, so there is no visible kink.
+const BRI_KNEE_POS = 300, BRI_KNEE = 40, BRI_CURVE = 2;   // slider position 0-1000
+function posToBri(p) {
+	if (p <= BRI_KNEE_POS) return Math.round(1 + (BRI_KNEE - 1) * Math.pow(p / BRI_KNEE_POS, BRI_CURVE));
+	return Math.round(BRI_KNEE + (255 - BRI_KNEE) * (p - BRI_KNEE_POS) / (1000 - BRI_KNEE_POS));
+}
+function briToPos(b) {
+	if (b <= BRI_KNEE) return Math.round(BRI_KNEE_POS * Math.pow(Math.max(0, (b - 1) / (BRI_KNEE - 1)), 1 / BRI_CURVE));
+	return Math.round(BRI_KNEE_POS + (1000 - BRI_KNEE_POS) * (b - BRI_KNEE) / (255 - BRI_KNEE));
+}
+$("bri").addEventListener("input", () => { $("briVal").textContent = posToBri(+$("bri").value); });
+$("bri").oninput = debounce(() => api("/json/state", { bri: posToBri(+$("bri").value) }), 150);
 
 // ---- network: status, "standalone network always on", setup preview (GET /asl/setupinfo) ----
 async function loadNet() {
@@ -773,11 +787,11 @@ function showBriHint(b) {
 	h.textContent = `Crossfades off below brightness ${hopBelow}`;
 	h.classList.toggle("below", b < hopBelow);
 }
-$("bri").addEventListener("input", () => showBriHint(+$("bri").value));
+$("bri").addEventListener("input", () => showBriHint(posToBri(+$("bri").value)));
 // tell when the crossfade can't show: at the current brightness the firmware hops instead
 function showXfadeWarn() {
 	const w = $("xfadeWarn"), b = state ? state.bri : 255;
-	showBriHint(quiet($("bri")) ? +$("bri").value : b);
+	showBriHint(quiet($("bri")) ? posToBri(+$("bri").value) : b);
 	const off = hopBelow > 0 && b < hopBelow;
 	w.style.display = off ? "" : "none";
 	if (off) w.textContent = `Not in effect right now: at brightness ${b} (below ${hopBelow}, "Hop Below Brightness" in Map settings) trains hop between LEDs, because a blend shows as a stutter with so few brightness steps.`;

@@ -75,7 +75,10 @@ finished its run), after one plot cycle of grace in live mode (live data
 routinely drops a train for one fetch). A turnback at a terminal starts a new
 sprite (direction is part of the sprite identity).
 Live data jumps ahead after missed updates and jitters backwards, so a live
-train follows these rules (by track, i.e. its direction of travel):
+train follows these rules, once its direction of travel is known (learned
+from its own first move of at least one LED; WMATA lists both tracks in the
+same geographic order, so the track tables don't give it; until then it moves
+as before):
 forward moves always glide, a big jump at most at the line's *catch-up speed*
 (3× the fastest measured station-to-station average from the timing data,
 at least 0.5 LED/s; one glide at most 45 s), so it becomes a visible run
